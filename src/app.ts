@@ -1,10 +1,13 @@
-import express, { Response as ExResponse, Request as ExRequest, NextFunction } from "express";
 import bodyParser from "body-parser";
+import express, {
+  NextFunction,
+  Request as ExRequest,
+  Response as ExResponse,
+} from "express";
 import swaggerUi from "swagger-ui-express";
-import { RegisterRoutes } from "./routes"; // ⚠️ tsoa 실행 전엔 빨간 줄이 뜰 수 있어요!
 
-// resolveJsonModule 덕분에 가능해진 깔끔한 import!
-import swaggerDocument from "../build/swagger.json"; 
+import swaggerDocument from "../build/swagger.json";
+import { RegisterRoutes } from "./routes";
 
 export const app = express();
 

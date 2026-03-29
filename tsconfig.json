@@ -2,17 +2,17 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
-    "outDir": "./dist",           /* 빌드된 파일이 저장될 폴더 */
-    "rootDir": "./src",           /* 소스 코드 폴더 */
-    "strict": true,               /* 엄격한 타입 체크 (안정성) */
+    "outDir": "./dist" /* 빌드된 파일이 저장될 폴더 */,
+    "rootDir": "./src" /* 소스 코드 폴더 */,
+    "strict": true /* 엄격한 타입 체크 (안정성) */,
     "resolveJsonModule": true,
-    "esModuleInterop": true,      /* 라이브러리 import 호환성 */
-    "experimentalDecorators": true, /* Tsoa 필수 설정 1 */
-    "emitDecoratorMetadata": true,  /* Tsoa 필수 설정 2 */
-    "skipLibCheck": true,         /* 라이브러리 파일 체크 건너뛰기 (속도 향상) */
+    "esModuleInterop": true /* 라이브러리 import 호환성 */,
+    "experimentalDecorators": true /* Tsoa 필수 설정 1 */,
+    "emitDecoratorMetadata": true /* Tsoa 필수 설정 2 */,
+    "skipLibCheck": true /* 라이브러리 파일 체크 건너뛰기 (속도 향상) */,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true,             /* 디버깅할 때 편리함 */
+    "sourceMap": true /* 디버깅할 때 편리함 */
   },
-  "include": ["src/**/*"],        /* src 폴더 안의 파일들만 컴파일 */
-  "exclude": ["node_modules"]     /* 라이브러리 폴더는 제외 */
+  "include": ["src/**/*"] /* src 폴더 안의 파일들만 컴파일 */,
+  "exclude": ["node_modules"] /* 라이브러리 폴더는 제외 */
 }
