@@ -1,0 +1,37 @@
+# Dependency directories (이미지 빌드 시 새로 설치하므로 제외)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Docker/Local DB data (로컬 DB 데이터 폴더가 이미지에 들어가면 안 됨)
+postgres_data/
+docker-compose.yml
+Dockerfile
+
+# Prisma (스키마는 필요하지만, 생성된 클라이언트는 빌드 시 생성함)
+# 만약 이미지를 가볍게 유지하고 싶다면 제외
+prisma/migrations
+
+# Environment variables (보안상 절대 포함 금지)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build output (빌드된 결과물 폴더 - 예: dist, build)
+dist
+out
+.next
+
+# OS/IDE metadata
+.DS_Store
+.vscode
+.git
+.gitignore
+Thumbs.db
+
+# Test files
+tests/
+*.test.js
+*.spec.js

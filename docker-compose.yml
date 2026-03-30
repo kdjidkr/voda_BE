@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine # 가볍고 안정적인 버전
+    container_name: voda_postgres_local
+    restart: always
+    environment:
+      POSTGRES_USER: voda_user
+      POSTGRES_PASSWORD: voda_password
+      POSTGRES_DB: voda_db
+    ports:
+      - "5435:5432" # 내 컴퓨터의 5435 포트와 연결
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data # 데이터 휘발 방지용 저장소
