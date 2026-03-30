@@ -15,15 +15,17 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^7.5.0",
-    "body-parser": "^2.2.2",
+    "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
+    "morgan": "^1.10.1",
     "swagger-ui-express": "^5.0.1",
     "tsoa": "^7.0.0-alpha.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/body-parser": "^1.19.6",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^25.5.0",
     "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
