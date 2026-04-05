@@ -7,6 +7,9 @@ on:
     types:
       - closed
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: deploy-develop
   cancel-in-progress: true
