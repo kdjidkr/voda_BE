@@ -1,11 +1,38 @@
+type ErrorCodeObject = {
+  readonly code: string;
+  readonly status: number;
+  readonly message: string;
+};
+
 export class HttpException extends Error {
+  public status: number;
+  public override message: string;
+  public errorCode?: string;
+  public details?: unknown;
+
+  constructor(status: number, message: string, errorCode?: string, details?: unknown);
+  constructor(errorCodeObject: ErrorCodeObject, details?: unknown);
   constructor(
-    public status: number,        // HTTP 상태 코드 (404, 400 등)
-    public message: string,       // 클라이언트에 전달할 메시지
-    public errorCode?: string,    // 도메인 상세 코드 (ex: 'USER_NOT_FOUND')
-    public details?: unknown      // 추가 디버깅 정보
+    statusOrErrorCodeObject: number | ErrorCodeObject,
+    messageOrDetails?: string | unknown,
+    errorCode?: string,
+    details?: unknown,
   ) {
-    super(message);
+    if (typeof statusOrErrorCodeObject === "number") {
+      const resolvedMessage = typeof messageOrDetails === "string" ? messageOrDetails : "Unknown error";
+      super(resolvedMessage);
+      this.status = statusOrErrorCodeObject;
+      this.message = resolvedMessage;
+      this.errorCode = errorCode;
+      this.details = details;
+    } else {
+      super(statusOrErrorCodeObject.message);
+      this.status = statusOrErrorCodeObject.status;
+      this.message = statusOrErrorCodeObject.message;
+      this.errorCode = statusOrErrorCodeObject.code;
+      this.details = messageOrDetails;
+    }
+
     this.name = this.constructor.name;
     // TypeScript에서 Error 상속 시 프로토타입 체인이 끊기는 현상 방지
     Object.setPrototypeOf(this, HttpException.prototype);
