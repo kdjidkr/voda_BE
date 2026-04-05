@@ -5,27 +5,29 @@ import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 
 import swaggerDocument from "../build/swagger.json";
-import { RegisterRoutes } from "./routes";
 import { globalErrorHandler } from "./middlewares/errorHandler";
+import { RegisterRoutes } from "./routes";
 
 export const app = express();
 
 // 쿠키 설정을 위한 cors 설정
-const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000,http://localhost:5173")
-	.split(",")
-	.map((origin) => origin.trim())
-	.filter(Boolean);
+const allowedOrigins = (
+  process.env.CORS_ORIGINS ?? "http://localhost:3000,http://localhost:5173"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const corsOptions: CorsOptions = {
-	origin(origin, callback) {
-		if (!origin || allowedOrigins.includes(origin)) {
-			callback(null, true);
-			return;
-		}
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
 
-		callback(null, false);
-	},
-	credentials: true,
+    callback(null, false);
+  },
+  credentials: true,
 };
 
 // 1. 미들웨어 설정 (데이터 파싱)

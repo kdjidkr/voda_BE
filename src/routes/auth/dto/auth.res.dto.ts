@@ -1,3 +1,3 @@
-export class AccessTokenResponseDto{
-    accessToken!: string;
+export class AccessTokenResponseDto {
+  accessToken!: string;
 }

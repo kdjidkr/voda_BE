@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   db:
     image: postgres:16-alpine # 가볍고 안정적인 버전
@@ -11,4 +11,7 @@ services:
     ports:
       - "5435:5432" # 내 컴퓨터의 5435 포트와 연결
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data # 데이터 휘발 방지용 저장소
+      - voda_postgres_data:/var/lib/postgresql/data # Docker named volume 사용
+
+volumes:
+  voda_postgres_data:

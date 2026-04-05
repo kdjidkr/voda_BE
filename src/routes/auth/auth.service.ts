@@ -1,105 +1,130 @@
-import { SignUpRequestDto } from "./dto/auth.req.dto"
-import { AuthTokenPair, SignUpInput, SignUpOutput } from "./dto/auth.model";
-import * as bcrypt from 'bcrypt';
-import { validateEmail, validateNickname, validatePassword } from "../utils/validators";
-import { authRepository } from "./auth.repository";
-import { JwtPayload } from "../../types/jwt-payload";
+import * as bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 import { redisClient } from "../../config/redis";
 import { REDIS_KEYS } from "../../config/redis";
-import { HttpException } from "../../errors/HttpException";
 import { ErrorCode } from "../../errors/ErrorCodes";
+import { HttpException } from "../../errors/HttpException";
+import { JwtPayload } from "../../types/jwt-payload";
 import { usersRepository } from "../users/users.repository";
+import {
+  validateEmail,
+  validateNickname,
+  validatePassword,
+} from "../utils/validators";
+import { authRepository } from "./auth.repository";
+import { AuthTokenPair, SignUpInput, SignUpOutput } from "./dto/auth.model";
+import { SignUpRequestDto } from "./dto/auth.req.dto";
 
-import jwt from 'jsonwebtoken';
+class AuthService {
+  private readonly SALT_ROUNDS = 10;
 
-class AuthService{
-    private readonly SALT_ROUNDS = 10;
+  constructor() {}
 
-    constructor() {
+  async signUp(requestBody: SignUpRequestDto): Promise<AuthTokenPair> {
+    await this.validateSignUpData(requestBody);
+    return await this.processSignup(
+      requestBody,
+      async (hashedPassword, formattedBirthDate) => {
+        const { password, birthDate, ...rest } = requestBody;
+        const signUpInput: SignUpInput = {
+          ...rest,
+          hashedPassword,
+          formattedBirthDate,
+        };
+        return await authRepository.createAccount(signUpInput);
+      },
+    );
+  }
+
+  private async processSignup(
+    requestBody: SignUpRequestDto,
+    createAccountFn: (
+      hashedPassword: string | undefined,
+      formattedBirthDate: Date,
+    ) => Promise<SignUpOutput>,
+  ): Promise<AuthTokenPair> {
+    const { password, birthDate, registrationType } = requestBody;
+    const formattedBirthDate = new Date(`${birthDate}T00:00:00.000Z`);
+    const hashedPassword =
+      password && registrationType === "EMAIL"
+        ? await bcrypt.hash(password, this.SALT_ROUNDS)
+        : undefined;
+
+    const newAccount = await createAccountFn(
+      hashedPassword,
+      formattedBirthDate,
+    );
+    const payload: JwtPayload = {
+      sub: newAccount.id,
+    };
+    return this.generateAndSaveTokens(payload);
+  }
+
+  private async validateSignUpData(singUpRawData: SignUpRequestDto) {
+    const { email, nickname, password, registrationType, oauthId } =
+      singUpRawData;
+    validateEmail(email);
+    validateNickname(nickname);
+    if (password) {
+      validatePassword(password);
     }
 
-    async signUp(requestBody: SignUpRequestDto)
-    : Promise<AuthTokenPair> {
-        await this.validateSignUpData(requestBody)
-        return await this.processSignup(requestBody, async (hashedPassword, formattedBirthDate) => {
-            const { password, birthDate, ...rest } = requestBody
-            const signUpInput: SignUpInput = {
-                ...rest,
-                hashedPassword,
-                formattedBirthDate
-            };
-            return await authRepository.createAccount(signUpInput);
-        })
+    if (registrationType === "EMAIL" && oauthId) {
+      throw new HttpException(ErrorCode.AUTH001, { registrationType, oauthId });
+    }
+    if (registrationType !== "EMAIL" && password) {
+      throw new HttpException(ErrorCode.AUTH001, { registrationType });
+    }
+    if (registrationType === "EMAIL" && !password) {
+      throw new HttpException(ErrorCode.AUTH001, { registrationType });
+    }
+    if (registrationType !== "EMAIL" && !oauthId) {
+      throw new HttpException(ErrorCode.AUTH001, { registrationType });
     }
 
-    private async processSignup(
-        requestBody: SignUpRequestDto,
-        createAccountFn: (
-            hashedPassword: string | undefined,
-            formattedBirthDate: Date
-        ) => Promise<SignUpOutput>): Promise<AuthTokenPair> {
-            const { password, birthDate, registrationType } = requestBody
-            const formattedBirthDate = new Date(`${birthDate}T00:00:00.000Z`)
-            const hashedPassword = password && registrationType === 'EMAIL'
-                ? await bcrypt.hash(password, this.SALT_ROUNDS)
-                : undefined;
-
-            const newAccount = await createAccountFn(hashedPassword, formattedBirthDate);
-            const payload: JwtPayload = {
-                sub : newAccount.id
-            };
-            return this.generateAndSaveTokens(payload)
-        }
-
-    private async validateSignUpData(singUpRawData: SignUpRequestDto) {
-        const { email, nickname, password, registrationType, oauthId } = singUpRawData
-        validateEmail(email);
-        validateNickname(nickname);
-        if (password){
-            validatePassword(password)
-        }
-
-        if (registrationType === 'EMAIL' && oauthId) {
-        throw new HttpException(ErrorCode.AUTH001, { registrationType, oauthId });
-        }
-        if (registrationType !== 'EMAIL' && password) {
-        throw new HttpException(ErrorCode.AUTH001, { registrationType });
-        }
-        if (registrationType === 'EMAIL' && !password) {
-        throw new HttpException(ErrorCode.AUTH001, { registrationType });
-        }
-        if (registrationType !== 'EMAIL' && !oauthId) {
-        throw new HttpException(ErrorCode.AUTH001, { registrationType });
-        }
-
-        if (password){
-        validatePassword(password);
-        }
-
-        if (await usersRepository.findUserbyNickname(nickname)){
-            throw new HttpException(ErrorCode.AUTH002)
-        }
-
-        if (await usersRepository.findUserbyEmail(email)){
-            throw new HttpException(ErrorCode.AUTH003)
-        }
-
-        if (oauthId && await usersRepository.findUserbyOauthId(oauthId)) {
-            throw new HttpException(ErrorCode.AUTH004)
-        }
+    if (password) {
+      validatePassword(password);
     }
 
-    private async generateAndSaveTokens(payload: JwtPayload): Promise<AuthTokenPair> {
-        const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
-        const refreshToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '14d' });
-        try {
-            await redisClient.set(REDIS_KEYS.REFRESH_TOKEN(payload.sub), refreshToken, 'EX', 60 * 60 * 24 * 14)
-        } catch (error) {
-            console.error(`[Refresh Token Storage] Redis 저장 실패 - userId: ${payload}`, error);
-            throw new HttpException(ErrorCode.AUTH005, { payload });
-        }
-        return { accessToken, refreshToken }
+    if (await usersRepository.findUserbyNickname(nickname)) {
+      throw new HttpException(ErrorCode.AUTH002);
     }
+
+    if (await usersRepository.findUserbyEmail(email)) {
+      throw new HttpException(ErrorCode.AUTH003);
+    }
+
+    if (oauthId && (await usersRepository.findUserbyOauthId(oauthId))) {
+      throw new HttpException(ErrorCode.AUTH004);
+    }
+  }
+
+  private async generateAndSaveTokens(
+    payload: JwtPayload,
+  ): Promise<AuthTokenPair> {
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+      expiresIn: "1h",
+    });
+    const refreshToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+      expiresIn: "14d",
+    });
+    try {
+      await redisClient.set(
+        REDIS_KEYS.REFRESH_TOKEN(payload.sub),
+        refreshToken,
+        "EX",
+        60 * 60 * 24 * 14,
+      );
+    } catch (error) {
+      console.error(
+        `[Refresh Token Storage] Redis 저장 실패 - userId: ${payload}`,
+        error,
+      );
+      throw new HttpException(ErrorCode.AUTH005, { payload });
+    }
+    return { accessToken, refreshToken };
+  }
 }
 
 export const authService = new AuthService();

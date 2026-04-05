@@ -1,6 +1,9 @@
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 -- CreateEnum
 CREATE TYPE "diary_input_type" AS ENUM ('CALL', 'CHAT', 'VOICE', 'KEYWORDS', 'MANUAL', 'AI');
 
@@ -15,7 +18,7 @@ CREATE TYPE "registration_type" AS ENUM ('EMAIL', 'KAKAO', 'GOOGLE', 'APPLE', 'N
 
 -- CreateTable
 CREATE TABLE "ai_memory" (
-    "ai_memory_id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "ai_memory_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
     "memory_data" JSONB,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -59,7 +62,7 @@ CREATE TABLE "chat_room" (
 
 -- CreateTable
 CREATE TABLE "diary" (
-    "diary_id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "diary_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
     "title" VARCHAR(200),
     "content" TEXT NOT NULL,
@@ -95,7 +98,7 @@ CREATE TABLE "keyword" (
 
 -- CreateTable
 CREATE TABLE "report" (
-    "report_id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "report_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
     "report_type" "report_type" NOT NULL,
     "summary" JSONB NOT NULL,
@@ -108,7 +111,7 @@ CREATE TABLE "report" (
 
 -- CreateTable
 CREATE TABLE "todo_list" (
-    "todo_id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "todo_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
     "title" VARCHAR(255) NOT NULL,
     "content" TEXT,
@@ -125,7 +128,7 @@ CREATE TABLE "todo_list" (
 
 -- CreateTable
 CREATE TABLE "user" (
-    "user_id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "user_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "password" VARCHAR(255) NOT NULL,
     "name" VARCHAR(50) NOT NULL,
     "birth_date" DATE NOT NULL,
@@ -143,7 +146,7 @@ CREATE TABLE "user" (
 
 -- CreateTable
 CREATE TABLE "user_oauth_account" (
-    "user_oauth_account_id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "user_oauth_account_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
     "registration_type" "registration_type" NOT NULL,
     "oauth_id" VARCHAR(255) NOT NULL,

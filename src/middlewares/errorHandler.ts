@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { ValidateError } from "tsoa";
 
-import type { ApiResponse } from "../interfaces/ApiResponse";
 import { HttpException } from "../errors/HttpException";
+import type { ApiResponse } from "../interfaces/ApiResponse";
 
 export function globalErrorHandler(
   err: unknown,

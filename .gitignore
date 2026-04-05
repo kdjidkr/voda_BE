@@ -19,3 +19,6 @@ Thumbs.db
 
 # Prisma generated client
 /src/generated/prisma
+
+# Local PostgreSQL bind data directory
+postgres_data/

@@ -10,7 +10,12 @@ export class HttpException extends Error {
   public errorCode?: string;
   public details?: unknown;
 
-  constructor(status: number, message: string, errorCode?: string, details?: unknown);
+  constructor(
+    status: number,
+    message: string,
+    errorCode?: string,
+    details?: unknown,
+  );
   constructor(errorCodeObject: ErrorCodeObject, details?: unknown);
   constructor(
     statusOrErrorCodeObject: number | ErrorCodeObject,
@@ -19,7 +24,10 @@ export class HttpException extends Error {
     details?: unknown,
   ) {
     if (typeof statusOrErrorCodeObject === "number") {
-      const resolvedMessage = typeof messageOrDetails === "string" ? messageOrDetails : "Unknown error";
+      const resolvedMessage =
+        typeof messageOrDetails === "string"
+          ? messageOrDetails
+          : "Unknown error";
       super(resolvedMessage);
       this.status = statusOrErrorCodeObject;
       this.message = resolvedMessage;
