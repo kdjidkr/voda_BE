@@ -22,3 +22,6 @@ Thumbs.db
 
 # Local PostgreSQL bind data directory
 postgres_data/
+
+# 로컬 docker 설정 파일 방지
+docker-compose.yml

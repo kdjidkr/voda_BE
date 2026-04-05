@@ -15,3 +15,13 @@ services:
 
 volumes:
   voda_postgres_data:
+
+services:
+  voda-api:
+    image: ${DOCKER_USERNAME}/voda-api:develop
+    container_name: voda-api-server
+    ports:
+      - "3000:3000"
+    env_file: .env
+    restart: always
+    network_mode: "bridge" # 💡 기존 Redis와 통신하기 위해
