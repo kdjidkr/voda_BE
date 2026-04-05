@@ -30,6 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 💡 빌드 체크 전에 이 과정을 꼭 넣어야 합니다!
+      - name: Generate Prisma Client 💎
+        run: npx prisma generate
+
       # 빌드가 성공하는지 미리 체크하는 과정, 아주 중요합니다. 🛡️
       - name: Build Check
         run: npm run build
