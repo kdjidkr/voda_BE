@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "predev": "npm run db:sync && tsoa spec-and-routes",
+    "predev": "npm run api:sync",
     "dev": "nodemon --watch src --exec ts-node src/server.ts",
+    "api:sync": "tsoa spec-and-routes",
     "db:migrate": "prisma migrate deploy",
     "db:sync": "npm run db:migrate && prisma generate",
-    "dev:setup": "npm run db:sync && npm run dev",
+    "dev:setup": "npm run db:sync && npm run api:sync && npm run dev",
     "build": "tsoa spec-and-routes && tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
