@@ -26,6 +26,33 @@ export const ErrorCode = {
     message: "서버 저장소 오류가 발생했습니다.",
   },
 
+  // 업로드 관련
+  UPLOAD001: {
+    code: "UPLOAD001",
+    status: 400,
+    message: "업로드할 파일이 없습니다.",
+  },
+  UPLOAD002: {
+    code: "UPLOAD002",
+    status: 500,
+    message: "파일 업로드 중 저장소 오류가 발생했습니다.",
+  },
+  UPLOAD003: {
+    code: "UPLOAD003",
+    status: 413,
+    message: "업로드 파일 용량 제한을 초과했습니다.",
+  },
+  UPLOAD004: {
+    code: "UPLOAD004",
+    status: 400,
+    message: "multipart/form-data 요청 형식이 올바르지 않습니다.",
+  },
+  UPLOAD005: {
+    code: "UPLOAD005",
+    status: 404,
+    message: "업로드 대상 S3 버킷을 찾을 수 없습니다.",
+  },
+
   // 유효성 관련
   INVALID001: {
     code: "INVALID001",

@@ -5,6 +5,7 @@ import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 
 import swaggerDocument from "../build/swagger.json";
+import { upload } from "./config/s3";
 import { globalErrorHandler } from "./middlewares/errorHandler";
 import { RegisterRoutes } from "./routes";
 
@@ -42,7 +43,7 @@ app.use(express.json());
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 3. Tsoa가 생성한 라우트 등록
-RegisterRoutes(app);
+RegisterRoutes(app, { multer: upload });
 
 // 글로벌 에러 핸들러 (반드시 라우트 뒤에!)
 app.use(globalErrorHandler);
