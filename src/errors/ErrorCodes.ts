@@ -25,6 +25,36 @@ export const ErrorCode = {
     status: 500,
     message: "서버 저장소 오류가 발생했습니다.",
   },
+  AUTH006: {
+    code: "AUTH006",
+    status: 500,
+    message: "JWT 비밀키가 설정되지 않았습니다.",
+  },
+  AUTH007: {
+    code: "AUTH007",
+    status: 401,
+    message: "액세스 토큰이 없습니다.",
+  },
+  AUTH008: {
+    code: "AUTH008",
+    status: 401,
+    message: "액세스 토큰이 유효하지 않습니다.",
+  },
+  AUTH009: {
+    code: "AUTH009",
+    status: 401,
+    message: "리프레시 토큰이 없습니다.",
+  },
+  AUTH010: {
+    code: "AUTH010",
+    status: 401,
+    message: "리프레시 토큰이 유효하지 않습니다.",
+  },
+  AUTH011: {
+    code: "AUTH011",
+    status: 401,
+    message: "지원하지 않는 인증 방식입니다.",
+  },
 
   // 업로드 관련
   UPLOAD001: {

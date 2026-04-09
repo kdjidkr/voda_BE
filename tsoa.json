@@ -7,6 +7,7 @@
     "specVersion": 3
   },
   "routes": {
+    "authenticationModule": "./src/routes/auth/authentication.ts",
     "routesDir": "src"
   }
 }
