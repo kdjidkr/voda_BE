@@ -21,6 +21,11 @@ import { CreateBasicDiaryResponseDto } from "./dto/diaries.res.dto";
 @Route("diaries")
 @Tags("다이어리 작성, 조회, 삭제 등의 기능을 담당합니다.")
 export class DiariesController extends Controller {
+  /**
+   * @summary 일기를 작성합니다.
+   * @description 제목, 내용, 사진 URL 목록을 받아 기본 일기를 생성합니다.
+   * @returns 생성된 일기 정보
+   */
   @Security("jwt")
   @SuccessResponse(201, "기본 일기 생성 성공")
   @Example<ApiResponse<CreateBasicDiaryResponseDto>>({

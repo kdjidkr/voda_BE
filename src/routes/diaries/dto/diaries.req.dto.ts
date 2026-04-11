@@ -1,5 +1,5 @@
 export class CreateBasicDiaryRequestDto {
   title!: string;
-  content!: string;
+  content?: string;
   photos?: string[];
 }
