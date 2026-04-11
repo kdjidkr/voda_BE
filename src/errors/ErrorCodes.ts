@@ -114,4 +114,11 @@ export const ErrorCode = {
     status: 400,
     message: "사진 URL 형식이 올바르지 않습니다.",
   },
+
+  // 다이어리 관련
+  DIARY001: {
+    code: "DIARY001",
+    status: 404,
+    message: "삭제할 일기 사진을 찾을 수 없습니다.",
+  },
 } as const;

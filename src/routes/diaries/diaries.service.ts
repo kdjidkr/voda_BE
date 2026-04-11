@@ -1,4 +1,5 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
+import { HttpException } from "../../errors/HttpException";
 import { validateNonEmptyText, validatePhotoUrls } from "../utils/validators";
 import { BasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
@@ -40,6 +41,17 @@ export class DiariesService {
       inputId: result.input_id ?? undefined,
     };
     return responseDto;
+  }
+
+  async deleteDiaryPhoto(userId: string, diaryPhotoId: string): Promise<void> {
+    const deleted = await diariesRepository.deleteDiaryPhoto(
+      userId,
+      diaryPhotoId,
+    );
+
+    if (!deleted) {
+      throw new HttpException(ErrorCode.DIARY001);
+    }
   }
 }
 
