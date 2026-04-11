@@ -13,10 +13,10 @@ export class DiariesService {
     requestBody: CreateBasicDiaryRequestDto,
   ): Promise<CreateBasicDiaryResponseDto> {
     const title = validateNonEmptyText(requestBody.title, ErrorCode.INVALID004);
-    const content = validateNonEmptyText(
-      requestBody.content,
-      ErrorCode.INVALID005,
-    );
+    const content =
+      requestBody.content === undefined
+        ? ""
+        : validateNonEmptyText(requestBody.content, ErrorCode.INVALID005);
     const photos = validatePhotoUrls(requestBody.photos);
 
     const basicDiaryInput: BasicDiaryInput = {

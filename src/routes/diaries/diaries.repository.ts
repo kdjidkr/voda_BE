@@ -13,9 +13,6 @@ class DiariesRepository {
     basicDiaryInput: BasicDiaryInput,
   ): Promise<DiaryWithPhotos> {
     const { userId, title, content, photos } = basicDiaryInput;
-    if (!content) {
-      throw new Error("내용이 없다는 오류 생성");
-    }
     return await prisma.diary.create({
       data: {
         user_id: userId,
