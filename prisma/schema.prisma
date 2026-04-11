@@ -50,12 +50,12 @@ model ai_memory {
 }
 
 model call_room {
-  call_room_id String      @id(map: "pk_call_room") @db.Uuid
+  call_room_id String      @id(map: "pk_call_room") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   call_text    call_text[]
 }
 
 model call_text {
-  call_text_id String    @id(map: "pk_call_text") @db.Uuid
+  call_text_id String    @id(map: "pk_call_text") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   call_room_id String    @db.Uuid
   text_content String
   created_at   DateTime  @default(now()) @db.Timestamp(6)
@@ -63,7 +63,7 @@ model call_text {
 }
 
 model chat_message {
-  chat_message_id String    @id(map: "pk_chat_message") @db.Uuid
+  chat_message_id String    @id(map: "pk_chat_message") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   chat_room_id    String    @db.Uuid
   text_content    String
   created_at      DateTime  @default(now()) @db.Timestamp(6)
@@ -71,7 +71,7 @@ model chat_message {
 }
 
 model chat_room {
-  chat_room_id String         @id(map: "pk_chat_room") @db.Uuid
+  chat_room_id String         @id(map: "pk_chat_room") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   chat_message chat_message[]
 }
 
@@ -91,14 +91,14 @@ model diary {
 }
 
 model diary_photo {
-  diary_photo_id String @id(map: "pk_diary_photo") @db.Uuid
+  diary_photo_id String @id(map: "pk_diary_photo") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   diary_id       String @db.Uuid
   image_url      String
   sort_order     Int    @default(0)
 }
 
 model keyword {
-  keyword_id   String @id(map: "pk_keyword") @db.Uuid
+  keyword_id   String @id(map: "pk_keyword") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   diary_id     String @db.Uuid
   keyword_text String
 }
@@ -130,7 +130,7 @@ model todo_list {
 }
 
 model voice_source {
-  voice_id   String @id(map: "pk_voice_source") @db.Uuid
+  voice_id   String @id(map: "pk_voice_source") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   voice_text String
 }
 
