@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,6 +5,135 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model user {
+  user_id        String               @id(map: "pk_user") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  password       String               @db.VarChar(255)
+  name           String               @db.VarChar(50)
+  birth_date     DateTime             @db.Date
+  nickname       String               @db.VarChar(50)
+  email          String               @unique(map: "uq_user_email") @db.VarChar(100)
+  gender         user_gender
+  profile_image  String?
+  created_at     DateTime             @default(now()) @db.Timestamp(6)
+  updated_at     DateTime             @default(now()) @db.Timestamp(6)
+  deleted_at     DateTime?            @db.Timestamp(6)
+  ai_memory      ai_memory[]
+  diary          diary[]
+  report         report[]
+  todo_list      todo_list[]
+  oauth_accounts user_oauth_account[]
+
+  @@map("user")
+}
+
+model user_oauth_account {
+  user_oauth_account_id String            @id(map: "pk_user_oauth_account") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id               String            @db.Uuid
+  registration_type     registration_type
+  oauth_id              String            @db.VarChar(255)
+  created_at            DateTime          @default(now()) @db.Timestamp(6)
+  user                  user              @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_to_user_oauth_account")
+
+  @@unique([registration_type, oauth_id], map: "uq_user_oauth_account_registration_type_oauth_id")
+  @@unique([user_id, registration_type], map: "uq_user_oauth_account_user_id_registration_type")
+  @@map("user_oauth_account")
+}
+
+model ai_memory {
+  ai_memory_id String   @id(map: "pk_ai_memory") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String   @db.Uuid
+  memory_data  Json?
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  user         user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_to_ai_memory")
+}
+
+model call_room {
+  call_room_id String      @id(map: "pk_call_room") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  call_text    call_text[]
+}
+
+model call_text {
+  call_text_id String    @id(map: "pk_call_text") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  call_room_id String    @db.Uuid
+  text_content String
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  call_room    call_room @relation(fields: [call_room_id], references: [call_room_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_call_room_to_call_text")
+}
+
+model chat_message {
+  chat_message_id String    @id(map: "pk_chat_message") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chat_room_id    String    @db.Uuid
+  text_content    String
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+  chat_room       chat_room @relation(fields: [chat_room_id], references: [chat_room_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_chat_room_to_chat_message")
+}
+
+model chat_room {
+  chat_room_id String         @id(map: "pk_chat_room") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chat_message chat_message[]
+}
+
+model diary {
+  diary_id      String           @id(map: "pk_diary") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String           @db.Uuid
+  title         String?          @db.VarChar(200)
+  content       String
+  initial_draft String
+  diary_date    DateTime         @default(dbgenerated("CURRENT_DATE")) @db.Date
+  analysis      Json
+  input_type    diary_input_type
+  input_id      String?          @db.Uuid
+  created_at    DateTime         @default(now()) @db.Timestamp(6)
+  deleted_at    DateTime?        @db.Timestamp(6)
+  user          user             @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_to_diary")
+  diary_photo   diary_photo[]
+}
+
+model diary_photo {
+  diary_photo_id String @id(map: "pk_diary_photo") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  diary_id       String @db.Uuid
+  image_url      String
+  sort_order     Int    @default(autoincrement())
+  diary          diary  @relation(fields: [diary_id], references: [diary_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model keyword {
+  keyword_id   String @id(map: "pk_keyword") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  diary_id     String @db.Uuid
+  keyword_text String
+}
+
+model report {
+  report_id    String      @id(map: "pk_report") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String      @db.Uuid
+  report_type  report_type
+  summary      Json
+  base_date    DateTime    @db.Date
+  details_json Json?
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  user         user        @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_to_report")
+}
+
+model todo_list {
+  todo_id      String    @id(map: "pk_todo_list") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String    @db.Uuid
+  title        String    @db.VarChar(255)
+  content      String?
+  todo_type    String    @db.VarChar(50)
+  day_of_week  Int?      @db.SmallInt
+  day_of_month Int?      @db.SmallInt
+  due_to       DateTime? @db.Timestamp(6)
+  status       Boolean   @default(false)
+  completed_at DateTime? @db.Timestamp(6)
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  user         user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_to_todo_list")
+}
+
+model voice_source {
+  voice_id   String @id(map: "pk_voice_source") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  voice_text String
 }
 
 enum user_gender {
@@ -26,32 +150,16 @@ enum registration_type {
   NAVER
 }
 
-model user {
-  user_id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  password       String               @db.VarChar(255)
-  name           String               @db.VarChar(50)
-  birth_date     DateTime             @db.Date
-  nickname       String               @db.VarChar(50)
-  email          String               @unique(map: "uq_user_email") @db.VarChar(100)
-  gender         user_gender
-  profile_image  String?
-  created_at     DateTime             @default(now()) @db.Timestamp(6)
-  updated_at     DateTime             @default(now()) @db.Timestamp(6)
-  deleted_at     DateTime?            @db.Timestamp(6)
-  oauth_accounts user_oauth_account[]
-
-  @@map("user")
+enum diary_input_type {
+  CALL
+  CHAT
+  VOICE
+  KEYWORDS
+  MANUAL
+  AI
 }
 
-model user_oauth_account {
-  user_oauth_account_id String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id               String            @db.Uuid
-  registration_type     registration_type
-  oauth_id              String            @db.VarChar(255)
-  created_at            DateTime          @default(now()) @db.Timestamp(6)
-  user                  user              @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_user_to_user_oauth_account")
-
-  @@unique([registration_type, oauth_id], map: "uq_user_oauth_account_registration_type_oauth_id")
-  @@unique([user_id, registration_type], map: "uq_user_oauth_account_user_id_registration_type")
-  @@map("user_oauth_account")
+enum report_type {
+  WEEKLY
+  MONTHLY
 }
