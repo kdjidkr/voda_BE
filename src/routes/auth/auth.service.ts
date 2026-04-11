@@ -12,8 +12,8 @@ import {
   validateNickname,
   validatePassword,
 } from "../utils/validators";
-import { authRepository } from "./auth.repository";
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
+import { authRepository } from "./auth.repository";
 import { SignUpRequestDto } from "./dto/auth.req.dto";
 
 class AuthService {
