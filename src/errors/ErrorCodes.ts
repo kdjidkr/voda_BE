@@ -99,4 +99,19 @@ export const ErrorCode = {
     status: 400,
     message: "비밀번호 형식이 올바르지 않습니다.",
   },
+  INVALID004: {
+    code: "INVALID004",
+    status: 400,
+    message: "일기 제목은 공백일 수 없습니다.",
+  },
+  INVALID005: {
+    code: "INVALID005",
+    status: 400,
+    message: "일기 내용은 공백일 수 없습니다.",
+  },
+  INVALID006: {
+    code: "INVALID006",
+    status: 400,
+    message: "사진 URL 형식이 올바르지 않습니다.",
+  },
 } as const;

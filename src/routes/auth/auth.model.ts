@@ -1,4 +1,4 @@
-import { Gender, RegistrationType } from "./auth.types";
+import { Gender, RegistrationType } from "./dto/auth.types";
 
 export class SignUpInput {
   email!: string;

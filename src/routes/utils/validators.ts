@@ -24,3 +24,31 @@ export const validatePassword = (password: string): void => {
     throw new HttpException(ErrorCode.INVALID003);
   }
 };
+
+export const validateNonEmptyText = (
+  value: string | undefined,
+  errorCode: (typeof ErrorCode)[keyof typeof ErrorCode],
+): string => {
+  const normalizedValue = value?.trim();
+
+  if (!normalizedValue) {
+    throw new HttpException(errorCode);
+  }
+
+  return normalizedValue;
+};
+
+export const validatePhotoUrls = (photos?: string[]): string[] | undefined => {
+  if (!photos) {
+    return undefined;
+  }
+
+  const normalizedPhotos = photos.map((photo) => photo.trim());
+  const hasInvalidPhoto = normalizedPhotos.some((photo) => photo.length === 0);
+
+  if (hasInvalidPhoto) {
+    throw new HttpException(ErrorCode.INVALID006);
+  }
+
+  return normalizedPhotos;
+};

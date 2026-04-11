@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { prisma } from "../../config/prisma";
-import { SignUpInput, SignUpOutput } from "./dto/auth.model";
+import { SignUpInput, SignUpOutput } from "./auth.model";
 
 class AuthRepository {
   async createAccount(singUpInput: SignUpInput): Promise<SignUpOutput> {

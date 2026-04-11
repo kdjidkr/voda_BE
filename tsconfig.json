@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2021",
     "module": "commonjs",
     "outDir": "./dist" /* 빌드된 파일이 저장될 폴더 */,
     "rootDir": "./src" /* 소스 코드 폴더 */,
