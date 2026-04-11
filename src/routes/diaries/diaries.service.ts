@@ -13,7 +13,9 @@ export class DiariesService {
     requestBody: CreateBasicDiaryRequestDto,
   ): Promise<CreateBasicDiaryResponseDto> {
     const title = validateNonEmptyText(requestBody.title, ErrorCode.INVALID004);
-    const content = validateNonEmptyText(
+    const content = 
+      requestBody.content === undefined ? "" :
+    validateNonEmptyText(
       requestBody.content,
       ErrorCode.INVALID005,
     );

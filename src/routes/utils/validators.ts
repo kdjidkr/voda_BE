@@ -18,7 +18,7 @@ export const validateEmail = (email: string): void => {
 
 export const validatePassword = (password: string): void => {
   // 영문, 숫자, 특수문자가 모두 포함된 8자 이상 16자 이하 조합
-  const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,16}$/;
+  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,16}$/;
   if (!passwordRegex.test(password)) {
     throw new HttpException(ErrorCode.INVALID003);
   }
