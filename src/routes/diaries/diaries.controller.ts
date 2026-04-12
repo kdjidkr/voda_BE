@@ -184,7 +184,7 @@ export class DiariesController extends Controller {
     success: false,
     error: {
       code: "DIARY001",
-      message: "삭제할 일기 사진을 찾을 수 없거나 삭제 권한이 없는 사진입니다",
+      message: "삭제할 일기 사진을 찾을 수 없거나 삭제 권한이 없는 사진입니다.",
     },
   })
   @Delete("photos/{diaryPhotoId}")
