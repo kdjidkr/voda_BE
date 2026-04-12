@@ -37,7 +37,6 @@ class DiariesRepository {
       },
     });
   }
-
   async findDiaryById(
     userId: string,
     diaryId: string,
@@ -55,6 +54,22 @@ class DiariesRepository {
         },
       },
     });
+  }
+
+  async deleteDiaryPhoto(
+    userId: string,
+    diaryPhotoId: string,
+  ): Promise<boolean> {
+    const result = await prisma.diary_photo.deleteMany({
+      where: {
+        diary_photo_id: diaryPhotoId,
+        diary: {
+          user_id: userId,
+        },
+      },
+    });
+
+    return result.count > 0;
   }
 }
 

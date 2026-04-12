@@ -1,6 +1,10 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
-import { validateNonEmptyText, validatePhotoUrls } from "../utils/validators";
+import {
+  validateNonEmptyText,
+  validatePhotoUrls,
+  validateUuid,
+} from "../utils/validators";
 import { BasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
 import { CreateBasicDiaryRequestDto } from "./dto/diaries.req.dto";
@@ -43,11 +47,28 @@ export class DiariesService {
     return responseDto;
   }
 
+  async deleteDiaryPhoto(userId: string, diaryPhotoId: string): Promise<void> {
+    const normalizedDiaryPhotoId = validateUuid(
+      diaryPhotoId,
+      ErrorCode.INVALID007,
+    );
+
+    const deleted = await diariesRepository.deleteDiaryPhoto(
+      userId,
+      normalizedDiaryPhotoId,
+    );
+
+    if (!deleted) {
+      throw new HttpException(ErrorCode.DIARY001);
+    }
+  }
+
   async getDiaryById(
     userId: string,
     diaryId: string,
   ): Promise<CreateBasicDiaryResponseDto> {
-    const result = await diariesRepository.findDiaryById(userId, diaryId);
+    const normalizedDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
+    const result = await diariesRepository.findDiaryById(userId, normalizedDiaryId);
 
     if (!result) {
       throw new HttpException(ErrorCode.DIARY002);

@@ -114,8 +114,18 @@ export const ErrorCode = {
     status: 400,
     message: "사진 URL 형식이 올바르지 않습니다.",
   },
+  INVALID007: {
+    code: "INVALID007",
+    status: 400,
+    message: "UUID 형식이 올바르지 않습니다.",
+  },
 
   // 다이어리 관련
+  DIARY001: {
+    code: "DIARY001",
+    status: 404,
+    message: "삭제할 일기 사진을 찾을 수 없거나 접근 권한이 없습니다.",
+  },
   DIARY002: {
     code: "DIARY002",
     status: 404,

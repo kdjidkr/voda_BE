@@ -52,3 +52,18 @@ export const validatePhotoUrls = (photos?: string[]): string[] | undefined => {
 
   return normalizedPhotos;
 };
+
+export const validateUuid = (
+  value: string,
+  errorCode: (typeof ErrorCode)[keyof typeof ErrorCode],
+): string => {
+  const normalizedValue = value.trim();
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!uuidRegex.test(normalizedValue)) {
+    throw new HttpException(errorCode, { value });
+  }
+
+  return normalizedValue;
+};
