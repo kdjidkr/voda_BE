@@ -141,9 +141,6 @@ export class AuthController extends Controller {
     error: {
       code: "INVALID008",
       message: "비밀번호는 공백일 수 없습니다.",
-      details: {
-        password: "",
-      },
     },
   })
   @Response<ApiResponse<null>>(401, "로그인 인증 실패", {
