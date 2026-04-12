@@ -39,8 +39,8 @@ class AuthService {
   }
 
   async signIn(requestBody: SignInRequestDto): Promise<AuthTokenPair> {
-    validateEmail(requestBody.email);
     const email = requestBody.email.trim();
+    validateEmail(email);
     const password = validateNonEmptyText(
       requestBody.password,
       ErrorCode.INVALID008,
