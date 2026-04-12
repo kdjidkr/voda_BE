@@ -52,7 +52,9 @@ export async function expressAuthentication(
   }
 
   if (securityName === "jwtRefresh") {
-    const token = request.cookies?.["__Host-refresh_token"];
+    const token =
+      request.cookies?.["__Host-refresh_token"] ??
+      request.cookies?.["refresh_token"];
 
     if (!token) {
       throw new HttpException(ErrorCode.AUTH009);

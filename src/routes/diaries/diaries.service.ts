@@ -68,7 +68,10 @@ export class DiariesService {
     diaryId: string,
   ): Promise<CreateBasicDiaryResponseDto> {
     const normalizedDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
-    const result = await diariesRepository.findDiaryById(userId, normalizedDiaryId);
+    const result = await diariesRepository.findDiaryById(
+      userId,
+      normalizedDiaryId,
+    );
 
     if (!result) {
       throw new HttpException(ErrorCode.DIARY002);

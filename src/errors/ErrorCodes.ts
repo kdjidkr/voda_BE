@@ -55,6 +55,11 @@ export const ErrorCode = {
     status: 401,
     message: "지원하지 않는 인증 방식입니다.",
   },
+  AUTH012: {
+    code: "AUTH012",
+    status: 401,
+    message: "이메일 또는 비밀번호가 올바르지 않습니다.",
+  },
 
   // 업로드 관련
   UPLOAD001: {
@@ -118,6 +123,11 @@ export const ErrorCode = {
     code: "INVALID007",
     status: 400,
     message: "UUID 형식이 올바르지 않습니다.",
+  },
+  INVALID008: {
+    code: "INVALID008",
+    status: 400,
+    message: "비밀번호는 공백일 수 없습니다.",
   },
 
   // 다이어리 관련
