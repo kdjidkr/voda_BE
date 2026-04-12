@@ -166,6 +166,13 @@ export class DiariesController extends Controller {
    */
   @Security("jwt")
   @SuccessResponse(200, "일기 사진 삭제 성공")
+  @Response<ApiResponse<null>>(400, "diaryPhotoId가 UUID 형식이 아닌 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "유효하지 않은 UUID 형식입니다.",
+    },
+  })
   @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
     success: false,
     error: {
