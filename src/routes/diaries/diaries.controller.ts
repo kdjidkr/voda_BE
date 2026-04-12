@@ -1,7 +1,7 @@
 import {
   Body,
-  Delete,
   Controller,
+  Delete,
   Example,
   Get,
   Path,
@@ -180,13 +180,18 @@ export class DiariesController extends Controller {
       message: "액세스 토큰이 유효하지 않습니다.",
     },
   })
-  @Response<ApiResponse<null>>(404, "삭제할 사진이 없거나 본인 소유가 아닌 경우", {
-    success: false,
-    error: {
-      code: "DIARY001",
-      message: "삭제할 일기 사진을 찾을 수 없거나 삭제 권한이 없는 사진입니다.",
+  @Response<ApiResponse<null>>(
+    404,
+    "삭제할 사진이 없거나 본인 소유가 아닌 경우",
+    {
+      success: false,
+      error: {
+        code: "DIARY001",
+        message:
+          "삭제할 일기 사진을 찾을 수 없거나 삭제 권한이 없는 사진입니다.",
+      },
     },
-  })
+  )
   @Delete("photos/{diaryPhotoId}")
   public async deleteDiaryPhoto(
     @Path() diaryPhotoId: string,

@@ -61,6 +61,31 @@ class AuthService {
     return await this.generateAndSaveTokens({ sub: user.user_id });
   }
 
+  async reissueTokens(
+    userId: string,
+    refreshToken: string,
+  ): Promise<AuthTokenPair> {
+    let savedRefreshToken: string | null;
+
+    try {
+      savedRefreshToken = await redisClient.get(
+        REDIS_KEYS.REFRESH_TOKEN(userId),
+      );
+    } catch (error) {
+      console.error(
+        `[Refresh Token Read] Redis 조회 실패 - userId: ${userId}`,
+        error,
+      );
+      throw new HttpException(ErrorCode.AUTH005, { userId });
+    }
+
+    if (!savedRefreshToken || savedRefreshToken !== refreshToken) {
+      throw new HttpException(ErrorCode.AUTH010);
+    }
+
+    return await this.generateAndSaveTokens({ sub: userId });
+  }
+
   private async processSignup(
     requestBody: SignUpRequestDto,
     createAccountFn: (
