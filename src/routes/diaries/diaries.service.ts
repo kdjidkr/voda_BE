@@ -1,4 +1,5 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
+import { HttpException } from "../../errors/HttpException";
 import { validateNonEmptyText, validatePhotoUrls } from "../utils/validators";
 import { BasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
@@ -39,6 +40,32 @@ export class DiariesService {
       inputType: result.input_type,
       inputId: result.input_id ?? undefined,
     };
+    return responseDto;
+  }
+
+  async getDiaryById(
+    userId: string,
+    diaryId: string,
+  ): Promise<CreateBasicDiaryResponseDto> {
+    const result = await diariesRepository.findDiaryById(userId, diaryId);
+
+    if (!result) {
+      throw new HttpException(ErrorCode.DIARY002);
+    }
+
+    const responseDto: CreateBasicDiaryResponseDto = {
+      diaryId: result.diary_id,
+      title: result.title ?? "",
+      content: result.content ?? "",
+      photos: result.diary_photo.map((photo) => ({
+        photoId: photo.diary_photo_id,
+        imageUrl: photo.image_url,
+      })),
+      createdAt: result.created_at,
+      inputType: result.input_type,
+      inputId: result.input_id ?? undefined,
+    };
+
     return responseDto;
   }
 }

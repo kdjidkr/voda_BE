@@ -37,6 +37,25 @@ class DiariesRepository {
       },
     });
   }
+
+  async findDiaryById(
+    userId: string,
+    diaryId: string,
+  ): Promise<DiaryWithPhotos | null> {
+    return await prisma.diary.findFirst({
+      where: {
+        diary_id: diaryId,
+        user_id: userId,
+      },
+      include: {
+        diary_photo: {
+          orderBy: {
+            sort_order: "asc",
+          },
+        },
+      },
+    });
+  }
 }
 
 export const diariesRepository = new DiariesRepository();
