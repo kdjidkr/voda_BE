@@ -124,7 +124,7 @@ export const ErrorCode = {
   DIARY001: {
     code: "DIARY001",
     status: 404,
-    message: "삭제할 일기 사진을 찾을 수 없습니다.",
+    message: "삭제할 일기 사진을 찾을 수 없거나 접근 권한이 없습니다.",
   },
   DIARY002: {
     code: "DIARY002",
