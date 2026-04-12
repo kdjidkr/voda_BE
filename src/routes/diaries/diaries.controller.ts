@@ -127,13 +127,17 @@ export class DiariesController extends Controller {
       message: "액세스 토큰이 유효하지 않습니다.",
     },
   })
-  @Response<ApiResponse<null>>(404, "조회할 일기가 없거나 본인 소유가 아닌 경우", {
-    success: false,
-    error: {
-      code: "DIARY002",
-      message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+  @Response<ApiResponse<null>>(
+    404,
+    "조회할 일기가 없거나 본인 소유가 아닌 경우",
+    {
+      success: false,
+      error: {
+        code: "DIARY002",
+        message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+      },
     },
-  })
+  )
   @Get("{diaryId}")
   public async getDiaryById(
     @Path() diaryId: string,
