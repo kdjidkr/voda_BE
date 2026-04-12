@@ -10,11 +10,12 @@ import { usersRepository } from "../users/users.repository";
 import {
   validateEmail,
   validateNickname,
+  validateNonEmptyText,
   validatePassword,
 } from "../utils/validators";
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
 import { authRepository } from "./auth.repository";
-import { SignUpRequestDto } from "./dto/auth.req.dto";
+import { SignInRequestDto, SignUpRequestDto } from "./dto/auth.req.dto";
 
 class AuthService {
   private readonly SALT_ROUNDS = 10;
@@ -35,6 +36,29 @@ class AuthService {
         return await authRepository.createAccount(signUpInput);
       },
     );
+  }
+
+  async signIn(requestBody: SignInRequestDto): Promise<AuthTokenPair> {
+    validateEmail(requestBody.email);
+    const email = requestBody.email.trim();
+    const password = validateNonEmptyText(
+      requestBody.password,
+      ErrorCode.INVALID008,
+    );
+
+    const user = await usersRepository.findUserByEmailForSignIn(email);
+
+    if (!user?.password) {
+      throw new HttpException(ErrorCode.AUTH012);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new HttpException(ErrorCode.AUTH012);
+    }
+
+    return await this.generateAndSaveTokens({ sub: user.user_id });
   }
 
   private async processSignup(

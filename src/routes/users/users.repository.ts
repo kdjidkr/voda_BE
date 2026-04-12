@@ -25,6 +25,19 @@ class UsersRepository {
     });
   }
 
+  async findUserByEmailForSignIn(email: string) {
+    return prisma.user.findFirst({
+      where: {
+        email,
+        deleted_at: null,
+      },
+      select: {
+        user_id: true,
+        password: true,
+      },
+    });
+  }
+
   async findUserbyOauthId(oauthId: string) {
     return prisma.user_oauth_account.findFirst({
       where: {

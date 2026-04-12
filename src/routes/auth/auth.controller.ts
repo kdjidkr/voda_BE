@@ -11,6 +11,7 @@ import {
 
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { authService } from "./auth.service";
+import { SignInRequestDto } from "./dto/auth.req.dto";
 import { SignUpRequestDto } from "./dto/auth.req.dto";
 import { AccessTokenResponseDto } from "./dto/auth.res.dto";
 
@@ -100,6 +101,66 @@ export class AuthController extends Controller {
       `__Host-refresh_token=${refreshToken}; ${cookieOption}`,
     );
     this.setStatus(201);
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+      },
+    };
+  }
+
+  /**
+   * @summary 이메일로 로그인합니다.
+   * @description 이메일과 비밀번호를 받아 인증 후 access Token 발급, refresh Token 쿠키 설정
+   * @returns accessToken 발급 (refreshToken은 쿠키로 설정)
+   */
+  @SuccessResponse(200, "일반 로그인 성공")
+  @Example<ApiResponse<AccessTokenResponseDto>>({
+    success: true,
+    data: {
+      accessToken: "accessToken",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "로그인 유효성 검증 오류", {
+    success: false,
+    error: {
+      code: "INVALID002",
+      message: "이메일 형식이 올바르지 않습니다.",
+      details: {
+        email: "kcwidrk@naver",
+      },
+    },
+  })
+  @Response<ApiResponse<null>>(400, "로그인 유효성 검증 오류", {
+    success: false,
+    error: {
+      code: "INVALID008",
+      message: "비밀번호는 공백일 수 없습니다.",
+      details: {
+        password: "",
+      },
+    },
+  })
+  @Response<ApiResponse<null>>(401, "로그인 인증 실패", {
+    success: false,
+    error: {
+      code: "AUTH012",
+      message: "이메일 또는 비밀번호가 올바르지 않습니다.",
+    },
+  })
+  @Post("login")
+  public async signIn(
+    @Body() requestBody: SignInRequestDto,
+  ): Promise<ApiResponse<AccessTokenResponseDto>> {
+    const result = await authService.signIn(requestBody);
+    const { accessToken, refreshToken } = result;
+    this.setStatus(200);
+    const cookieOption = this.getCookieOptions(1209600);
+    this.setHeader(
+      "Set-Cookie",
+      `__Host-refresh_token=${refreshToken}; ${cookieOption}`,
+    );
 
     return {
       success: true,

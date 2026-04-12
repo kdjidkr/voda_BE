@@ -10,3 +10,8 @@ export class SignUpRequestDto {
   registrationType!: RegistrationType;
   oauthId?: string;
 }
+
+export class SignInRequestDto {
+  email!: string;
+  password!: string;
+}
