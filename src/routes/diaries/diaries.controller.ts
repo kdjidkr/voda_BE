@@ -4,6 +4,7 @@ import {
   Delete,
   Example,
   Get,
+  Patch,
   Path,
   Post,
   Request,
@@ -18,7 +19,10 @@ import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { diariesService } from "./diaries.service";
-import { CreateBasicDiaryRequestDto } from "./dto/diaries.req.dto";
+import {
+  CreateBasicDiaryRequestDto,
+  UpdateBasicDiaryRequestDto,
+} from "./dto/diaries.req.dto";
 import { CreateBasicDiaryResponseDto } from "./dto/diaries.res.dto";
 
 @Route("diaries")
@@ -151,6 +155,102 @@ export class DiariesController extends Controller {
     }
 
     const result = await diariesService.getDiaryById(userId, diaryId);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
+   * @summary 일기를 수정합니다.
+   * @description 일기의 title과 content만 수정합니다. 사진은 수정하지 않습니다.
+   * @returns 수정된 일기 정보
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "일기 수정 성공")
+  @Example<ApiResponse<CreateBasicDiaryResponseDto>>({
+    success: true,
+    data: {
+      diaryId: "dbf94c44-359c-4f4b-8ac9-cd5c6de2b06f",
+      title: "수정된 제목",
+      content: "수정된 내용입니다.",
+      photos: [
+        {
+          photoId: "bc57f813-fd02-4b35-b9ea-a2364f493f9b",
+          imageUrl:
+            "https://example-bucket.s3.ap-northeast-2.amazonaws.com/diary/photo-1.jpg",
+        },
+      ],
+      inputType: "MANUAL",
+      createdAt: new Date("2026-04-11T11:50:00.000Z"),
+      inputId: undefined,
+    },
+  })
+  @Response<ApiResponse<null>>(400, "diaryId가 UUID 형식이 아닌 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "유효하지 않은 UUID 형식입니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "수정할 내용이 없는 경우", {
+    success: false,
+    error: {
+      code: "INVALID009",
+      message: "수정할 필드가 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "제목이 공백인 경우", {
+    success: false,
+    error: {
+      code: "INVALID004",
+      message: "일기 제목은 공백일 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "내용이 공백인 경우", {
+    success: false,
+    error: {
+      code: "INVALID005",
+      message: "일기 내용은 공백일 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(
+    404,
+    "수정할 일기가 없거나 본인 소유가 아닌 경우",
+    {
+      success: false,
+      error: {
+        code: "DIARY002",
+        message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+      },
+    },
+  )
+  @Patch("{diaryId}")
+  public async updateDiaryById(
+    @Path() diaryId: string,
+    @Body() requestBody: UpdateBasicDiaryRequestDto,
+    @Request() req: any,
+  ): Promise<ApiResponse<CreateBasicDiaryResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await diariesService.updateBasicDiary(
+      userId,
+      diaryId,
+      requestBody,
+    );
     this.setStatus(200);
 
     return {

@@ -3,3 +3,8 @@ export class CreateBasicDiaryRequestDto {
   content?: string;
   photos?: string[];
 }
+
+export class UpdateBasicDiaryRequestDto {
+  title?: string;
+  content?: string;
+}

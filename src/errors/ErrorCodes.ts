@@ -129,6 +129,11 @@ export const ErrorCode = {
     status: 400,
     message: "비밀번호는 공백일 수 없습니다.",
   },
+  INVALID009: {
+    code: "INVALID009",
+    status: 400,
+    message: "수정할 필드가 없습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {
