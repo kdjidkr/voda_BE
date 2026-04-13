@@ -7,7 +7,10 @@ import {
 } from "../utils/validators";
 import { BasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
-import { CreateBasicDiaryRequestDto } from "./dto/diaries.req.dto";
+import {
+  CreateBasicDiaryRequestDto,
+  UpdateBasicDiaryRequestDto,
+} from "./dto/diaries.req.dto";
 import { CreateBasicDiaryResponseDto } from "./dto/diaries.res.dto";
 
 export class DiariesService {
@@ -91,6 +94,62 @@ export class DiariesService {
     };
 
     return responseDto;
+  }
+
+  async updateBasicDiary(
+    userId: string,
+    diaryId: string,
+    requestBody: UpdateBasicDiaryRequestDto,
+  ): Promise<CreateBasicDiaryResponseDto> {
+    const normalizedDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
+    const hasTitle = requestBody.title !== undefined;
+    const hasContent = requestBody.content !== undefined;
+
+    if (!hasTitle && !hasContent) {
+      throw new HttpException(ErrorCode.INVALID009);
+    }
+
+    const updateBasicDiaryInput: {
+      title?: string;
+      content?: string;
+    } = {};
+
+    if (hasTitle) {
+      updateBasicDiaryInput.title = validateNonEmptyText(
+        requestBody.title,
+        ErrorCode.INVALID004,
+      );
+    }
+
+    if (hasContent) {
+      updateBasicDiaryInput.content = validateNonEmptyText(
+        requestBody.content,
+        ErrorCode.INVALID005,
+      );
+    }
+
+    const result = await diariesRepository.updateBasicDiary(
+      userId,
+      normalizedDiaryId,
+      updateBasicDiaryInput,
+    );
+
+    if (!result) {
+      throw new HttpException(ErrorCode.DIARY002);
+    }
+
+    return {
+      diaryId: result.diary_id,
+      title: result.title ?? "",
+      content: result.content ?? "",
+      photos: result.diary_photo.map((photo) => ({
+        photoId: photo.diary_photo_id,
+        imageUrl: photo.image_url,
+      })),
+      createdAt: result.created_at,
+      inputType: result.input_type,
+      inputId: result.input_id ?? undefined,
+    };
   }
 }
 

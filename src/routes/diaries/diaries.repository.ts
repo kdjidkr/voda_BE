@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
-import { BasicDiaryInput } from "./diaries.model";
+import { BasicDiaryInput, UpdateBasicDiaryInput } from "./diaries.model";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
   include: { diary_photo: true };
@@ -41,6 +41,38 @@ class DiariesRepository {
     userId: string,
     diaryId: string,
   ): Promise<DiaryWithPhotos | null> {
+    return await prisma.diary.findFirst({
+      where: {
+        diary_id: diaryId,
+        user_id: userId,
+      },
+      include: {
+        diary_photo: {
+          orderBy: {
+            sort_order: "asc",
+          },
+        },
+      },
+    });
+  }
+
+  async updateBasicDiary(
+    userId: string,
+    diaryId: string,
+    updateBasicDiaryInput: UpdateBasicDiaryInput,
+  ): Promise<DiaryWithPhotos | null> {
+    const result = await prisma.diary.updateMany({
+      where: {
+        diary_id: diaryId,
+        user_id: userId,
+      },
+      data: updateBasicDiaryInput,
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
     return await prisma.diary.findFirst({
       where: {
         diary_id: diaryId,

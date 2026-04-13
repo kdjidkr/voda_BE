@@ -76,6 +76,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UpdateBasicDiaryRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "title": {"dataType":"string"},
+            "content": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UploadResponseDto": {
         "dataType": "refObject",
         "properties": {
@@ -264,6 +273,39 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'getDiaryById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsDiariesController_updateDiaryById: Record<string, TsoaRoute.ParameterSchema> = {
+                diaryId: {"in":"path","name":"diaryId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UpdateBasicDiaryRequestDto"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.patch('/diaries/:diaryId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(DiariesController)),
+            ...(fetchMiddlewares<RequestHandler>(DiariesController.prototype.updateDiaryById)),
+
+            async function DiariesController_updateDiaryById(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsDiariesController_updateDiaryById, request, response });
+
+                const controller = new DiariesController();
+
+              await templateService.apiHandler({
+                methodName: 'updateDiaryById',
                 controller,
                 response,
                 next,
