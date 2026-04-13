@@ -4,6 +4,7 @@ import {
   validateNonEmptyText,
   validatePhotoUrls,
   validateUuid,
+  validateYearMonth,
 } from "../utils/validators";
 import { BasicDiaryInput, UpdateBasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
@@ -11,7 +12,11 @@ import {
   CreateBasicDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
 } from "./dto/diaries.req.dto";
-import { CreateBasicDiaryResponseDto } from "./dto/diaries.res.dto";
+import {
+  CreateBasicDiaryResponseDto,
+  MonthlyDiarySummaryDateGroupDto,
+  MonthlyDiarySummaryResponseDto,
+} from "./dto/diaries.res.dto";
 
 export class DiariesService {
   constructor() {}
@@ -96,6 +101,53 @@ export class DiariesService {
     return responseDto;
   }
 
+  async getMonthlyDiarySummaries(
+    userId: string,
+    year: string,
+    month: string,
+  ): Promise<MonthlyDiarySummaryResponseDto> {
+    const normalizedYearMonth = validateYearMonth(
+      year,
+      month,
+      ErrorCode.INVALID010,
+    );
+
+    const result = await diariesRepository.findMonthlyDiarySummaries(
+      userId,
+      normalizedYearMonth.year,
+      normalizedYearMonth.month,
+    );
+
+    const dateMap = new Map<string, MonthlyDiarySummaryDateGroupDto>();
+
+    for (const diary of result) {
+      const dateKey = this.formatDateKey(diary.diary_date);
+      const existingGroup = dateMap.get(dateKey);
+
+      const summaryItem = {
+        diaryId: diary.diary_id,
+        title: diary.title ?? "",
+        createdAt: diary.created_at,
+      };
+
+      if (existingGroup) {
+        existingGroup.diaries.push(summaryItem);
+        continue;
+      }
+
+      dateMap.set(dateKey, {
+        date: dateKey,
+        diaries: [summaryItem],
+      });
+    }
+
+    return {
+      year: normalizedYearMonth.year,
+      month: normalizedYearMonth.month,
+      dates: Array.from(dateMap.values()),
+    };
+  }
+
   async updateBasicDiary(
     userId: string,
     diaryId: string,
@@ -147,6 +199,14 @@ export class DiariesService {
       inputType: result.input_type,
       inputId: result.input_id ?? undefined,
     };
+  }
+
+  private formatDateKey(date: Date): string {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   }
 }
 

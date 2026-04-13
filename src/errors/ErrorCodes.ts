@@ -134,6 +134,11 @@ export const ErrorCode = {
     status: 400,
     message: "수정할 필드가 없습니다.",
   },
+  INVALID010: {
+    code: "INVALID010",
+    status: 400,
+    message: "연도 또는 월 형식이 올바르지 않습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {

@@ -67,3 +67,26 @@ export const validateUuid = (
 
   return normalizedValue;
 };
+
+export const validateYearMonth = (
+  year: string,
+  month: string,
+  errorCode: (typeof ErrorCode)[keyof typeof ErrorCode],
+): { year: number; month: number } => {
+  const trimmedYear = year.trim();
+  const trimmedMonth = month.trim();
+  const yearRegex = /^\d{4}$/;
+  const monthRegex = /^(0?[1-9]|1[0-2])$/;
+
+  const isValidYear = yearRegex.test(trimmedYear);
+  const isValidMonth = monthRegex.test(trimmedMonth);
+
+  if (!isValidYear || !isValidMonth) {
+    throw new HttpException(errorCode, { year, month });
+  }
+
+  const normalizedYear = Number.parseInt(trimmedYear, 10);
+  const normalizedMonth = Number.parseInt(trimmedMonth, 10);
+
+  return { year: normalizedYear, month: normalizedMonth };
+};

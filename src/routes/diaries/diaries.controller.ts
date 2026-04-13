@@ -7,6 +7,7 @@ import {
   Patch,
   Path,
   Post,
+  Query,
   Request,
   Response,
   Route,
@@ -23,7 +24,10 @@ import {
   CreateBasicDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
 } from "./dto/diaries.req.dto";
-import { CreateBasicDiaryResponseDto } from "./dto/diaries.res.dto";
+import {
+  CreateBasicDiaryResponseDto,
+  MonthlyDiarySummaryResponseDto,
+} from "./dto/diaries.res.dto";
 
 @Route("diaries")
 @Tags("다이어리 작성, 조회, 삭제 등의 기능을 담당합니다.")
@@ -94,6 +98,76 @@ export class DiariesController extends Controller {
 
     const result = await diariesService.createBasicDiary(userId, requestBody);
     this.setStatus(201);
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
+   * @summary 해당 월의 일기 요약을 조회합니다.
+   * @description 연도와 월을 받아 날짜별로 일기 제목과 생성 시각만 반환합니다.
+   * @returns 달력 화면용 일기 요약 목록
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "월 요약 조회 성공")
+  @Example<ApiResponse<MonthlyDiarySummaryResponseDto>>({
+    success: true,
+    data: {
+      year: 2025,
+      month: 10,
+      dates: [
+        {
+          date: "2025-10-06",
+          diaries: [
+            {
+              diaryId: "0fd288a9-e674-432f-84bb-9ea42372c85e",
+              title: "감기에 걸린 날",
+              createdAt: new Date("2025-10-06T11:20:00.000Z"),
+            },
+            {
+              diaryId: "11111111-2222-3333-4444-555555555555",
+              title: "감기 걸림 ㅠ",
+              createdAt: new Date("2025-10-06T08:10:00.000Z"),
+            },
+          ],
+        },
+      ],
+    },
+  })
+  @Response<ApiResponse<null>>(400, "연도 또는 월 형식이 올바르지 않은 경우", {
+    success: false,
+    error: {
+      code: "INVALID010",
+      message: "연도 또는 월 형식이 올바르지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Get("monthly-summary")
+  public async getMonthlyDiarySummaries(
+    @Query() year: string,
+    @Query() month: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<MonthlyDiarySummaryResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await diariesService.getMonthlyDiarySummaries(
+      userId,
+      year,
+      month,
+    );
+
+    this.setStatus(200);
     return {
       success: true,
       data: result,
