@@ -76,6 +76,45 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MonthlyDiarySummaryItemDto": {
+        "dataType": "refObject",
+        "properties": {
+            "diaryId": {"dataType":"string","required":true},
+            "title": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MonthlyDiarySummaryDateGroupDto": {
+        "dataType": "refObject",
+        "properties": {
+            "date": {"dataType":"string","required":true},
+            "diaries": {"dataType":"array","array":{"dataType":"refObject","ref":"MonthlyDiarySummaryItemDto"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MonthlyDiarySummaryResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "year": {"dataType":"double","required":true},
+            "month": {"dataType":"double","required":true},
+            "dates": {"dataType":"array","array":{"dataType":"refObject","ref":"MonthlyDiarySummaryDateGroupDto"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_MonthlyDiarySummaryResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"MonthlyDiarySummaryResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UpdateBasicDiaryRequestDto": {
         "dataType": "refObject",
         "properties": {
@@ -246,6 +285,39 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 next,
                 validatedArgs,
                 successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsDiariesController_getMonthlyDiarySummaries: Record<string, TsoaRoute.ParameterSchema> = {
+                year: {"in":"query","name":"year","required":true,"dataType":"string"},
+                month: {"in":"query","name":"month","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.get('/diaries/monthly-summary',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(DiariesController)),
+            ...(fetchMiddlewares<RequestHandler>(DiariesController.prototype.getMonthlyDiarySummaries)),
+
+            async function DiariesController_getMonthlyDiarySummaries(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsDiariesController_getMonthlyDiarySummaries, request, response });
+
+                const controller = new DiariesController();
+
+              await templateService.apiHandler({
+                methodName: 'getMonthlyDiarySummaries',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
               });
             } catch (err) {
                 return next(err);

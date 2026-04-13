@@ -67,3 +67,24 @@ export const validateUuid = (
 
   return normalizedValue;
 };
+
+export const validateYearMonth = (
+  year: string,
+  month: string,
+  errorCode: (typeof ErrorCode)[keyof typeof ErrorCode],
+): { year: number; month: number } => {
+  const normalizedYear = Number(year.trim());
+  const normalizedMonth = Number(month.trim());
+
+  const isValidYear = Number.isInteger(normalizedYear) && normalizedYear > 0;
+  const isValidMonth =
+    Number.isInteger(normalizedMonth) &&
+    normalizedMonth >= 1 &&
+    normalizedMonth <= 12;
+
+  if (!isValidYear || !isValidMonth) {
+    throw new HttpException(errorCode, { year, month });
+  }
+
+  return { year: normalizedYear, month: normalizedMonth };
+};

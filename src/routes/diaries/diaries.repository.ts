@@ -1,6 +1,10 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
-import { BasicDiaryInput, UpdateBasicDiaryInput } from "./diaries.model";
+import {
+  BasicDiaryInput,
+  MonthlyDiarySummaryInput,
+  UpdateBasicDiaryInput,
+} from "./diaries.model";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
   include: { diary_photo: true };
@@ -53,6 +57,40 @@ class DiariesRepository {
           },
         },
       },
+    });
+  }
+
+  async findMonthlyDiarySummaries(
+    userId: string,
+    year: number,
+    month: number,
+  ): Promise<MonthlyDiarySummaryInput[]> {
+    const startDate = new Date(Date.UTC(year, month - 1, 1));
+    const endDate = new Date(Date.UTC(year, month, 1));
+
+    return await prisma.diary.findMany({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+        diary_date: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      select: {
+        diary_id: true,
+        title: true,
+        created_at: true,
+        diary_date: true,
+      },
+      orderBy: [
+        {
+          diary_date: "asc",
+        },
+        {
+          created_at: "desc",
+        },
+      ],
     });
   }
 
