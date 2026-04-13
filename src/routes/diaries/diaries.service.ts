@@ -5,7 +5,7 @@ import {
   validatePhotoUrls,
   validateUuid,
 } from "../utils/validators";
-import { BasicDiaryInput } from "./diaries.model";
+import { BasicDiaryInput, UpdateBasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
 import {
   CreateBasicDiaryRequestDto,
@@ -109,10 +109,7 @@ export class DiariesService {
       throw new HttpException(ErrorCode.INVALID009);
     }
 
-    const updateBasicDiaryInput: {
-      title?: string;
-      content?: string;
-    } = {};
+    const updateBasicDiaryInput: UpdateBasicDiaryInput = {};
 
     if (hasTitle) {
       updateBasicDiaryInput.title = validateNonEmptyText(

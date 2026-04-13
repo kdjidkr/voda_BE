@@ -188,11 +188,18 @@ export class DiariesController extends Controller {
       inputId: undefined,
     },
   })
+  @Response<ApiResponse<null>>(400, "diaryId가 UUID 형식이 아닌 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "유효하지 않은 UUID 형식입니다.",
+    },
+  })
   @Response<ApiResponse<null>>(400, "수정할 내용이 없는 경우", {
     success: false,
     error: {
       code: "INVALID009",
-      message: "수정할 내용이 없습니다.",
+      message: "수정할 필드가 없습니다.",
     },
   })
   @Response<ApiResponse<null>>(400, "제목이 공백인 경우", {
