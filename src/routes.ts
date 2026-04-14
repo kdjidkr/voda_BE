@@ -23,9 +23,9 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "user_gender": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["MALE"]},{"dataType":"enum","enums":["FEMALE"]},{"dataType":"enum","enums":["OTHER"]}],"validators":{}},
+    "Gender": {
+        "dataType": "refEnum",
+        "enums": ["MALE","FEMALE","OTHER"],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserMeProfileDto": {
@@ -34,7 +34,7 @@ const models: TsoaRoute.Models = {
             "nickname": {"dataType":"string","required":true},
             "email": {"dataType":"string","required":true},
             "profile_image": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
-            "gender": {"ref":"user_gender","required":true},
+            "gender": {"ref":"Gender","required":true},
             "age": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
@@ -49,9 +49,9 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "registration_type": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["EMAIL"]},{"dataType":"enum","enums":["KAKAO"]},{"dataType":"enum","enums":["GOOGLE"]},{"dataType":"enum","enums":["APPLE"]},{"dataType":"enum","enums":["NAVER"]}],"validators":{}},
+    "RegistrationType": {
+        "dataType": "refEnum",
+        "enums": ["EMAIL","KAKAO","GOOGLE","APPLE","NAVER"],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserMeResponseDto": {
@@ -60,7 +60,7 @@ const models: TsoaRoute.Models = {
             "user_id": {"dataType":"string","required":true},
             "profile": {"ref":"UserMeProfileDto","required":true},
             "stats": {"ref":"UserMeStatsDto","required":true},
-            "accounts": {"dataType":"array","array":{"dataType":"refAlias","ref":"registration_type"},"required":true},
+            "accounts": {"dataType":"array","array":{"dataType":"refEnum","ref":"RegistrationType"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -228,16 +228,6 @@ const models: TsoaRoute.Models = {
             "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Gender": {
-        "dataType": "refEnum",
-        "enums": ["MALE","FEMALE","OTHER"],
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "RegistrationType": {
-        "dataType": "refEnum",
-        "enums": ["EMAIL","KAKAO","GOOGLE","APPLE","NAVER"],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SignUpRequestDto": {

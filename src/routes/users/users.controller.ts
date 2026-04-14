@@ -13,8 +13,9 @@ import {
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
-import { usersService } from "./users.service";
+import { Gender, RegistrationType } from "../auth/dto/auth.types";
 import { UserMeResponseDto } from "./dto/users.res.dto";
+import { usersService } from "./users.service";
 
 @Route("users")
 @Tags("User")
@@ -29,14 +30,14 @@ export class UsersController extends Controller {
         nickname: "코딩하는 고양이",
         email: "user@example.com",
         profile_image: "https://example.com/profile.png",
-        gender: "FEMALE",
+        gender: Gender.FEMALE,
         age: 28,
       },
       stats: {
         streak: 5,
         total_diaries: 42,
       },
-      accounts: ["GOOGLE", "KAKAO"],
+      accounts: [RegistrationType.GOOGLE, RegistrationType.KAKAO],
     },
   })
   @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
@@ -76,5 +77,4 @@ export class UsersController extends Controller {
     const message = "Hello Tsoa!";
     return message;
   }
-
 }

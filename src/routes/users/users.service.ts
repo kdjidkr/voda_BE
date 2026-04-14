@@ -1,19 +1,21 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
-import { usersRepository } from "./users.repository";
+import { registration_type, user_gender } from "../../generated/prisma/enums";
+import { Gender, RegistrationType } from "../auth/dto/auth.types";
 import { UserMeResponseDto } from "./dto/users.res.dto";
+import { usersRepository } from "./users.repository";
 
 class UsersService {
   async getMe(userId: string): Promise<UserMeResponseDto> {
-    const [user, totalDiaries, diaryDates] = await Promise.all([
-      usersRepository.findUserMeBaseProfile(userId),
-      usersRepository.countUserDiaries(userId),
-      usersRepository.findUserDiaryDates(userId),
-    ]);
-
+    const user = await usersRepository.findUserMeBaseProfile(userId);
     if (!user) {
       throw new HttpException(ErrorCode.USER001);
     }
+
+    const [totalDiaries, diaryDates] = await Promise.all([
+      usersRepository.countUserDiaries(userId),
+      usersRepository.findUserDiaryDates(userId),
+    ]);
 
     return {
       user_id: user.user_id,
@@ -21,7 +23,7 @@ class UsersService {
         nickname: user.nickname,
         email: user.email,
         profile_image: user.profile_image,
-        gender: user.gender,
+        gender: this.toGender(user.gender),
         age: this.calculateAge(user.birth_date),
       },
       stats: {
@@ -29,9 +31,39 @@ class UsersService {
         total_diaries: totalDiaries,
       },
       accounts: Array.from(
-        new Set(user.oauth_accounts.map((account) => account.registration_type)),
+        new Set(
+          user.oauth_accounts.map((account) =>
+            this.toRegistrationType(account.registration_type),
+          ),
+        ),
       ),
     };
+  }
+
+  private toGender(value: user_gender): Gender {
+    switch (value) {
+      case "MALE":
+        return Gender.MALE;
+      case "FEMALE":
+        return Gender.FEMALE;
+      case "OTHER":
+        return Gender.OTHER;
+    }
+  }
+
+  private toRegistrationType(value: registration_type): RegistrationType {
+    switch (value) {
+      case "EMAIL":
+        return RegistrationType.EMAIL;
+      case "KAKAO":
+        return RegistrationType.KAKAO;
+      case "GOOGLE":
+        return RegistrationType.GOOGLE;
+      case "APPLE":
+        return RegistrationType.APPLE;
+      case "NAVER":
+        return RegistrationType.NAVER;
+    }
   }
 
   private calculateAge(birthDate: Date): number {
@@ -44,7 +76,9 @@ class UsersService {
     const hasHadBirthdayThisYear =
       monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0);
 
-    return hasHadBirthdayThisYear ? currentYear - birthYear : currentYear - birthYear - 1;
+    return hasHadBirthdayThisYear
+      ? currentYear - birthYear
+      : currentYear - birthYear - 1;
   }
 
   private calculateCurrentStreak(diaryDates: Date[]): number {
@@ -65,7 +99,7 @@ class UsersService {
     } else if (dateSet.has(yesterdayKey)) {
       cursor = new Date(yesterday);
     } else {
-        return 0;
+      return 0;
     }
 
     let streak = 0;

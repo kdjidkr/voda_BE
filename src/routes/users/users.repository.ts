@@ -50,7 +50,9 @@ class UsersRepository {
     });
   }
 
-  async findUserMeBaseProfile(userId: string): Promise<UserMeBaseProfile | null> {
+  async findUserMeBaseProfile(
+    userId: string,
+  ): Promise<UserMeBaseProfile | null> {
     return prisma.user.findFirst({
       where: {
         user_id: userId,

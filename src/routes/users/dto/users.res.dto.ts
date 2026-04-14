@@ -1,10 +1,10 @@
-import { registration_type, user_gender } from "../../../generated/prisma/enums";
+import { Gender, RegistrationType } from "../../auth/dto/auth.types";
 
 export class UserMeProfileDto {
   nickname!: string;
   email!: string;
   profile_image!: string | null;
-  gender!: user_gender;
+  gender!: Gender;
   age!: number;
 }
 
@@ -17,5 +17,5 @@ export class UserMeResponseDto {
   user_id!: string;
   profile!: UserMeProfileDto;
   stats!: UserMeStatsDto;
-  accounts!: registration_type[];
+  accounts!: RegistrationType[];
 }
