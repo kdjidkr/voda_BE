@@ -151,4 +151,11 @@ export const ErrorCode = {
     status: 404,
     message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
   },
+
+  // 사용자 관련
+  USER001: {
+    code: "USER001",
+    status: 404,
+    message: "사용자 정보를 찾을 수 없습니다.",
+  },
 } as const;
