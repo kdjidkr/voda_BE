@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma";
+import { UserMeBaseProfile } from "./users.model";
 
 class UsersRepository {
   async findUserbyNickname(nickname: string) {
@@ -47,6 +48,55 @@ class UsersRepository {
         user_oauth_account_id: true,
       },
     });
+  }
+
+  async findUserMeBaseProfile(userId: string): Promise<UserMeBaseProfile | null> {
+    return prisma.user.findFirst({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+      },
+      select: {
+        user_id: true,
+        nickname: true,
+        email: true,
+        profile_image: true,
+        gender: true,
+        birth_date: true,
+        oauth_accounts: {
+          select: {
+            registration_type: true,
+          },
+        },
+      },
+    });
+  }
+
+  async countUserDiaries(userId: string): Promise<number> {
+    return prisma.diary.count({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+      },
+    });
+  }
+
+  async findUserDiaryDates(userId: string): Promise<Date[]> {
+    const diaryDates = await prisma.diary.findMany({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+      },
+      select: {
+        diary_date: true,
+      },
+      orderBy: {
+        diary_date: "desc",
+      },
+      distinct: ["diary_date"],
+    });
+
+    return diaryDates.map((diary) => diary.diary_date);
   }
 }
 
