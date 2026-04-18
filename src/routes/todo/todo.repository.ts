@@ -108,6 +108,17 @@ class TodoRepository {
 			},
 		});
 	}
+
+	async deleteTodo(userId: string, todoId: string): Promise<boolean> {
+		const result = await prisma.todo_list.deleteMany({
+			where: {
+				todo_id: todoId,
+				user_id: userId,
+			},
+		});
+
+		return result.count > 0;
+	}
 }
 
 export const todoRepository = new TodoRepository();

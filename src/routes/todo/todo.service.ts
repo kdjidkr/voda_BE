@@ -63,6 +63,15 @@ class TodoService {
 		return this.toCreateTodoResponse(result);
 	}
 
+	async deleteTodo(userId: string, todoId: string): Promise<void> {
+		const normalizedTodoId = validateUuid(todoId, ErrorCode.INVALID007);
+		const isDeleted = await todoRepository.deleteTodo(userId, normalizedTodoId);
+
+		if (!isDeleted) {
+			throw new HttpException(ErrorCode.TODO001);
+		}
+	}
+
 	async getTodos(
 		userId: string,
 		status?: TodoStatusFilter,

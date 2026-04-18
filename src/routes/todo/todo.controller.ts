@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	Example,
 	Get,
 	Patch,
@@ -214,6 +215,53 @@ export class TodoController extends Controller {
 		return {
 			success: true,
 			data: result,
+		};
+	}
+
+	/**
+	 * @summary 할 일을 삭제합니다.
+	 * @description 지정한 todoId의 할 일을 DB에서 영구 삭제합니다.
+	 */
+	@Security("jwt")
+	@SuccessResponse(200, "할 일 삭제 성공")
+	@Response<ApiResponse<null>>(400, "todoId가 UUID 형식이 아닌 경우", {
+		success: false,
+		error: {
+			code: "INVALID007",
+			message: "유효하지 않은 UUID 형식입니다.",
+		},
+	})
+	@Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+		success: false,
+		error: {
+			code: "AUTH008",
+			message: "액세스 토큰이 유효하지 않습니다.",
+		},
+	})
+	@Response<ApiResponse<null>>(404, "삭제할 할 일이 없거나 본인 소유가 아닌 경우", {
+		success: false,
+		error: {
+			code: "TODO001",
+			message: "조회할 할 일을 찾을 수 없거나 접근 권한이 없습니다.",
+		},
+	})
+	@Delete("{todoId}")
+	public async deleteTodo(
+		@Path() todoId: string,
+		@Request() req: any,
+	): Promise<ApiResponse<null>> {
+		const userId = req.user?.sub;
+
+		if (!userId) {
+			throw new HttpException(ErrorCode.AUTH008);
+		}
+
+		await todoService.deleteTodo(userId, todoId);
+		this.setStatus(200);
+
+		return {
+			success: true,
+			data: null,
 		};
 	}
 }
