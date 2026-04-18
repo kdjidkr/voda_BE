@@ -9,3 +9,5 @@ export interface ToggleTodoStatusInput {
 	todoId: string;
 	currentStatus: boolean;
 }
+
+export type TodoStatusFilter = "all" | "pending" | "completed";

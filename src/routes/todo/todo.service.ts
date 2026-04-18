@@ -3,11 +3,22 @@ import { HttpException } from "../../errors/HttpException";
 import { validateNonEmptyText, validateUuid } from "../utils/validators";
 
 import { CreateTodoRequestDto } from "./dto/todo.req.dto";
-import { CreateTodoResponseDto } from "./dto/todo.res.dto";
-import { CreateTodoInput, ToggleTodoStatusInput } from "./todo.model";
+import {
+	CreateTodoResponseDto,
+	GetTodoListResponseDto,
+	TodoItemDto,
+} from "./dto/todo.res.dto";
+import {
+	CreateTodoInput,
+	TodoStatusFilter,
+	ToggleTodoStatusInput,
+} from "./todo.model";
 import { todoRepository } from "./todo.repository";
 
 class TodoService {
+	private static readonly DEFAULT_TODO_PAGE_SIZE = 20;
+	private static readonly MAX_TODO_PAGE_SIZE = 100;
+
 	async createTodo(
 		userId: string,
 		requestBody: CreateTodoRequestDto,
@@ -52,6 +63,38 @@ class TodoService {
 		return this.toCreateTodoResponse(result);
 	}
 
+	async getTodos(
+		userId: string,
+		status?: TodoStatusFilter,
+		limit?: string,
+		cursor?: string,
+	): Promise<GetTodoListResponseDto> {
+		const filter = this.normalizeStatusFilter(status);
+		const pageSize = this.normalizePageSize(limit);
+		const normalizedCursor = this.normalizeCursor(cursor);
+		const todos = await todoRepository.findTodosByUserWithPagination(
+			userId,
+			filter,
+			pageSize,
+			normalizedCursor,
+		);
+
+		const hasNextPage = todos.length > pageSize;
+		const pageTodos = hasNextPage ? todos.slice(0, pageSize) : todos;
+		const todoItems = pageTodos.map((todo) => this.toTodoItem(todo));
+		const nextCursor = hasNextPage
+			? pageTodos[pageTodos.length - 1]?.todo_id
+			: undefined;
+
+		return {
+			filter,
+			limit: pageSize,
+			count: todoItems.length,
+			nextCursor,
+			todos: todoItems,
+		};
+	}
+
 	private toCreateTodoResponse(result: {
 		todo_id: string;
 		content: string | null;
@@ -61,14 +104,78 @@ class TodoService {
 		created_at: Date;
 	}): CreateTodoResponseDto {
 
+		const todoItem = this.toTodoItem(result);
+
+		return {
+			todoId: todoItem.todoId,
+			content: todoItem.content,
+			dueTo: todoItem.dueTo,
+			status: todoItem.status,
+			completedAt: todoItem.completedAt,
+			createdAt: todoItem.createdAt,
+		};
+	}
+
+	private toTodoItem(result: {
+		todo_id: string;
+		content: string | null;
+		due_to: Date | null;
+		status: boolean;
+		completed_at: Date | null;
+		created_at: Date;
+	}): TodoItemDto {
 		return {
 			todoId: result.todo_id,
-			content: result.content ?? '',
+			content: result.content ?? "",
 			dueTo: result.due_to ?? undefined,
 			status: result.status,
 			completedAt: result.completed_at ?? undefined,
 			createdAt: result.created_at,
 		};
+	}
+
+	private normalizeStatusFilter(status?: string): TodoStatusFilter {
+		if (!status || status.trim().length === 0) {
+			return "all";
+		}
+
+		const normalizedStatus = status.trim().toLowerCase();
+
+		if (
+			normalizedStatus !== "all" &&
+			normalizedStatus !== "pending" &&
+			normalizedStatus !== "completed"
+		) {
+			throw new HttpException(ErrorCode.INVALID013, { status });
+		}
+
+		return normalizedStatus;
+	}
+
+	private normalizePageSize(limit?: string): number {
+		if (!limit || limit.trim().length === 0) {
+			return TodoService.DEFAULT_TODO_PAGE_SIZE;
+		}
+
+		const parsed = Number.parseInt(limit, 10);
+		const isInvalid =
+			Number.isNaN(parsed) ||
+			parsed < 1 ||
+			parsed > TodoService.MAX_TODO_PAGE_SIZE;
+
+		if (isInvalid) {
+			throw new HttpException(ErrorCode.INVALID014, { limit });
+		}
+
+		return parsed;
+	}
+
+	private normalizeCursor(cursor?: string): string | undefined {
+		if (!cursor || cursor.trim().length === 0) {
+			return undefined;
+		}
+
+		return validateUuid(cursor, ErrorCode.INVALID007);
 	}
 
 	private validateDueTo(value?: Date): Date | undefined {

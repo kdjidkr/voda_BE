@@ -1,7 +1,11 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
 
-import { CreateTodoInput, ToggleTodoStatusInput } from "./todo.model";
+import {
+	CreateTodoInput,
+	TodoStatusFilter,
+	ToggleTodoStatusInput,
+} from "./todo.model";
 
 type TodoModel = Prisma.todo_listGetPayload<Record<string, never>>;
 
@@ -22,6 +26,59 @@ class TodoRepository {
 				todo_id: todoId,
 				user_id: userId,
 			},
+		});
+	}
+
+	async findTodosByUser(userId: string, filter: TodoStatusFilter): Promise<TodoModel[]> {
+		const statusCondition =
+			filter === "pending" ? false : filter === "completed" ? true : undefined;
+		
+		return await prisma.todo_list.findMany({
+			where: {
+				user_id: userId,
+				status: statusCondition,
+			},
+			orderBy: [
+				{
+					status: "asc",
+				},
+				{
+					due_to: "asc",
+				},
+				{
+					created_at: "desc",
+				},
+			],
+		});
+	}
+
+	async findTodosByUserWithPagination(
+		userId: string,
+		filter: TodoStatusFilter,
+		limit: number,
+		cursor?: string,
+	): Promise<TodoModel[]> {
+		const statusCondition =
+			filter === "pending" ? false : filter === "completed" ? true : undefined;
+
+		return await prisma.todo_list.findMany({
+			where: {
+				user_id: userId,
+				status: statusCondition,
+				...(cursor
+					? {
+						todo_id: {
+							lt: cursor,
+						},
+					}
+					: {}),
+			},
+			orderBy: [
+				{
+					todo_id: "desc",
+				},
+			],
+			take: limit + 1,
 		});
 	}
 

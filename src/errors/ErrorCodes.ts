@@ -149,6 +149,16 @@ export const ErrorCode = {
     status: 400,
     message: "마감 기한 형식이 올바르지 않습니다.",
   },
+  INVALID013: {
+    code: "INVALID013",
+    status: 400,
+    message: "할 일 조회 상태 필터 값이 올바르지 않습니다.",
+  },
+  INVALID014: {
+    code: "INVALID014",
+    status: 400,
+    message: "할 일 조회 페이지 크기(limit) 값이 올바르지 않습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {
