@@ -139,6 +139,16 @@ export const ErrorCode = {
     status: 400,
     message: "연도 또는 월 형식이 올바르지 않습니다.",
   },
+  INVALID011: {
+    code: "INVALID011",
+    status: 400,
+    message: "할 일 내용은 공백일 수 없습니다.",
+  },
+  INVALID012: {
+    code: "INVALID012",
+    status: 400,
+    message: "마감 기한 형식이 올바르지 않습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {
