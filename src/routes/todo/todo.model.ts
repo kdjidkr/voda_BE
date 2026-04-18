@@ -3,3 +3,9 @@ export interface CreateTodoInput {
 	content: string;
 	dueTo?: Date;
 }
+
+export interface ToggleTodoStatusInput {
+	userId: string;
+	todoId: string;
+	currentStatus: boolean;
+}

@@ -162,6 +162,13 @@ export const ErrorCode = {
     message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
   },
 
+  // 할 일 관련
+  TODO001: {
+    code: "TODO001",
+    status: 404,
+    message: "조회할 할 일을 찾을 수 없거나 접근 권한이 없습니다.",
+  },
+
   // 사용자 관련
   USER001: {
     code: "USER001",
