@@ -5,6 +5,10 @@ import {
   MonthlyDiarySummaryInput,
   UpdateBasicDiaryInput,
 } from "./diaries.model";
+import { 
+  KeywordResponseDto, 
+  CreateKeywordResponseDto 
+} from "./dto/diaries.res.dto";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
   include: { diary_photo: true };
@@ -141,6 +145,26 @@ class DiariesRepository {
 
     return result.count > 0;
   }
+
+  async createKeywords( diaryId: string, keywords: string[],
+  ): Promise<KeywordResponseDto[]> {
+    const createdKeywords = await Promise.all(
+      keywords.map((keyword) =>
+        prisma.keyword.create({
+          data: {
+            diary_id: diaryId,
+            keyword_text: keyword,
+          },
+        })
+      )
+    );
+
+    return createdKeywords.map((createdKeyword) => ({
+      keywordId: createdKeyword.keyword_id,
+      keyword: createdKeyword.keyword_text,
+    }));
+}
+  
 }
 
 export const diariesRepository = new DiariesRepository();

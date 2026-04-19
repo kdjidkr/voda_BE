@@ -16,6 +16,7 @@ import {
   CreateBasicDiaryResponseDto,
   MonthlyDiarySummaryDateGroupDto,
   MonthlyDiarySummaryResponseDto,
+  CreateKeywordResponseDto,
 } from "./dto/diaries.res.dto";
 
 export class DiariesService {
@@ -207,6 +208,33 @@ export class DiariesService {
     const day = String(date.getUTCDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
+  }
+
+  async createKeywords(
+    diaryId: string,
+    keywordTexts: string[],
+  ): Promise<CreateKeywordResponseDto> {
+    // 키워드가 정확히 3개인지 검증
+    if (!keywordTexts || keywordTexts.length !== 3) {
+      throw new HttpException(ErrorCode.AUTH014);
+    }
+
+    // 빈 키워드 확인
+    const hasEmptyKeyword = keywordTexts.some(
+      (keyword) => !keyword || keyword.trim() === "",
+    );
+    if (hasEmptyKeyword) {
+      throw new HttpException(ErrorCode.AUTH014);
+    }
+
+    const result = await diariesRepository.createKeywords(
+      diaryId,
+      keywordTexts.map((keyword) => keyword.trim()),
+    );
+
+    return {
+      keywords: result,
+    };
   }
 }
 
