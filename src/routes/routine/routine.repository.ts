@@ -16,6 +16,21 @@ class RoutineRepository {
       },
     });
   }
+
+  async softDeleteRoutine(userId: string, routineId: string): Promise<boolean> {
+    const result = await prisma.routine.updateMany({
+      where: {
+        routine_id: routineId,
+        user_id: userId,
+        deleted_at: null,
+      },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+
+    return result.count > 0;
+  }
 }
 
 export const routineRepository = new RoutineRepository();

@@ -1,6 +1,6 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
-import { validateNonEmptyText } from "../utils/validators";
+import { validateNonEmptyText, validateUuid } from "../utils/validators";
 import { CreateRoutineRequestDto } from "./dto/routine.req.dto";
 import { CreateRoutineResponseDto } from "./dto/routine.res.dto";
 import { CreateRoutineInput, RoutineType } from "./routine.model";
@@ -37,6 +37,18 @@ class RoutineService {
       dayOfMonth: result.day_of_month ?? undefined,
       createdAt: result.created_at,
     };
+  }
+
+  async deleteRoutine(userId: string, routineId: string): Promise<void> {
+    const normalizedRoutineId = validateUuid(routineId, ErrorCode.INVALID007);
+    const isDeleted = await routineRepository.softDeleteRoutine(
+      userId,
+      normalizedRoutineId,
+    );
+
+    if (!isDeleted) {
+      throw new HttpException(ErrorCode.ROUTINE001);
+    }
   }
 
   private normalizeRoutineType(type: string): RoutineType {

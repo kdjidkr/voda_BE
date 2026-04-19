@@ -808,6 +808,57 @@ export function RegisterRoutes(
     },
   );
   // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  const argsRoutineController_deleteRoutine: Record<
+    string,
+    TsoaRoute.ParameterSchema
+  > = {
+    routineId: {
+      in: "path",
+      name: "routineId",
+      required: true,
+      dataType: "string",
+    },
+    req: { in: "request", name: "req", required: true, dataType: "object" },
+  };
+  app.delete(
+    "/routine/:routineId",
+    authenticateMiddleware([{ jwt: [] }]),
+    ...fetchMiddlewares<RequestHandler>(RoutineController),
+    ...fetchMiddlewares<RequestHandler>(
+      RoutineController.prototype.deleteRoutine,
+    ),
+
+    async function RoutineController_deleteRoutine(
+      request: ExRequest,
+      response: ExResponse,
+      next: any,
+    ) {
+      // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+      let validatedArgs: any[] = [];
+      try {
+        validatedArgs = templateService.getValidatedArgs({
+          args: argsRoutineController_deleteRoutine,
+          request,
+          response,
+        });
+
+        const controller = new RoutineController();
+
+        await templateService.apiHandler({
+          methodName: "deleteRoutine",
+          controller,
+          response,
+          next,
+          validatedArgs,
+          successStatus: 200,
+        });
+      } catch (err) {
+        return next(err);
+      }
+    },
+  );
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
   const argsDiariesController_createBasicDiary: Record<
     string,
     TsoaRoute.ParameterSchema

@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Example,
+  Path,
   Post,
   Request,
   Response,
@@ -121,6 +123,57 @@ export class RoutineController extends Controller {
     return {
       success: true,
       data: result,
+    };
+  }
+
+  /**
+   * @summary 루틴을 삭제합니다.
+   * @description routine은 hard delete가 아닌 soft delete(deleted_at 설정)로 처리하며, history는 유지됩니다.
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "루틴 삭제 성공")
+  @Response<ApiResponse<null>>(400, "routineId가 UUID 형식이 아닌 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "UUID 형식이 올바르지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(
+    404,
+    "삭제할 루틴이 없거나 본인 소유가 아닌 경우",
+    {
+      success: false,
+      error: {
+        code: "ROUTINE001",
+        message: "조회할 루틴을 찾을 수 없거나 접근 권한이 없습니다.",
+      },
+    },
+  )
+  @Delete("{routineId}")
+  public async deleteRoutine(
+    @Path() routineId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<null>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    await routineService.deleteRoutine(userId, routineId);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: null,
     };
   }
 }
