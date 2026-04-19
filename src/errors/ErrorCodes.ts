@@ -159,6 +159,41 @@ export const ErrorCode = {
     status: 400,
     message: "할 일 조회 페이지 크기(limit) 값이 올바르지 않습니다.",
   },
+  INVALID015: {
+    code: "INVALID015",
+    status: 400,
+    message: "루틴 내용은 공백일 수 없습니다.",
+  },
+  INVALID016: {
+    code: "INVALID016",
+    status: 400,
+    message: "루틴 타입은 DAILY, WEEKLY, MONTHLY 중 하나여야 합니다.",
+  },
+  INVALID017: {
+    code: "INVALID017",
+    status: 400,
+    message: "주간 루틴 요일은 1(월)부터 7(일) 사이의 정수여야 합니다.",
+  },
+  INVALID019: {
+    code: "INVALID019",
+    status: 400,
+    message: "월간 루틴 날짜(dayOfMonth)는 1부터 31 사이의 정수여야 합니다.",
+  },
+  INVALID020: {
+    code: "INVALID020",
+    status: 400,
+    message: "루틴 타입별 입력 조합이 올바르지 않습니다.",
+  },
+  INVALID021: {
+    code: "INVALID021",
+    status: 400,
+    message: "루틴 조회 탭(tab) 값이 올바르지 않습니다.",
+  },
+  INVALID022: {
+    code: "INVALID022",
+    status: 400,
+    message: "오늘은 이 루틴의 상태를 변경할 수 없습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {
@@ -177,6 +212,13 @@ export const ErrorCode = {
     code: "TODO001",
     status: 404,
     message: "조회할 할 일을 찾을 수 없거나 접근 권한이 없습니다.",
+  },
+
+  // 루틴 관련
+  ROUTINE001: {
+    code: "ROUTINE001",
+    status: 404,
+    message: "조회할 루틴을 찾을 수 없거나 접근 권한이 없습니다.",
   },
 
   // 사용자 관련

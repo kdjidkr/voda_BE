@@ -8,6 +8,8 @@ import { UsersController } from './routes/users/users.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TodoController } from './routes/todo/todo.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { RoutineController } from './routes/routine/routine.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DiariesController } from './routes/diaries/diaries.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UploadController } from './routes/common/upload.controller';
@@ -150,6 +152,94 @@ const models: TsoaRoute.Models = {
         "properties": {
             "content": {"dataType":"string","required":true},
             "dueTo": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "RoutineListItemDto": {
+        "dataType": "refObject",
+        "properties": {
+            "routineId": {"dataType":"string","required":true},
+            "content": {"dataType":"string","required":true},
+            "type": {"dataType":"string","required":true},
+            "daysOfWeek": {"dataType":"array","array":{"dataType":"double"},"required":true},
+            "dayOfMonth": {"dataType":"double"},
+            "scheduledFor": {"dataType":"datetime"},
+            "completedAt": {"dataType":"datetime"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GetRoutineListResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "tab": {"dataType":"string","required":true},
+            "count": {"dataType":"double","required":true},
+            "routines": {"dataType":"array","array":{"dataType":"refObject","ref":"RoutineListItemDto"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_GetRoutineListResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"GetRoutineListResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateRoutineResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "routineId": {"dataType":"string","required":true},
+            "content": {"dataType":"string","required":true},
+            "type": {"dataType":"string","required":true},
+            "daysOfWeek": {"dataType":"array","array":{"dataType":"double"},"required":true},
+            "dayOfMonth": {"dataType":"double"},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CreateRoutineResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"CreateRoutineResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateRoutineRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "content": {"dataType":"string","required":true},
+            "type": {"dataType":"string","required":true},
+            "daysOfWeek": {"dataType":"array","array":{"dataType":"double"}},
+            "dayOfMonth": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ToggleRoutineStatusResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "routineId": {"dataType":"string","required":true},
+            "completed": {"dataType":"boolean","required":true},
+            "completedAt": {"dataType":"datetime"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_ToggleRoutineStatusResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"ToggleRoutineStatusResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
         },
         "additionalProperties": false,
     },
@@ -520,6 +610,134 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'deleteTodo',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsRoutineController_getRoutines: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                tab: {"in":"query","name":"tab","dataType":"string"},
+        };
+        app.get('/routine',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController)),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController.prototype.getRoutines)),
+
+            async function RoutineController_getRoutines(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsRoutineController_getRoutines, request, response });
+
+                const controller = new RoutineController();
+
+              await templateService.apiHandler({
+                methodName: 'getRoutines',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsRoutineController_createRoutine: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateRoutineRequestDto"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.post('/routine',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController)),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController.prototype.createRoutine)),
+
+            async function RoutineController_createRoutine(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsRoutineController_createRoutine, request, response });
+
+                const controller = new RoutineController();
+
+              await templateService.apiHandler({
+                methodName: 'createRoutine',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsRoutineController_toggleRoutineStatus: Record<string, TsoaRoute.ParameterSchema> = {
+                routineId: {"in":"path","name":"routineId","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.patch('/routine/:routineId/status',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController)),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController.prototype.toggleRoutineStatus)),
+
+            async function RoutineController_toggleRoutineStatus(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsRoutineController_toggleRoutineStatus, request, response });
+
+                const controller = new RoutineController();
+
+              await templateService.apiHandler({
+                methodName: 'toggleRoutineStatus',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsRoutineController_deleteRoutine: Record<string, TsoaRoute.ParameterSchema> = {
+                routineId: {"in":"path","name":"routineId","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.delete('/routine/:routineId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController)),
+            ...(fetchMiddlewares<RequestHandler>(RoutineController.prototype.deleteRoutine)),
+
+            async function RoutineController_deleteRoutine(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsRoutineController_deleteRoutine, request, response });
+
+                const controller = new RoutineController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteRoutine',
                 controller,
                 response,
                 next,
