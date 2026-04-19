@@ -4,6 +4,7 @@ import {
   Delete,
   Example,
   Get,
+  Patch,
   Path,
   Post,
   Query,
@@ -22,6 +23,7 @@ import { CreateRoutineRequestDto } from "./dto/routine.req.dto";
 import {
   CreateRoutineResponseDto,
   GetRoutineListResponseDto,
+  ToggleRoutineStatusResponseDto,
 } from "./dto/routine.res.dto";
 import { routineService } from "./routine.service";
 
@@ -182,6 +184,72 @@ export class RoutineController extends Controller {
 
     const result = await routineService.createRoutine(userId, requestBody);
     this.setStatus(201);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
+   * @summary 루틴 완료 상태를 토글합니다.
+   * @description 현재 회차(일/주/월) 내 완료 이력이 있으면 취소하고, 없으면 오늘 날짜로 완료 처리합니다.
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "루틴 상태 변경 성공")
+  @Example<ApiResponse<ToggleRoutineStatusResponseDto>>({
+    success: true,
+    data: {
+      routineId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
+      completed: true,
+      completedAt: new Date("2026-04-19T00:00:00.000Z"),
+    },
+  })
+  @Response<ApiResponse<null>>(400, "routineId가 UUID 형식이 아닌 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "UUID 형식이 올바르지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "오늘 토글할 수 없는 루틴인 경우", {
+    success: false,
+    error: {
+      code: "INVALID022",
+      message: "오늘은 이 루틴의 상태를 변경할 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(
+    404,
+    "조회할 루틴이 없거나 본인 소유가 아닌 경우",
+    {
+      success: false,
+      error: {
+        code: "ROUTINE001",
+        message: "조회할 루틴을 찾을 수 없거나 접근 권한이 없습니다.",
+      },
+    },
+  )
+  @Patch("{routineId}/status")
+  public async toggleRoutineStatus(
+    @Path() routineId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<ToggleRoutineStatusResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await routineService.toggleRoutineStatus(userId, routineId);
+    this.setStatus(200);
 
     return {
       success: true,

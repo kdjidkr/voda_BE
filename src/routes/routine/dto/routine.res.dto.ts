@@ -22,3 +22,9 @@ export class GetRoutineListResponseDto {
   count!: number;
   routines!: RoutineListItemDto[];
 }
+
+export class ToggleRoutineStatusResponseDto {
+  routineId!: string;
+  completed!: boolean;
+  completedAt?: Date;
+}

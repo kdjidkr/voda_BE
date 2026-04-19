@@ -67,6 +67,55 @@ class RoutineRepository {
       },
     });
   }
+
+  async findActiveRoutineWithHistoryById(
+    userId: string,
+    routineId: string,
+  ): Promise<RoutineWithHistoryModel | null> {
+    return await prisma.routine.findFirst({
+      where: {
+        routine_id: routineId,
+        user_id: userId,
+        deleted_at: null,
+      },
+      include: {
+        history: {
+          select: {
+            completed_at: true,
+          },
+          orderBy: {
+            completed_at: "desc",
+          },
+        },
+      },
+    });
+  }
+
+  async createRoutineHistory(
+    routineId: string,
+    completedAt: Date,
+  ): Promise<void> {
+    await prisma.routine_history.create({
+      data: {
+        routine_id: routineId,
+        completed_at: completedAt,
+      },
+    });
+  }
+
+  async deleteRoutineHistoryByDate(
+    routineId: string,
+    completedAt: Date,
+  ): Promise<boolean> {
+    const result = await prisma.routine_history.deleteMany({
+      where: {
+        routine_id: routineId,
+        completed_at: completedAt,
+      },
+    });
+
+    return result.count > 0;
+  }
 }
 
 export const routineRepository = new RoutineRepository();

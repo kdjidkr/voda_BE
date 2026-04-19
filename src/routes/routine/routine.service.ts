@@ -6,6 +6,7 @@ import {
   CreateRoutineResponseDto,
   GetRoutineListResponseDto,
   RoutineListItemDto,
+  ToggleRoutineStatusResponseDto,
 } from "./dto/routine.res.dto";
 import {
   CreateRoutineInput,
@@ -100,6 +101,50 @@ class RoutineService {
       tab: normalizedTab,
       count: routineItems.length,
       routines: routineItems,
+    };
+  }
+
+  async toggleRoutineStatus(
+    userId: string,
+    routineId: string,
+  ): Promise<ToggleRoutineStatusResponseDto> {
+    const normalizedRoutineId = validateUuid(routineId, ErrorCode.INVALID007);
+    const routine = await routineRepository.findActiveRoutineWithHistoryById(
+      userId,
+      normalizedRoutineId,
+    );
+
+    if (!routine) {
+      throw new HttpException(ErrorCode.ROUTINE001);
+    }
+
+    const today = this.getTodayUtcDate();
+
+    if (!this.canToggleToday(routine, today)) {
+      throw new HttpException(ErrorCode.INVALID022);
+    }
+
+    const currentCompletion = this.findCompletionInCurrentCycle(routine, today);
+
+    if (currentCompletion) {
+      await routineRepository.deleteRoutineHistoryByDate(
+        normalizedRoutineId,
+        currentCompletion,
+      );
+
+      return {
+        routineId: normalizedRoutineId,
+        completed: false,
+        completedAt: undefined,
+      };
+    }
+
+    await routineRepository.createRoutineHistory(normalizedRoutineId, today);
+
+    return {
+      routineId: normalizedRoutineId,
+      completed: true,
+      completedAt: today,
     };
   }
 
@@ -207,6 +252,68 @@ class RoutineService {
     }
 
     return normalizedTab;
+  }
+
+  private canToggleToday(
+    routine: {
+      type: string;
+      days_of_week: number[];
+      day_of_month: number | null;
+    },
+    today: Date,
+  ): boolean {
+    if (routine.type === "DAILY") {
+      return true;
+    }
+
+    if (routine.type === "WEEKLY") {
+      if (routine.days_of_week.length === 0) {
+        return true;
+      }
+
+      return routine.days_of_week.includes(this.getIsoWeekday(today));
+    }
+
+    if (!routine.day_of_month) {
+      return true;
+    }
+
+    const daysInMonth = this.getDaysInMonth(today);
+
+    if (routine.day_of_month > daysInMonth) {
+      return false;
+    }
+
+    return today.getUTCDate() === routine.day_of_month;
+  }
+
+  private findCompletionInCurrentCycle(
+    routine: {
+      type: string;
+      history: { completed_at: Date }[];
+    },
+    today: Date,
+  ): Date | undefined {
+    if (routine.type === "DAILY") {
+      return this.findCompletionOnDate(routine.history, today);
+    }
+
+    if (routine.type === "WEEKLY") {
+      const weekRange = this.getWeekRange(today);
+      return this.findCompletionInRange(
+        routine.history,
+        weekRange.start,
+        weekRange.end,
+      );
+    }
+
+    const monthRange = this.getMonthRange(today);
+
+    return this.findCompletionInRange(
+      routine.history,
+      monthRange.start,
+      monthRange.end,
+    );
   }
 
   private calculateRoutineCycle(
