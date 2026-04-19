@@ -139,6 +139,26 @@ export const ErrorCode = {
     status: 400,
     message: "연도 또는 월 형식이 올바르지 않습니다.",
   },
+  INVALID011: {
+    code: "INVALID011",
+    status: 400,
+    message: "할 일 내용은 공백일 수 없습니다.",
+  },
+  INVALID012: {
+    code: "INVALID012",
+    status: 400,
+    message: "마감 기한 형식이 올바르지 않습니다.",
+  },
+  INVALID013: {
+    code: "INVALID013",
+    status: 400,
+    message: "할 일 조회 상태 필터 값이 올바르지 않습니다.",
+  },
+  INVALID014: {
+    code: "INVALID014",
+    status: 400,
+    message: "할 일 조회 페이지 크기(limit) 값이 올바르지 않습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {
@@ -150,6 +170,13 @@ export const ErrorCode = {
     code: "DIARY002",
     status: 404,
     message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+  },
+
+  // 할 일 관련
+  TODO001: {
+    code: "TODO001",
+    status: 404,
+    message: "조회할 할 일을 찾을 수 없거나 접근 권한이 없습니다.",
   },
 
   // 사용자 관련
