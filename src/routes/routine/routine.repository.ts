@@ -3,6 +3,18 @@ import type { Prisma } from "../../generated/prisma/client";
 import { CreateRoutineInput } from "./routine.model";
 
 type RoutineModel = Prisma.routineGetPayload<Record<string, never>>;
+type RoutineWithHistoryModel = Prisma.routineGetPayload<{
+  include: {
+    history: {
+      select: {
+        completed_at: true;
+      };
+      orderBy: {
+        completed_at: "desc";
+      };
+    };
+  };
+}>;
 
 class RoutineRepository {
   async createRoutine(input: CreateRoutineInput): Promise<RoutineModel> {
@@ -30,6 +42,30 @@ class RoutineRepository {
     });
 
     return result.count > 0;
+  }
+
+  async findActiveRoutinesWithHistory(
+    userId: string,
+  ): Promise<RoutineWithHistoryModel[]> {
+    return await prisma.routine.findMany({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+      },
+      include: {
+        history: {
+          select: {
+            completed_at: true,
+          },
+          orderBy: {
+            completed_at: "desc",
+          },
+        },
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
   }
 }
 

@@ -184,6 +184,11 @@ export const ErrorCode = {
     status: 400,
     message: "루틴 타입별 입력 조합이 올바르지 않습니다.",
   },
+  INVALID021: {
+    code: "INVALID021",
+    status: 400,
+    message: "루틴 조회 탭(tab) 값이 올바르지 않습니다.",
+  },
 
   // 다이어리 관련
   DIARY001: {

@@ -3,8 +3,10 @@ import {
   Controller,
   Delete,
   Example,
+  Get,
   Path,
   Post,
+  Query,
   Request,
   Response,
   Route,
@@ -17,12 +19,73 @@ import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { CreateRoutineRequestDto } from "./dto/routine.req.dto";
-import { CreateRoutineResponseDto } from "./dto/routine.res.dto";
+import {
+  CreateRoutineResponseDto,
+  GetRoutineListResponseDto,
+} from "./dto/routine.res.dto";
 import { routineService } from "./routine.service";
 
 @Route("routine")
 @Tags("루틴 기능")
 export class RoutineController extends Controller {
+  /**
+   * @summary 루틴 목록을 조회합니다.
+   * @description tab 쿼리는 문자열로 받으며, 허용값은 incomplete, scheduled, completed 입니다.
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "루틴 목록 조회 성공")
+  @Example<ApiResponse<GetRoutineListResponseDto>>({
+    success: true,
+    data: {
+      tab: "scheduled",
+      count: 1,
+      routines: [
+        {
+          routineId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
+          content: "수영 레슨",
+          type: "WEEKLY",
+          daysOfWeek: [3, 5],
+          dayOfMonth: undefined,
+          scheduledFor: new Date("2026-04-22T00:00:00.000Z"),
+          completedAt: undefined,
+        },
+      ],
+    },
+  })
+  @Response<ApiResponse<null>>(400, "tab 값이 올바르지 않은 경우", {
+    success: false,
+    error: {
+      code: "INVALID021",
+      message: "루틴 조회 탭(tab) 값이 올바르지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Get("/")
+  public async getRoutines(
+    @Request() req: any,
+    @Query() tab?: string,
+  ): Promise<ApiResponse<GetRoutineListResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await routineService.getRoutines(userId, tab);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
   /**
    * @summary 루틴을 등록합니다.
    * @description

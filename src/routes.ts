@@ -207,6 +207,55 @@ const models: TsoaRoute.Models = {
     additionalProperties: false,
   },
   // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  RoutineListItemDto: {
+    dataType: "refObject",
+    properties: {
+      routineId: { dataType: "string", required: true },
+      content: { dataType: "string", required: true },
+      type: { dataType: "string", required: true },
+      daysOfWeek: {
+        dataType: "array",
+        array: { dataType: "double" },
+        required: true,
+      },
+      dayOfMonth: { dataType: "double" },
+      scheduledFor: { dataType: "datetime" },
+      completedAt: { dataType: "datetime" },
+    },
+    additionalProperties: false,
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  GetRoutineListResponseDto: {
+    dataType: "refObject",
+    properties: {
+      tab: { dataType: "string", required: true },
+      count: { dataType: "double", required: true },
+      routines: {
+        dataType: "array",
+        array: { dataType: "refObject", ref: "RoutineListItemDto" },
+        required: true,
+      },
+    },
+    additionalProperties: false,
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  ApiResponse_GetRoutineListResponseDto_: {
+    dataType: "refObject",
+    properties: {
+      success: { dataType: "boolean", required: true },
+      data: { ref: "GetRoutineListResponseDto" },
+      error: {
+        dataType: "nestedObjectLiteral",
+        nestedProperties: {
+          details: { dataType: "any" },
+          message: { dataType: "string", required: true },
+          code: { dataType: "string", required: true },
+        },
+      },
+    },
+    additionalProperties: false,
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
   CreateRoutineResponseDto: {
     dataType: "refObject",
     properties: {
@@ -745,6 +794,52 @@ export function RegisterRoutes(
 
         await templateService.apiHandler({
           methodName: "deleteTodo",
+          controller,
+          response,
+          next,
+          validatedArgs,
+          successStatus: 200,
+        });
+      } catch (err) {
+        return next(err);
+      }
+    },
+  );
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  const argsRoutineController_getRoutines: Record<
+    string,
+    TsoaRoute.ParameterSchema
+  > = {
+    req: { in: "request", name: "req", required: true, dataType: "object" },
+    tab: { in: "query", name: "tab", dataType: "string" },
+  };
+  app.get(
+    "/routine",
+    authenticateMiddleware([{ jwt: [] }]),
+    ...fetchMiddlewares<RequestHandler>(RoutineController),
+    ...fetchMiddlewares<RequestHandler>(
+      RoutineController.prototype.getRoutines,
+    ),
+
+    async function RoutineController_getRoutines(
+      request: ExRequest,
+      response: ExResponse,
+      next: any,
+    ) {
+      // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+      let validatedArgs: any[] = [];
+      try {
+        validatedArgs = templateService.getValidatedArgs({
+          args: argsRoutineController_getRoutines,
+          request,
+          response,
+        });
+
+        const controller = new RoutineController();
+
+        await templateService.apiHandler({
+          methodName: "getRoutines",
           controller,
           response,
           next,
