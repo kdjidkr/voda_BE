@@ -149,7 +149,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "content": {"dataType":"string","required":true},
-            "dueTo": {"dataType":"datetime"},
+            "dueTo": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -403,7 +403,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTodoController_getTodos: Record<string, TsoaRoute.ParameterSchema> = {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["all"]},{"dataType":"enum","enums":["pending"]},{"dataType":"enum","enums":["completed"]}]},
+                status: {"in":"query","name":"status","dataType":"string"},
                 limit: {"in":"query","name":"limit","dataType":"string"},
                 cursor: {"in":"query","name":"cursor","dataType":"string"},
         };

@@ -32,7 +32,7 @@ class TodoRepository {
 	async findTodosByUser(userId: string, filter: TodoStatusFilter): Promise<TodoModel[]> {
 		const statusCondition =
 			filter === "pending" ? false : filter === "completed" ? true : undefined;
-		
+
 		return await prisma.todo_list.findMany({
 			where: {
 				user_id: userId,
@@ -40,13 +40,10 @@ class TodoRepository {
 			},
 			orderBy: [
 				{
-					status: "asc",
-				},
-				{
-					due_to: "asc",
-				},
-				{
 					created_at: "desc",
+				},
+				{
+					todo_id: "desc",
 				},
 			],
 		});
@@ -65,19 +62,23 @@ class TodoRepository {
 			where: {
 				user_id: userId,
 				status: statusCondition,
-				...(cursor
-					? {
-						todo_id: {
-							lt: cursor,
-						},
-					}
-					: {}),
 			},
 			orderBy: [
+				{
+					created_at: "desc",
+				},
 				{
 					todo_id: "desc",
 				},
 			],
+			...(cursor
+				? {
+					cursor: {
+						todo_id: cursor,
+					},
+					skip: 1,
+				}
+				: {}),
 			take: limit + 1,
 		});
 	}

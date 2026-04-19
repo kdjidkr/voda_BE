@@ -74,7 +74,7 @@ class TodoService {
 
 	async getTodos(
 		userId: string,
-		status?: TodoStatusFilter,
+		status?: string,
 		limit?: string,
 		cursor?: string,
 	): Promise<GetTodoListResponseDto> {
@@ -187,12 +187,12 @@ class TodoService {
 		return validateUuid(cursor, ErrorCode.INVALID007);
 	}
 
-	private validateDueTo(value?: Date): Date | undefined {
+	private validateDueTo(value?: string): Date | undefined {
 		if (!value) {
 			return undefined;
 		}
 
-		const dueToDate = value instanceof Date ? value : new Date(value);
+		const dueToDate = new Date(value);
 
 		if (Number.isNaN(dueToDate.getTime())) {
 			throw new HttpException(ErrorCode.INVALID012);

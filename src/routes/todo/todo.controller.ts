@@ -29,7 +29,9 @@ import { todoService } from "./todo.service";
 export class TodoController extends Controller {
 	/**
 	 * @summary 할 일 목록을 조회합니다.
-	 * @description status 쿼리로 전체(all), 미완료(pending), 완료(completed) 목록을 필터링할 수 있습니다.
+	 * @description status 쿼리는 문자열로 받으며, 허용값은 all, pending, completed 입니다. 결과는 created_at 기준 최신순으로 정렬됩니다. 잘못된 값은 400 INVALID013으로 반환합니다.
+	 * @example GET /todo?status=pending&limit=20
+	 * @example GET /todo?status=completed&limit=20&cursor=58d5db0b-5837-4933-b2d4-f032cb7a8a64
 	 */
 	@Security("jwt")
 	@SuccessResponse(200, "할 일 목록 조회 성공")
@@ -83,7 +85,7 @@ export class TodoController extends Controller {
 	@Get("/")
 	public async getTodos(
 		@Request() req: any,
-		@Query() status?: "all" | "pending" | "completed",
+		@Query() status?: string,
 		@Query() limit?: string,
 		@Query() cursor?: string,
 	): Promise<ApiResponse<GetTodoListResponseDto>> {
@@ -104,10 +106,15 @@ export class TodoController extends Controller {
 
 	/**
 	 * @summary 할 일을 등록합니다.
-	 * @description 일회성 할 일을 생성하며, 마감 기한은 선택값입니다.
+	 * @description 일회성 할 일을 생성하며, 마감 기한은 선택값입니다. dueTo는 ISO 8601 문자열로 전달합니다.
+	 * @example {"content":"매달 납부하기","dueTo":"2026-04-18T12:00:00.000Z"}
 	 */
 	@Security("jwt")
 	@SuccessResponse(201, "할 일 생성 성공")
+	@Example<CreateTodoRequestDto>({
+		content: "매달 납부하기",
+		dueTo: "2026-04-18T12:00:00.000Z",
+	})
 	@Example<ApiResponse<CreateTodoResponseDto>>({
 		success: true,
 		data: {
