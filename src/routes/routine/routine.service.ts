@@ -139,17 +139,31 @@ class RoutineService {
       };
     }
 
-    await routineRepository.createRoutineHistory(normalizedRoutineId, today);
+    try {
+      await routineRepository.createRoutineHistory(normalizedRoutineId, today);
 
-    return {
-      routineId: normalizedRoutineId,
-      completed: true,
-      completedAt: today,
-    };
+      return {
+        routineId: normalizedRoutineId,
+        completed: true,
+        completedAt: today,
+      };
+    } catch (err: any) {
+      // Handle concurrent create attempts that trigger unique constraint
+      // Prisma unique-constraint error code is P2002. Treat as idempotent success.
+      if (err?.code === "P2002" || /duplicate key/i.test(err?.message ?? "")) {
+        return {
+          routineId: normalizedRoutineId,
+          completed: true,
+          completedAt: today,
+        };
+      }
+
+      throw err;
+    }
   }
 
   private normalizeRoutineType(type: string): RoutineType {
-    const normalizedType = type?.trim().toUpperCase();
+    const normalizedType = (type?.trim() ?? "").toUpperCase();
 
     if (
       normalizedType !== "DAILY" &&
@@ -241,7 +255,7 @@ class RoutineService {
   }
 
   private normalizeRoutineTab(tab?: string): RoutineTabType {
-    const normalizedTab = tab?.trim().toLowerCase() ?? "incomplete";
+    const normalizedTab = (tab?.trim() ?? "incomplete").toLowerCase();
 
     if (
       normalizedTab !== "incomplete" &&
