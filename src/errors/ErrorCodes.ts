@@ -179,6 +179,20 @@ export const ErrorCode = {
     message: "조회할 할 일을 찾을 수 없거나 접근 권한이 없습니다.",
   },
 
+  // 루틴 관련
+  ROUTINE001: {
+    code: "ROUTINE001",
+    status: 404,
+    message: "조회할 루틴을 찾을 수 없거나 접근 권한이 없습니다.",
+  },
+
+  // 보고서 관련
+  REPORT001: {
+    code: "REPORT001",
+    status: 404,
+    message: "조회할 보고서를 찾을 수 없습니다.",
+  },
+
   // 사용자 관련
   USER001: {
     code: "USER001",
