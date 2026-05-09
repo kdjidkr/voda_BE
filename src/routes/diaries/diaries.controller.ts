@@ -413,13 +413,6 @@ export class DiariesController extends Controller {
       ],
     },
   })
-  @Response<ApiResponse<null>>(400, "diaryId가 UUID 형식이 올바르지 않은 경우", {
-    success: false,
-    error: {
-      code: "INVALID007",
-      message: "UUID 형식이 올바르지 않습니다.",
-    },
-  })
   @Response<ApiResponse<null>>(400, "키워드가 3개 이상이 아닌 경우", {
     success: false,
     error: {
