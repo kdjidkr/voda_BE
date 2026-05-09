@@ -231,11 +231,6 @@ export class DiariesService {
       throw new HttpException(ErrorCode.DIARY002);
     }
 
-    // 권한 확인
-    if (diary.user_id !== userId) {
-      throw new HttpException(ErrorCode.AUTH013);
-    }
-
     // 키워드 저장
     const result = await diariesRepository.createKeywords(
       validDiaryId,

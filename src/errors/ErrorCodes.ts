@@ -60,11 +60,7 @@ export const ErrorCode = {
     status: 401,
     message: "이메일 또는 비밀번호가 올바르지 않습니다.",
   },
-  AUTH013: {
-    code: "AUTH013",
-    status: 403,
-    message: "해당 일기에 접근할 권한이 없습니다.",
-  },
+  
 
   // 업로드 관련
   UPLOAD001: {
