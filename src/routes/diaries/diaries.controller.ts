@@ -23,6 +23,7 @@ import { diariesService } from "./diaries.service";
 import {
   CreateBasicDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
+  CreateKeywordsRequestDto,
 } from "./dto/diaries.req.dto";
 import {
   CreateBasicDiaryResponseDto,
@@ -388,7 +389,7 @@ export class DiariesController extends Controller {
 
   /**
    * @summary 일기에 키워드를 추가합니다.
-   * @description 정확히 3개의 키워드를 받아 일기에 저장합니다.
+   * @description 3개 이상의 키워드를 받아 일기에 저장합니다.
    * @returns 저장된 키워드 정보
    */
   @Security("jwt")
@@ -415,7 +416,7 @@ export class DiariesController extends Controller {
   @Response<ApiResponse<null>>(400, "키워드가 3개가 아닌 경우", {
     success: false,
     error: {
-      code: "AUTH014",
+      code: "KEYWORD001",
       message: "키워드는 최소 3개 이상이어야 합니다.",
     },
   })
@@ -429,7 +430,7 @@ export class DiariesController extends Controller {
   @Post("{diaryId}/keywords")
   public async createKeywords(
     @Path() diaryId: string,
-    @Body() requestBody: { keywords: string[] },
+    @Body() requestBody: CreateKeywordsRequestDto,
     @Request() req: any,
   ): Promise<ApiResponse<CreateKeywordResponseDto>> {
     const userId = req.user?.sub;
@@ -439,6 +440,7 @@ export class DiariesController extends Controller {
     }
 
     const result = await diariesService.createKeywords(
+      userId,
       diaryId,
       requestBody.keywords,
     );

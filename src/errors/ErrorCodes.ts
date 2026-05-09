@@ -65,11 +65,6 @@ export const ErrorCode = {
     status: 403,
     message: "해당 일기에 접근할 권한이 없습니다.",
   },
-  AUTH014: {
-    code: "AUTH014",
-    status: 400,
-    message: "키워드는 최소 3개 이상이어야 합니다.",
-  },
 
   // 업로드 관련
   UPLOAD001: {
@@ -149,12 +144,7 @@ export const ErrorCode = {
     status: 400,
     message: "연도 또는 월 형식이 올바르지 않습니다.",
   },
-  INVALID011: {
-    code: "INVALID011",
-    status: 404,
-    message: "존재하지 않는 일기입니다.",
-  },
- 
+
 
   // 다이어리 관련
   DIARY001: {
@@ -174,4 +164,12 @@ export const ErrorCode = {
     status: 404,
     message: "사용자 정보를 찾을 수 없습니다.",
   },
+
+  // 키워드 관련
+   KEYWORD001: {
+    code: "KEYWORD001",
+    status: 400,
+    message: "키워드는 최소 3개 이상이어야 합니다.",
+  },
+
 } as const;

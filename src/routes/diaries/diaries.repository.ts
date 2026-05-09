@@ -7,7 +7,6 @@ import {
 } from "./diaries.model";
 import { 
   KeywordResponseDto, 
-  CreateKeywordResponseDto 
 } from "./dto/diaries.res.dto";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
@@ -148,7 +147,7 @@ class DiariesRepository {
 
   async createKeywords( diaryId: string, keywords: string[],
   ): Promise<KeywordResponseDto[]> {
-    const createdKeywords = await Promise.all(
+    const createdKeywords = await prisma.$transaction(
       keywords.map((keyword) =>
         prisma.keyword.create({
           data: {

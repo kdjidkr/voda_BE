@@ -30,12 +30,12 @@ export class MonthlyDiarySummaryResponseDto {
   dates!: MonthlyDiarySummaryDateGroupDto[];
 }
 
-//단일 키워드 응답 DTO
+// 단일 키워드 응답 DTO
 export class KeywordResponseDto {
   keywordId!: string;
   keyword!: string;
 }
-//키워드 묶음 응답 DTO
+// 키워드 묶음 응답 DTO
 export class CreateKeywordResponseDto {
   keywords!: KeywordResponseDto[];
 }

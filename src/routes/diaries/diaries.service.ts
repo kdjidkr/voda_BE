@@ -211,24 +211,34 @@ export class DiariesService {
   }
 
   async createKeywords(
+    userId: string,
     diaryId: string,
     keywordTexts: string[],
   ): Promise<CreateKeywordResponseDto> {
-    // 키워드가 정확히 3개인지 검증
-    if (!keywordTexts || keywordTexts.length !== 3) {
-      throw new HttpException(ErrorCode.AUTH014);
+
+    // UUID 형식 검증
+    const validDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
+
+    // 키워드가 3개 이상인지 검증
+    if (!keywordTexts || keywordTexts.length < 3) {
+      throw new HttpException(ErrorCode.KEYWORD001);
     }
 
-    // 빈 키워드 확인
-    const hasEmptyKeyword = keywordTexts.some(
-      (keyword) => !keyword || keyword.trim() === "",
-    );
-    if (hasEmptyKeyword) {
-      throw new HttpException(ErrorCode.AUTH014);
+    //다이어리 조회
+    const diary = await diariesRepository.findDiaryById(userId, validDiaryId);
+
+    if (!diary) {
+      throw new HttpException(ErrorCode.DIARY002);
     }
 
+    // 권한 확인
+    if (diary.user_id !== userId) {
+      throw new HttpException(ErrorCode.AUTH013);
+    }
+
+    // 키워드 저장
     const result = await diariesRepository.createKeywords(
-      diaryId,
+      validDiaryId,
       keywordTexts.map((keyword) => keyword.trim()),
     );
 
