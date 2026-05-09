@@ -23,10 +23,12 @@ import { diariesService } from "./diaries.service";
 import {
   CreateBasicDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
+  CreateKeywordsRequestDto,
 } from "./dto/diaries.req.dto";
 import {
   CreateBasicDiaryResponseDto,
   MonthlyDiarySummaryResponseDto,
+  CreateKeywordResponseDto,
 } from "./dto/diaries.res.dto";
 
 @Route("diaries")
@@ -382,6 +384,78 @@ export class DiariesController extends Controller {
 
     return {
       success: true,
+    };
+  }
+
+  /**
+   * @summary 일기에 키워드를 추가합니다.
+   * @description 3개 이상의 키워드를 받아 일기에 저장합니다.
+   * @returns 저장된 키워드 정보
+   */
+  @Security("jwt")
+  @SuccessResponse(201, "키워드 저장 성공")
+  @Example<ApiResponse<CreateKeywordResponseDto>>({
+    success: true,
+    data: {
+      keywords: [
+        {
+          keywordId: "bc57f813-fd02-4b35-b9ea-a2364f493f9b",
+          keyword: "월요일 9시 수업 피곤",
+        },
+        {
+          keywordId: "cd57f813-fd02-4b35-b9ea-a2364f493f9c",
+          keyword: "점심 제육 존맛",
+        },
+        {
+          keywordId: "de57f813-fd02-4b35-b9ea-a2364f493f9d",
+          keyword: "중간 끝났는데 바쁨",
+        },
+      ],
+    },
+  })
+  @Response<ApiResponse<null>>(400, "키워드가 3개 이상이 아닌 경우", {
+    success: false,
+    error: {
+      code: "KEYWORD001",
+      message: "키워드는 최소 3개 이상이어야 합니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(404, "일기를 찾을 수 없거나 접근 권한이 없는 경우", {
+    success: false,
+    error: {
+      code: "DIARY002",
+      message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+    },
+  })
+  @Post("{diaryId}/keywords")
+  public async createKeywords(
+    @Path() diaryId: string,
+    @Body() requestBody: CreateKeywordsRequestDto,
+    @Request() req: any,
+  ): Promise<ApiResponse<CreateKeywordResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await diariesService.createKeywords(
+      userId,
+      diaryId,
+      requestBody.keywords,
+    );
+    this.setStatus(201);
+
+    return {
+      success: true,
+      data: result,
     };
   }
 }
