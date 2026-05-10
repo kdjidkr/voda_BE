@@ -1,8 +1,8 @@
 import { Gender, RegistrationType } from "./dto/auth.types";
 
 export class SignUpInput {
-  email!: string;
-  hashedPassword?: string;
+  email!: string | null;
+  hashedPassword?: string | null | undefined;
   name!: string;
   nickname!: string;
   formattedBirthDate!: Date;

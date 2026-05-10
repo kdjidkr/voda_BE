@@ -16,7 +16,7 @@ import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { authService } from "./auth.service";
 import {
-  KakaoSignInRequestDto,
+  KakaoAuthRequestDto,
   SignInRequestDto,
   SignUpRequestDto,
 } from "./dto/auth.req.dto";
@@ -177,8 +177,8 @@ export class AuthController extends Controller {
   }
 
   /**
-   * @summary 카카오로 로그인합니다.
-   * @description 카카오 access token으로 사용자 정보를 조회한 뒤 회원가입 또는 로그인 처리 후 access Token 발급, refresh Token 쿠키 설정
+   * @summary 카카오로 로그인/회원가입합니다.
+   * @description 카카오 authorization code를 교환해 카카오 id를 확인한 뒤, 클라이언트가 보낸 프로필 정보로 회원가입 또는 로그인 처리 후 access Token 발급, refresh Token 쿠키 설정
    */
   @SuccessResponse(200, "카카오 로그인 성공")
   @Example<ApiResponse<AccessTokenResponseDto>>({
@@ -191,19 +191,19 @@ export class AuthController extends Controller {
     success: false,
     error: {
       code: "INVALID023",
-      message: "카카오 액세스 토큰은 공백일 수 없습니다.",
+      message: "카카오 인증 코드는 공백일 수 없습니다.",
     },
   })
   @Response<ApiResponse<null>>(401, "카카오 로그인 인증 실패", {
     success: false,
     error: {
       code: "AUTH013",
-      message: "카카오 액세스 토큰이 유효하지 않습니다.",
+      message: "카카오 인증 코드가 유효하지 않습니다.",
     },
   })
   @Post("kakao")
   public async kakaoLogin(
-    @Body() requestBody: KakaoSignInRequestDto,
+    @Body() requestBody: KakaoAuthRequestDto,
   ): Promise<ApiResponse<AccessTokenResponseDto>> {
     const result = await authService.signInWithKakao(requestBody);
     const { accessToken, refreshToken } = result;

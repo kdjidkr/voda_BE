@@ -16,22 +16,11 @@ import {
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
 import { authRepository } from "./auth.repository";
 import {
-  KakaoSignInRequestDto,
+  KakaoAuthRequestDto,
   SignInRequestDto,
   SignUpRequestDto,
 } from "./dto/auth.req.dto";
 import { Gender, RegistrationType } from "./dto/auth.types";
-
-type KakaoAccountProfile = {
-  email?: string;
-  profile?: {
-    nickname?: string;
-    profile_image_url?: string;
-  };
-  birthday?: string;
-  birthyear?: string;
-  gender?: string;
-};
 
 type KakaoUserResponse = {
   id?: number;
@@ -39,7 +28,6 @@ type KakaoUserResponse = {
     nickname?: string;
     profile_image?: string;
   };
-  kakao_account?: KakaoAccountProfile;
 };
 
 class AuthService {
@@ -64,64 +52,53 @@ class AuthService {
   }
 
   async signInWithKakao(
-    requestBody: KakaoSignInRequestDto,
+    requestBody: KakaoAuthRequestDto,
   ): Promise<AuthTokenPair> {
-    const accessToken = validateNonEmptyText(
-      requestBody.accessToken,
-      ErrorCode.INVALID023,
-    );
+    const code = validateNonEmptyText(requestBody.code, ErrorCode.INVALID023);
+    const name = validateNonEmptyText(requestBody.name, ErrorCode.AUTH001);
+    const nickname = validateNonEmptyText(requestBody.nickname, ErrorCode.AUTH001);
+    validateNickname(nickname);
+
+    const birthDate = this.parseClientBirthDate(requestBody.birthDate);
+    const gender = requestBody.gender;
+
+    await this.reserveKakaoAuthCode(code);
+
+    const accessToken = await this.exchangeKakaoCode(code);
     const kakaoProfile = await this.fetchKakaoProfile(accessToken);
+
+    if (!kakaoProfile.id) {
+      throw new HttpException(ErrorCode.AUTH014);
+    }
+
     const kakaoId = String(kakaoProfile.id);
-    const userNickname = this.extractKakaoNickname(kakaoProfile);
-    const userEmail = this.extractKakaoEmail(kakaoProfile);
-    const userProfileImage = this.extractKakaoProfileImage(kakaoProfile);
     const existingOauthAccount = await usersRepository.findUserbyOauthId(
       kakaoId,
     );
 
-    let userId: string;
-
     if (existingOauthAccount) {
-      userId = existingOauthAccount.user_id;
-    } else if (userEmail) {
-      const existingUser = await usersRepository.findUserbyEmail(userEmail);
-
-      if (existingUser) {
-        await authRepository.createOauthAccount(
-          existingUser.user_id,
-          RegistrationType.KAKAO,
-          kakaoId,
-        );
-        userId = existingUser.user_id;
-      } else {
-        const newAccount = await authRepository.createAccount({
-          email: userEmail,
-          name: userNickname,
-          nickname: userNickname,
-          formattedBirthDate: this.parseKakaoBirthDate(kakaoProfile),
-          gender: this.parseKakaoGender(kakaoProfile),
-          registrationType: RegistrationType.KAKAO,
-          oauthId: kakaoId,
-          profileImage: userProfileImage,
-        });
-        userId = newAccount.id;
-      }
-    } else {
-      const fallbackEmail = `kakao_${kakaoId}@kakao.local`;
-      const newAccount = await authRepository.createAccount({
-        email: fallbackEmail,
-        name: userNickname,
-        nickname: userNickname,
-        formattedBirthDate: this.parseKakaoBirthDate(kakaoProfile),
-        gender: this.parseKakaoGender(kakaoProfile),
-        registrationType: RegistrationType.KAKAO,
-        oauthId: kakaoId,
-        profileImage: userProfileImage,
+      return await this.generateAndSaveTokens({
+        sub: existingOauthAccount.user_id,
       });
-      userId = newAccount.id;
     }
 
-    return await this.generateAndSaveTokens({ sub: userId });
+    if (await usersRepository.findUserbyNickname(nickname)) {
+      throw new HttpException(ErrorCode.AUTH002);
+    }
+
+    const newAccount = await authRepository.createAccount({
+      email: null,
+      hashedPassword: null,
+      name,
+      nickname,
+      formattedBirthDate: birthDate,
+      gender,
+      registrationType: RegistrationType.KAKAO,
+      oauthId: kakaoId,
+      profileImage: requestBody.profileImage ?? null,
+    });
+
+    return await this.generateAndSaveTokens({ sub: newAccount.id });
   }
 
   async signIn(requestBody: SignInRequestDto): Promise<AuthTokenPair> {
@@ -261,6 +238,65 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
+  private async reserveKakaoAuthCode(code: string): Promise<void> {
+    try {
+      const key = REDIS_KEYS.KAKAO_AUTH_CODE(code);
+      const result = await redisClient.set(key, "used", "EX", 300, "NX");
+
+      if (result !== "OK") {
+        throw new HttpException(ErrorCode.AUTH015);
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      console.error(`[Kakao Auth Code] Redis 저장 실패 - code: ${code}`, error);
+      throw new HttpException(ErrorCode.AUTH005, { code });
+    }
+  }
+
+  private async exchangeKakaoCode(code: string): Promise<string> {
+    const clientId = process.env.KAKAO_REST_API_KEY;
+    const redirectUri = process.env.KAKAO_REDIRECT_URI;
+    const clientSecret = process.env.KAKAO_CLIENT_SECRET;
+
+    if (!clientId || !redirectUri) {
+      throw new HttpException(ErrorCode.AUTH016);
+    }
+
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      code,
+    });
+
+    if (clientSecret) {
+      body.set("client_secret", clientSecret);
+    }
+
+    const response = await fetch("https://kauth.kakao.com/oauth/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+      body: body.toString(),
+    });
+
+    if (!response.ok) {
+      throw new HttpException(ErrorCode.AUTH013);
+    }
+
+    const payload = (await response.json()) as { access_token?: string };
+
+    if (!payload.access_token) {
+      throw new HttpException(ErrorCode.AUTH013);
+    }
+
+    return payload.access_token;
+  }
+
   private async fetchKakaoProfile(
     accessToken: string,
   ): Promise<KakaoUserResponse> {
@@ -271,66 +307,30 @@ class AuthService {
     });
 
     if (!response.ok) {
-      throw new HttpException(ErrorCode.AUTH013);
-    }
-
-    const payload = (await response.json()) as KakaoUserResponse;
-
-    if (!payload.id) {
       throw new HttpException(ErrorCode.AUTH014);
     }
 
-    return payload;
+    return (await response.json()) as KakaoUserResponse;
   }
 
-  private extractKakaoNickname(profile: KakaoUserResponse): string {
-    const nickname =
-      profile.kakao_account?.profile?.nickname ??
-      profile.properties?.nickname ??
-      `kakao_${profile.id}`;
+  private parseClientBirthDate(birthDate: string): Date {
+    const normalizedBirthDate = validateNonEmptyText(
+      birthDate,
+      ErrorCode.AUTH001,
+    );
+    const birthDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
-    return validateNonEmptyText(nickname, ErrorCode.AUTH014);
-  }
-
-  private extractKakaoEmail(profile: KakaoUserResponse): string | undefined {
-    const email = profile.kakao_account?.email?.trim();
-    return email && email.length > 0 ? email : undefined;
-  }
-
-  private extractKakaoProfileImage(profile: KakaoUserResponse): string | null {
-    const profileImage =
-      profile.kakao_account?.profile?.profile_image_url ??
-      profile.properties?.profile_image ??
-      null;
-
-    return profileImage;
-  }
-
-  private parseKakaoBirthDate(profile: KakaoUserResponse): Date {
-    const birthYear = profile.kakao_account?.birthyear;
-    const birthday = profile.kakao_account?.birthday;
-
-    if (birthYear && birthday && /^\d{4}$/.test(birthYear) && /^\d{4}$/.test(birthday)) {
-      const month = birthday.slice(0, 2);
-      const day = birthday.slice(2, 4);
-      return new Date(`${birthYear}-${month}-${day}T00:00:00.000Z`);
+    if (!birthDateRegex.test(normalizedBirthDate)) {
+      throw new HttpException(ErrorCode.AUTH001, { birthDate });
     }
 
-    return new Date("1970-01-01T00:00:00.000Z");
-  }
+    const parsedBirthDate = new Date(`${normalizedBirthDate}T00:00:00.000Z`);
 
-  private parseKakaoGender(profile: KakaoUserResponse): Gender {
-    const gender = profile.kakao_account?.gender?.toUpperCase();
-
-    if (gender === "MALE") {
-      return Gender.MALE;
+    if (Number.isNaN(parsedBirthDate.getTime())) {
+      throw new HttpException(ErrorCode.AUTH001, { birthDate });
     }
 
-    if (gender === "FEMALE") {
-      return Gender.FEMALE;
-    }
-
-    return Gender.OTHER;
+    return parsedBirthDate;
   }
 }
 

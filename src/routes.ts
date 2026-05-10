@@ -36,7 +36,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "nickname": {"dataType":"string","required":true},
-            "email": {"dataType":"string","required":true},
+            "email": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "profile_image": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "gender": {"ref":"Gender","required":true},
             "age": {"dataType":"double","required":true},
@@ -413,10 +413,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "KakaoSignInRequestDto": {
+    "KakaoAuthRequestDto": {
         "dataType": "refObject",
         "properties": {
-            "accessToken": {"dataType":"string","required":true},
+            "code": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "nickname": {"dataType":"string","required":true},
+            "birthDate": {"dataType":"string","required":true},
+            "gender": {"ref":"Gender","required":true},
+            "profileImage": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
     },
@@ -1051,7 +1056,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAuthController_kakaoLogin: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"KakaoSignInRequestDto"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"KakaoAuthRequestDto"},
         };
         app.post('/auth/kakao',
             ...(fetchMiddlewares<RequestHandler>(AuthController)),

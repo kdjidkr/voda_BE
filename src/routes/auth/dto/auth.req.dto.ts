@@ -16,6 +16,11 @@ export class SignInRequestDto {
   password!: string;
 }
 
-export class KakaoSignInRequestDto {
-  accessToken!: string;
+export class KakaoAuthRequestDto {
+  code!: string;
+  name!: string;
+  nickname!: string;
+  birthDate!: string;
+  gender!: Gender;
+  profileImage?: string | null;
 }

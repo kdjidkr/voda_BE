@@ -63,12 +63,22 @@ export const ErrorCode = {
   AUTH013: {
     code: "AUTH013",
     status: 401,
-    message: "카카오 액세스 토큰이 유효하지 않습니다.",
+    message: "카카오 인증 코드가 유효하지 않습니다.",
   },
   AUTH014: {
     code: "AUTH014",
     status: 502,
     message: "카카오 사용자 정보를 조회할 수 없습니다.",
+  },
+  AUTH015: {
+    code: "AUTH015",
+    status: 409,
+    message: "이미 사용된 카카오 인증 코드입니다.",
+  },
+  AUTH016: {
+    code: "AUTH016",
+    status: 500,
+    message: "카카오 OAuth 환경변수가 설정되지 않았습니다.",
   },
 
   // 업로드 관련
@@ -207,7 +217,7 @@ export const ErrorCode = {
   INVALID023: {
     code: "INVALID023",
     status: 400,
-    message: "카카오 액세스 토큰은 공백일 수 없습니다.",
+    message: "카카오 인증 코드는 공백일 수 없습니다.",
   },
 
   // 다이어리 관련
