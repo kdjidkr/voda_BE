@@ -223,6 +223,23 @@ export const ErrorCode = {
     message: "조회할 루틴을 찾을 수 없거나 접근 권한이 없습니다.",
   },
 
+  // 보고서 관련
+  REPORT001: {
+    code: "REPORT001",
+    status: 404,
+    message: "조회할 보고서를 찾을 수 없습니다.",
+  },
+  REPORT002: {
+    code: "REPORT002",
+    status: 409,
+    message: "해당 보고서가 이미 존재합니다.",
+  },
+  INVALID100: {
+    code: "INVALID100",
+    status: 400,
+    message: "보고서 조회 페이지 크기(limit) 값이 올바르지 않습니다.",
+  },
+
   // 사용자 관련
   USER001: {
     code: "USER001",
