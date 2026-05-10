@@ -16,6 +16,7 @@ import {
   CreateBasicDiaryResponseDto,
   MonthlyDiarySummaryDateGroupDto,
   MonthlyDiarySummaryResponseDto,
+  CreateKeywordResponseDto,
 } from "./dto/diaries.res.dto";
 
 export class DiariesService {
@@ -207,6 +208,38 @@ export class DiariesService {
     const day = String(date.getUTCDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
+  }
+
+  async createKeywords(
+    userId: string,
+    diaryId: string,
+    keywordTexts: string[],
+  ): Promise<CreateKeywordResponseDto> {
+
+    // UUID 형식 검증
+    const validDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
+
+    // 키워드가 3개 이상인지 검증
+    if (!keywordTexts || keywordTexts.length < 3) {
+      throw new HttpException(ErrorCode.KEYWORD001);
+    }
+
+    //다이어리 조회
+    const diary = await diariesRepository.findDiaryById(userId, validDiaryId);
+
+    if (!diary) {
+      throw new HttpException(ErrorCode.DIARY002);
+    }
+
+    // 키워드 저장
+    const result = await diariesRepository.createKeywords(
+      validDiaryId,
+      keywordTexts.map((keyword) => keyword.trim()),
+    );
+
+    return {
+      keywords: result,
+    };
   }
 }
 

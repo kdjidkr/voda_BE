@@ -60,6 +60,7 @@ export const ErrorCode = {
     status: 401,
     message: "이메일 또는 비밀번호가 올바르지 않습니다.",
   },
+  
 
   // 업로드 관련
   UPLOAD001: {
@@ -159,6 +160,42 @@ export const ErrorCode = {
     status: 400,
     message: "할 일 조회 페이지 크기(limit) 값이 올바르지 않습니다.",
   },
+  INVALID015: {
+    code: "INVALID015",
+    status: 400,
+    message: "루틴 내용은 공백일 수 없습니다.",
+  },
+  INVALID016: {
+    code: "INVALID016",
+    status: 400,
+    message: "루틴 타입은 DAILY, WEEKLY, MONTHLY 중 하나여야 합니다.",
+  },
+  INVALID017: {
+    code: "INVALID017",
+    status: 400,
+    message: "주간 루틴 요일은 1(월)부터 7(일) 사이의 정수여야 합니다.",
+  },
+  INVALID019: {
+    code: "INVALID019",
+    status: 400,
+    message: "월간 루틴 날짜(dayOfMonth)는 1부터 31 사이의 정수여야 합니다.",
+  },
+  INVALID020: {
+    code: "INVALID020",
+    status: 400,
+    message: "루틴 타입별 입력 조합이 올바르지 않습니다.",
+  },
+  INVALID021: {
+    code: "INVALID021",
+    status: 400,
+    message: "루틴 조회 탭(tab) 값이 올바르지 않습니다.",
+  },
+  INVALID022: {
+    code: "INVALID022",
+    status: 400,
+    message: "오늘은 이 루틴의 상태를 변경할 수 없습니다.",
+  },
+
 
   // 다이어리 관련
   DIARY001: {
@@ -199,4 +236,12 @@ export const ErrorCode = {
     status: 404,
     message: "사용자 정보를 찾을 수 없습니다.",
   },
+
+  // 키워드 관련
+   KEYWORD001: {
+    code: "KEYWORD001",
+    status: 400,
+    message: "키워드는 최소 3개 이상이어야 합니다.",
+  },
+
 } as const;
