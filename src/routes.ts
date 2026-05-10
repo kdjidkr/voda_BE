@@ -279,29 +279,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "GetReportResponseDto": {
-        "dataType": "refObject",
-        "properties": {
-            "reportId": {"dataType":"string","required":true},
-            "reportType": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
-            "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
-            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string","required":true},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
-            "createdAt": {"dataType":"datetime","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ApiResponse_GetReportResponseDto_": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "data": {"ref":"GetReportResponseDto"},
-            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ReportListItemDto": {
         "dataType": "refObject",
         "properties": {
@@ -327,6 +304,29 @@ const models: TsoaRoute.Models = {
         "properties": {
             "success": {"dataType":"boolean","required":true},
             "data": {"ref":"GetReportListResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GetReportResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "reportId": {"dataType":"string","required":true},
+            "reportType": {"dataType":"string","required":true},
+            "baseDate": {"dataType":"datetime","required":true},
+            "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
+            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string","required":true},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_GetReportResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"GetReportResponseDto"},
             "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
         },
         "additionalProperties": false,
@@ -904,45 +904,13 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_getReport: Record<string, TsoaRoute.ParameterSchema> = {
-                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
-                req: {"in":"request","name":"req","required":true,"dataType":"object"},
-        };
-        app.get('/report/:reportId',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReport)),
-
-            async function ReportController_getReport(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_getReport, request, response });
-
-                const controller = new ReportController();
-
-              await templateService.apiHandler({
-                methodName: 'getReport',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsReportController_getReports: Record<string, TsoaRoute.ParameterSchema> = {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
                 limit: {"in":"query","name":"limit","dataType":"string"},
                 cursor: {"in":"query","name":"cursor","dataType":"string"},
         };
         app.get('/report',
-            authenticateMiddleware([{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":[]},{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
             ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReports)),
 
@@ -975,7 +943,6 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.get('/report/month',
-            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
             ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReportByMonth)),
 
@@ -995,7 +962,38 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 response,
                 next,
                 validatedArgs,
-                successStatus: 200,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsReportController_getReport: Record<string, TsoaRoute.ParameterSchema> = {
+                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.get('/report/:reportId',
+            ...(fetchMiddlewares<RequestHandler>(ReportController)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReport)),
+
+            async function ReportController_getReport(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_getReport, request, response });
+
+                const controller = new ReportController();
+
+              await templateService.apiHandler({
+                methodName: 'getReport',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
               });
             } catch (err) {
                 return next(err);
@@ -1023,6 +1021,38 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'deleteReport',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsReportController_deleteWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
+                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.delete('/report/weekly/:reportId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ReportController)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.deleteWeeklyReport)),
+
+            async function ReportController_deleteWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_deleteWeeklyReport, request, response });
+
+                const controller = new ReportController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteWeeklyReport',
                 controller,
                 response,
                 next,

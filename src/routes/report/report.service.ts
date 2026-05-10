@@ -65,7 +65,7 @@ class ReportService {
     );
 
     if (existingReport) {
-      throw new HttpException(ErrorCode.REPORT001);
+      throw new HttpException(ErrorCode.REPORT002);
     }
 
     const createReportInput: CreateReportInput = {
@@ -98,7 +98,7 @@ class ReportService {
       normalizedReportId,
     );
 
-    if (!report) {
+    if (!report || report.report_type !== "MONTHLY") {
       throw new HttpException(ErrorCode.REPORT001);
     }
 
@@ -117,6 +117,7 @@ class ReportService {
       userId,
       pageSize,
       normalizedCursor,
+      "MONTHLY",
     );
 
     const hasNextPage = reports.length > pageSize;
@@ -149,7 +150,7 @@ class ReportService {
       Number.isNaN(parsed) || parsed < 1 || parsed > ReportService.MAX_REPORT_PAGE_SIZE;
 
     if (isInvalid) {
-      throw new HttpException(ErrorCode.INVALID014, { limit });
+      throw new HttpException(ErrorCode.INVALID100, { limit });
     }
 
     return parsed;
@@ -169,6 +170,10 @@ class ReportService {
     month: number,
   ): Promise<GetReportResponseDto> {
     if (!Number.isInteger(year) || !Number.isInteger(month)) {
+      throw new HttpException(ErrorCode.INVALID010);
+    }
+
+    if (month < 1 || month > 12) {
       throw new HttpException(ErrorCode.INVALID010);
     }
 
@@ -251,7 +256,7 @@ class ReportService {
     );
 
     if (existingReport) {
-      throw new HttpException(ErrorCode.REPORT001);
+      throw new HttpException(ErrorCode.REPORT002);
     }
 
     const createReportInput: CreateReportInput = {
@@ -284,11 +289,29 @@ class ReportService {
       normalizedReportId,
     );
 
-    if (!report) {
+    if (!report || report.report_type !== "WEEKLY") {
       throw new HttpException(ErrorCode.REPORT001);
     }
 
     return this.mapToResponseDto(report);
+  }
+
+  async deleteWeeklyReport(userId: string, reportId: string): Promise<void> {
+    const normalizedReportId = validateUuid(reportId, ErrorCode.INVALID007);
+    const report = await reportRepository.findReportById(userId, normalizedReportId);
+
+    if (!report || report.report_type !== "WEEKLY") {
+      throw new HttpException(ErrorCode.REPORT001);
+    }
+
+    const isDeleted = await reportRepository.deleteReport(
+      userId,
+      normalizedReportId,
+    );
+
+    if (!isDeleted) {
+      throw new HttpException(ErrorCode.REPORT001);
+    }
   }
 
   async getWeeklyReports(
@@ -389,7 +412,7 @@ class ReportService {
     }
 
     // 날짜를 UTC로 변환 (시간을 고려하지 않음)
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
   }
 
   private parseAndValidateDateForWeekly(dateString: string): Date {

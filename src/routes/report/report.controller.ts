@@ -94,8 +94,8 @@ export class ReportController extends Controller {
     {
       success: false,
       error: {
-        code: "REPORT001",
-        message: "해당 월의 보고서가 이미 존재합니다.",
+        code: "REPORT002",
+        message: "해당 보고서가 이미 존재합니다.",
       },
     },
   )
@@ -178,32 +178,13 @@ export class ReportController extends Controller {
       message: "조회할 보고서를 찾을 수 없습니다.",
     },
   })
-  @Get("{reportId}")
-  public async getReport(
-    @Path() reportId: string,
-    @Request() req: any,
-  ): Promise<ApiResponse<GetReportResponseDto>> {
-    const userId = req.user?.sub;
-
-    if (!userId) {
-      throw new HttpException(ErrorCode.AUTH008);
-    }
-
-    const result = await reportService.getReport(userId, reportId);
-    this.setStatus(200);
-
-    return {
-      success: true,
-      data: result,
-    };
-  }
+  
 
   /**
    * @summary 모든 월간 보고서를 조회합니다.
    * @description 사용자의 모든 보고서를 base_date 최신순으로 조회합니다.
    */
   @Security("jwt")
-  @SuccessResponse(200, "월간 보고서 목록 조회 성공")
   @Example<ApiResponse<GetReportListResponseDto>>({
     success: true,
     data: {
@@ -249,39 +230,7 @@ export class ReportController extends Controller {
       data: result,
     };
   }
-
-  /**
-   * @summary 특정 연도/월에 해당하는 월간 보고서를 조회합니다.
-   * @description 쿼리 파라미터로 `year`와 `month`를 전달하면 해당 월의 보고서를 반환합니다.
-   */
-  @Security("jwt")
-  @SuccessResponse(200, "월간 보고서 조회 성공")
-  @Example<ApiResponse<GetReportResponseDto>>({
-    success: true,
-    data: {
-      reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-      reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
-      summary: {
-        text: "(닉네임)의 한 달 분석 텍스트...",
-        photoCount: 3,
-        diaryCount: 15,
-      },
-      detailsJson: {
-        photos: [
-          "https://s3.../photo1.jpg",
-          "https://s3.../photo2.jpg",
-          "https://s3.../photo3.jpg",
-        ],
-        aiAnalysis: "AI가 바라본 9월의 분석...",
-        diaryIds: [
-          "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-        ],
-      },
-      createdAt: new Date("2026-04-30T09:00:00.000Z"),
-    },
-  })
+  
   @Response<ApiResponse<null>>(400, "year 또는 month 형식이 올바르지 않은 경우", {
     success: false,
     error: {
@@ -317,11 +266,56 @@ export class ReportController extends Controller {
     };
   }
 
+  @Get("{reportId}")
+  public async getReport(
+    @Path() reportId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<GetReportResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await reportService.getReport(userId, reportId);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
   /**
    * @summary 월간 보고서를 삭제합니다.
    */
   @Security("jwt")
   @SuccessResponse(200, "월간 보고서 삭제 성공")
+  @Delete("{reportId}")
+  public async deleteReport(
+    @Path() reportId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<null>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    await reportService.deleteReport(userId, reportId);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: null,
+    };
+  }
+
+  /**
+   * @summary 주간 보고서를 삭제합니다.
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "주간 보고서 삭제 성공")
   @Response<ApiResponse<null>>(400, "reportId가 UUID 형식이 아닌 경우", {
     success: false,
     error: {
@@ -343,8 +337,8 @@ export class ReportController extends Controller {
       message: "조회할 보고서를 찾을 수 없습니다.",
     },
   })
-  @Delete("{reportId}")
-  public async deleteReport(
+  @Delete("/weekly/{reportId}")
+  public async deleteWeeklyReport(
     @Path() reportId: string,
     @Request() req: any,
   ): Promise<ApiResponse<null>> {
@@ -354,7 +348,7 @@ export class ReportController extends Controller {
       throw new HttpException(ErrorCode.AUTH008);
     }
 
-    await reportService.deleteReport(userId, reportId);
+    await reportService.deleteWeeklyReport(userId, reportId);
     this.setStatus(200);
 
     return {
@@ -478,8 +472,8 @@ export class ReportController extends Controller {
     {
       success: false,
       error: {
-        code: "REPORT001",
-        message: "해당 주의 보고서가 이미 존재합니다.",
+        code: "REPORT002",
+        message: "해당 보고서가 이미 존재합니다.",
       },
     },
   )
