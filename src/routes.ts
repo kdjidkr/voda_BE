@@ -910,7 +910,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 cursor: {"in":"query","name":"cursor","dataType":"string"},
         };
         app.get('/report',
-            authenticateMiddleware([{"jwt":[]},{"jwt":[]}]),
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
             ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReports)),
 
@@ -943,6 +943,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.get('/report/month',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
             ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReportByMonth)),
 
@@ -962,7 +963,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 response,
                 next,
                 validatedArgs,
-                successStatus: undefined,
+                successStatus: 200,
               });
             } catch (err) {
                 return next(err);
@@ -974,6 +975,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.get('/report/:reportId',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
             ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getReport)),
 
@@ -993,7 +995,7 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 response,
                 next,
                 validatedArgs,
-                successStatus: undefined,
+                successStatus: 200,
               });
             } catch (err) {
                 return next(err);

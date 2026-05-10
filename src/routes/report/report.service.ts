@@ -188,6 +188,12 @@ class ReportService {
 
   async deleteReport(userId: string, reportId: string): Promise<void> {
     const normalizedReportId = validateUuid(reportId, ErrorCode.INVALID007);
+    const report = await reportRepository.findReportById(userId, normalizedReportId);
+
+    if (!report || report.report_type !== "MONTHLY") {
+      throw new HttpException(ErrorCode.REPORT001);
+    }
+
     const isDeleted = await reportRepository.deleteReport(
       userId,
       normalizedReportId,

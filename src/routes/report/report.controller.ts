@@ -127,6 +127,132 @@ export class ReportController extends Controller {
   }
 
   /**
+   * @summary 모든 월간 보고서를 조회합니다.
+   * @description 사용자의 모든 보고서를 base_date 최신순으로 조회합니다.
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "월간 보고서 목록 조회 성공")
+  @Example<ApiResponse<GetReportListResponseDto>>({
+    success: true,
+    data: {
+      limit: 20,
+      count: 2,
+      nextCursor: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
+      reports: [
+        {
+          reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
+          baseDate: new Date("2025-09-01"),
+        },
+        {
+          reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
+          baseDate: new Date("2025-08-01"),
+        },
+      ],
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Get("/")
+  public async getReports(
+    @Request() req: any,
+    @Query() limit?: string,
+    @Query() cursor?: string,
+  ): Promise<ApiResponse<GetReportListResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await reportService.getReports(userId, limit, cursor);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+  
+  /**
+   * @summary 특정 연도/월에 해당하는 월간 보고서를 조회합니다.
+   * @description 쿼리 파라미터로 `year`와 `month`를 전달하면 해당 월의 보고서를 반환합니다.
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "월간 보고서 조회 성공")
+  @Example<ApiResponse<GetReportResponseDto>>({
+    success: true,
+    data: {
+      reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
+      reportType: "MONTHLY",
+      baseDate: new Date("2025-09-01"),
+      summary: {
+        text: "(닉네임)의 한 달 분석 텍스트...",
+        photoCount: 3,
+        diaryCount: 15,
+      },
+      detailsJson: {
+        photos: [
+          "https://s3.../photo1.jpg",
+          "https://s3.../photo2.jpg",
+          "https://s3.../photo3.jpg",
+        ],
+        aiAnalysis: "AI가 바라본 9월의 분석...",
+        diaryIds: [
+          "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
+          "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
+        ],
+      },
+      createdAt: new Date("2026-04-30T09:00:00.000Z"),
+    },
+  })
+  @Response<ApiResponse<null>>(400, "year 또는 month 형식이 올바르지 않은 경우", {
+    success: false,
+    error: {
+      code: "INVALID010",
+      message: "연도 또는 월 형식이 올바르지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(404, "조회할 보고서가 없는 경우", {
+    success: false,
+    error: {
+      code: "REPORT001",
+      message: "조회할 보고서를 찾을 수 없습니다.",
+    },
+  })
+  @Get("/month")
+  public async getReportByMonth(
+    @Query() year: number,
+    @Query() month: number,
+    @Request() req: any,
+  ): Promise<ApiResponse<GetReportResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await reportService.getReportByMonth(userId, year, month);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
    * @summary 월간 보고서를 조회합니다.
    */
   @Security("jwt")
@@ -178,94 +304,6 @@ export class ReportController extends Controller {
       message: "조회할 보고서를 찾을 수 없습니다.",
     },
   })
-  
-
-  /**
-   * @summary 모든 월간 보고서를 조회합니다.
-   * @description 사용자의 모든 보고서를 base_date 최신순으로 조회합니다.
-   */
-  @Security("jwt")
-  @Example<ApiResponse<GetReportListResponseDto>>({
-    success: true,
-    data: {
-      limit: 20,
-      count: 2,
-      nextCursor: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-      reports: [
-        {
-          reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          baseDate: new Date("2025-09-01"),
-        },
-        {
-          reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          baseDate: new Date("2025-08-01"),
-        },
-      ],
-    },
-  })
-  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
-    success: false,
-    error: {
-      code: "AUTH008",
-      message: "액세스 토큰이 유효하지 않습니다.",
-    },
-  })
-  @Get("/")
-  public async getReports(
-    @Request() req: any,
-    @Query() limit?: string,
-    @Query() cursor?: string,
-  ): Promise<ApiResponse<GetReportListResponseDto>> {
-    const userId = req.user?.sub;
-
-    if (!userId) {
-      throw new HttpException(ErrorCode.AUTH008);
-    }
-
-    const result = await reportService.getReports(userId, limit, cursor);
-    this.setStatus(200);
-
-    return {
-      success: true,
-      data: result,
-    };
-  }
-  
-  @Response<ApiResponse<null>>(400, "year 또는 month 형식이 올바르지 않은 경우", {
-    success: false,
-    error: {
-      code: "INVALID010",
-      message: "연도 또는 월 형식이 올바르지 않습니다.",
-    },
-  })
-  @Response<ApiResponse<null>>(404, "조회할 보고서가 없는 경우", {
-    success: false,
-    error: {
-      code: "REPORT001",
-      message: "조회할 보고서를 찾을 수 없습니다.",
-    },
-  })
-  @Get("/month")
-  public async getReportByMonth(
-    @Query() year: number,
-    @Query() month: number,
-    @Request() req: any,
-  ): Promise<ApiResponse<GetReportResponseDto>> {
-    const userId = req.user?.sub;
-
-    if (!userId) {
-      throw new HttpException(ErrorCode.AUTH008);
-    }
-
-    const result = await reportService.getReportByMonth(userId, year, month);
-    this.setStatus(200);
-
-    return {
-      success: true,
-      data: result,
-    };
-  }
-
   @Get("{reportId}")
   public async getReport(
     @Path() reportId: string,
