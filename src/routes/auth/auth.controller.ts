@@ -15,7 +15,11 @@ import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { authService } from "./auth.service";
-import { SignInRequestDto, SignUpRequestDto } from "./dto/auth.req.dto";
+import {
+  KakaoSignInRequestDto,
+  SignInRequestDto,
+  SignUpRequestDto,
+} from "./dto/auth.req.dto";
 import { AccessTokenResponseDto } from "./dto/auth.res.dto";
 
 @Route("auth")
@@ -155,6 +159,53 @@ export class AuthController extends Controller {
     @Body() requestBody: SignInRequestDto,
   ): Promise<ApiResponse<AccessTokenResponseDto>> {
     const result = await authService.signIn(requestBody);
+    const { accessToken, refreshToken } = result;
+    this.setStatus(200);
+    const cookieOption = this.getCookieOptions(1209600);
+    const cookieName = this.getRefreshCookieName();
+    this.setHeader(
+      "Set-Cookie",
+      `${cookieName}=${refreshToken}; ${cookieOption}`,
+    );
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+      },
+    };
+  }
+
+  /**
+   * @summary 카카오로 로그인합니다.
+   * @description 카카오 access token으로 사용자 정보를 조회한 뒤 회원가입 또는 로그인 처리 후 access Token 발급, refresh Token 쿠키 설정
+   */
+  @SuccessResponse(200, "카카오 로그인 성공")
+  @Example<ApiResponse<AccessTokenResponseDto>>({
+    success: true,
+    data: {
+      accessToken: "accessToken",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "카카오 로그인 유효성 검증 오류", {
+    success: false,
+    error: {
+      code: "INVALID023",
+      message: "카카오 액세스 토큰은 공백일 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "카카오 로그인 인증 실패", {
+    success: false,
+    error: {
+      code: "AUTH013",
+      message: "카카오 액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Post("kakao")
+  public async kakaoLogin(
+    @Body() requestBody: KakaoSignInRequestDto,
+  ): Promise<ApiResponse<AccessTokenResponseDto>> {
+    const result = await authService.signInWithKakao(requestBody);
     const { accessToken, refreshToken } = result;
     this.setStatus(200);
     const cookieOption = this.getCookieOptions(1209600);

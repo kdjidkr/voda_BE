@@ -60,6 +60,16 @@ export const ErrorCode = {
     status: 401,
     message: "이메일 또는 비밀번호가 올바르지 않습니다.",
   },
+  AUTH013: {
+    code: "AUTH013",
+    status: 401,
+    message: "카카오 액세스 토큰이 유효하지 않습니다.",
+  },
+  AUTH014: {
+    code: "AUTH014",
+    status: 502,
+    message: "카카오 사용자 정보를 조회할 수 없습니다.",
+  },
 
   // 업로드 관련
   UPLOAD001: {
@@ -193,6 +203,11 @@ export const ErrorCode = {
     code: "INVALID022",
     status: 400,
     message: "오늘은 이 루틴의 상태를 변경할 수 없습니다.",
+  },
+  INVALID023: {
+    code: "INVALID023",
+    status: 400,
+    message: "카카오 액세스 토큰은 공백일 수 없습니다.",
   },
 
   // 다이어리 관련

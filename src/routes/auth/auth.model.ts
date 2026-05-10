@@ -9,6 +9,7 @@ export class SignUpInput {
   gender!: Gender;
   registrationType!: RegistrationType;
   oauthId?: string;
+  profileImage?: string | null;
 }
 
 export class SignUpOutput {

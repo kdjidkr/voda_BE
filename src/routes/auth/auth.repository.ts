@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { prisma } from "../../config/prisma";
+import { RegistrationType } from "./dto/auth.types";
 import { SignUpInput, SignUpOutput } from "./auth.model";
 
 class AuthRepository {
@@ -14,6 +15,7 @@ class AuthRepository {
       gender,
       registrationType,
       oauthId,
+      profileImage,
     } = singUpInput;
 
     const result = await prisma.$transaction(async (tx) => {
@@ -27,6 +29,7 @@ class AuthRepository {
           nickname,
           birth_date: formattedBirthDate,
           gender,
+          profile_image: profileImage,
         },
       });
 
@@ -48,6 +51,21 @@ class AuthRepository {
       id: result.user_id,
       nickname: result.nickname,
     };
+  }
+
+  async createOauthAccount(
+    userId: string,
+    registrationType: RegistrationType,
+    oauthId: string,
+  ): Promise<void> {
+    await prisma.user_oauth_account.create({
+      data: {
+        user_oauth_account_id: randomUUID(),
+        user_id: userId,
+        registration_type: registrationType,
+        oauth_id: oauthId,
+      },
+    });
   }
 }
 

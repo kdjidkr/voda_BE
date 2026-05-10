@@ -15,3 +15,7 @@ export class SignInRequestDto {
   email!: string;
   password!: string;
 }
+
+export class KakaoSignInRequestDto {
+  accessToken!: string;
+}
