@@ -237,4 +237,11 @@ export const ErrorCode = {
     message: "키워드는 최소 3개 이상이어야 합니다.",
   },
 
+  // 음성 소스 관련
+  VOICE_SOURCE001: {
+    code: "VOICE_SOURCE001",
+    status: 400,
+    message: "저장할 음성 소스 텍스트가 없습니다.",
+  },
+
 } as const;
