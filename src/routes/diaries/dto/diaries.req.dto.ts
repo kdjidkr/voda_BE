@@ -8,3 +8,7 @@ export class UpdateBasicDiaryRequestDto {
   title?: string;
   content?: string;
 }
+
+export class CreateKeywordsRequestDto {
+  keywords!: string[];
+}
