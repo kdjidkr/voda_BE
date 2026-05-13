@@ -16,6 +16,8 @@ import { DiariesController } from './routes/diaries/diaries.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UploadController } from './routes/common/upload.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { CallRoomsController } from './routes/call-rooms/call-rooms.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './routes/auth/auth.controller';
 import { expressAuthentication } from './routes/auth/authentication';
 // @ts-ignore - no great way to install types from subpackage
@@ -490,6 +492,52 @@ const models: TsoaRoute.Models = {
             "success": {"dataType":"boolean","required":true},
             "data": {"ref":"UploadMultipleResponseDto"},
             "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CallTextResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "callTextId": {"dataType":"string","required":true},
+            "callRoomId": {"dataType":"string","required":true},
+            "textContent": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateCallRoomResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "callRoomId": {"dataType":"string","required":true},
+            "callTexts": {"dataType":"array","array":{"dataType":"refObject","ref":"CallTextResponseDto"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CreateCallRoomResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"CreateCallRoomResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CallTextRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "textContent": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateCallRoomRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "texts": {"dataType":"array","array":{"dataType":"refObject","ref":"CallTextRequestDto"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -1418,6 +1466,37 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'uploadImages',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCallRoomsController_createCallRoom: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"body","name":"request","required":true,"ref":"CreateCallRoomRequestDto"},
+        };
+        app.post('/call-rooms',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController.prototype.createCallRoom)),
+
+            async function CallRoomsController_createCallRoom(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCallRoomsController_createCallRoom, request, response });
+
+                const controller = new CallRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'createCallRoom',
                 controller,
                 response,
                 next,

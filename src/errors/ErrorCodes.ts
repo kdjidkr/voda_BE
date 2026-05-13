@@ -254,4 +254,16 @@ export const ErrorCode = {
     message: "키워드는 최소 3개 이상이어야 합니다.",
   },
 
+  // 통화 내용 관련
+  CALL_ROOM001: {
+    code: "CALL_ROOM001",
+    status: 400,
+    message: "통화 내용은 최소 1개 이상이어야 합니다.",
+  },
+  CALL_ROOM002: {
+    code: "CALL_ROOM002",
+    status: 400,
+    message: "통화 내용 텍스트는 공백일 수 없습니다.",
+  },
+
 } as const;
