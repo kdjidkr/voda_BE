@@ -413,10 +413,30 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "KakaoAuthRequestDto": {
+    "KakaoAuthCallbackResponseDto": {
         "dataType": "refObject",
         "properties": {
-            "code": {"dataType":"string","required":true},
+            "needsSignup": {"dataType":"boolean","required":true},
+            "accessToken": {"dataType":"string"},
+            "sessionToken": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_KakaoAuthCallbackResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"KakaoAuthCallbackResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "KakaoCompleteSignupRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "sessionToken": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "nickname": {"dataType":"string","required":true},
             "birthDate": {"dataType":"string","required":true},
@@ -1055,30 +1075,60 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsAuthController_kakaoLogin: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"KakaoAuthRequestDto"},
+        const argsAuthController_kakaoCallback: Record<string, TsoaRoute.ParameterSchema> = {
+                code: {"in":"query","name":"code","required":true,"dataType":"string"},
         };
-        app.post('/auth/kakao',
+        app.get('/auth/kakao/callback',
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
-            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.kakaoLogin)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.kakaoCallback)),
 
-            async function AuthController_kakaoLogin(request: ExRequest, response: ExResponse, next: any) {
+            async function AuthController_kakaoCallback(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_kakaoLogin, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_kakaoCallback, request, response });
 
                 const controller = new AuthController();
 
               await templateService.apiHandler({
-                methodName: 'kakaoLogin',
+                methodName: 'kakaoCallback',
                 controller,
                 response,
                 next,
                 validatedArgs,
                 successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_completeKakaoSignup: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"KakaoCompleteSignupRequestDto"},
+        };
+        app.post('/auth/kakao/signup',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.completeKakaoSignup)),
+
+            async function AuthController_completeKakaoSignup(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_completeKakaoSignup, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'completeKakaoSignup',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
               });
             } catch (err) {
                 return next(err);

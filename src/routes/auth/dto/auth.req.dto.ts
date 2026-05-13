@@ -16,8 +16,12 @@ export class SignInRequestDto {
   password!: string;
 }
 
-export class KakaoAuthRequestDto {
+export class KakaoCallbackRequestDto {
   code!: string;
+}
+
+export class KakaoCompleteSignupRequestDto {
+  sessionToken!: string;
   name!: string;
   nickname!: string;
   birthDate!: string;

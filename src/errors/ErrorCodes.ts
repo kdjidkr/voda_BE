@@ -80,6 +80,11 @@ export const ErrorCode = {
     status: 500,
     message: "카카오 OAuth 환경변수가 설정되지 않았습니다.",
   },
+  AUTH017: {
+    code: "AUTH017",
+    status: 401,
+    message: "카카오 회원가입 세션이 유효하지 않습니다.",
+  },
 
   // 업로드 관련
   UPLOAD001: {

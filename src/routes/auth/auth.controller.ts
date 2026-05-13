@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Example,
+  Get,
   Post,
+  Query,
   Request,
   Response,
   Route,
@@ -16,11 +18,14 @@ import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { authService } from "./auth.service";
 import {
-  KakaoAuthRequestDto,
+  KakaoCompleteSignupRequestDto,
   SignInRequestDto,
   SignUpRequestDto,
 } from "./dto/auth.req.dto";
-import { AccessTokenResponseDto } from "./dto/auth.res.dto";
+import {
+  AccessTokenResponseDto,
+  KakaoAuthCallbackResponseDto,
+} from "./dto/auth.res.dto";
 
 @Route("auth")
 @Tags("로그인, 회원가입 등 인증 기능을 담당합니다.")
@@ -180,34 +185,102 @@ export class AuthController extends Controller {
    * @summary 카카오로 로그인/회원가입합니다.
    * @description 카카오 authorization code를 교환해 카카오 id를 확인한 뒤, 클라이언트가 보낸 프로필 정보로 회원가입 또는 로그인 처리 후 access Token 발급, refresh Token 쿠키 설정
    */
-  @SuccessResponse(200, "카카오 로그인 성공")
-  @Example<ApiResponse<AccessTokenResponseDto>>({
+  @SuccessResponse(200, "카카오 콜백 처리 성공")
+  @Example<ApiResponse<KakaoAuthCallbackResponseDto>>({
     success: true,
     data: {
+      needsSignup: false,
       accessToken: "accessToken",
     },
   })
-  @Response<ApiResponse<null>>(400, "카카오 로그인 유효성 검증 오류", {
+  @Example<ApiResponse<KakaoAuthCallbackResponseDto>>({
+    success: true,
+    data: {
+      needsSignup: true,
+      sessionToken: "session-token",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "카카오 콜백 유효성 검증 오류", {
     success: false,
     error: {
       code: "INVALID023",
       message: "카카오 인증 코드는 공백일 수 없습니다.",
     },
   })
-  @Response<ApiResponse<null>>(401, "카카오 로그인 인증 실패", {
+  @Response<ApiResponse<null>>(401, "카카오 콜백 인증 실패", {
     success: false,
     error: {
       code: "AUTH013",
       message: "카카오 인증 코드가 유효하지 않습니다.",
     },
   })
-  @Post("kakao")
-  public async kakaoLogin(
-    @Body() requestBody: KakaoAuthRequestDto,
-  ): Promise<ApiResponse<AccessTokenResponseDto>> {
-    const result = await authService.signInWithKakao(requestBody);
-    const { accessToken, refreshToken } = result;
+  @Get("kakao/callback")
+  public async kakaoCallback(
+    @Query() code: string,
+  ): Promise<ApiResponse<KakaoAuthCallbackResponseDto>> {
+    const result = await authService.handleKakaoCallback(code);
+    const cookieOption = this.getCookieOptions(1209600);
+    const cookieName = this.getRefreshCookieName();
+
+    if (result.accessToken) {
+      this.setStatus(200);
+      this.setHeader(
+        "Set-Cookie",
+        `${cookieName}=${result.refreshToken}; ${cookieOption}`,
+      );
+
+      return {
+        success: true,
+        data: {
+          needsSignup: false,
+          accessToken: result.accessToken,
+        },
+      };
+    }
+
     this.setStatus(200);
+
+    return {
+      success: true,
+      data: {
+        needsSignup: true,
+        sessionToken: result.sessionToken,
+      },
+    };
+  }
+
+  /**
+   * @summary 카카오 회원가입을 완료합니다.
+   * @description 카카오 callback에서 발급한 sessionToken과 클라이언트 입력값으로 사용자 계정을 생성합니다.
+   */
+  @SuccessResponse(201, "카카오 회원가입 성공")
+  @Example<ApiResponse<AccessTokenResponseDto>>({
+    success: true,
+    data: {
+      accessToken: "accessToken",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "카카오 회원가입 유효성 검증 오류", {
+    success: false,
+    error: {
+      code: "INVALID023",
+      message: "카카오 인증 코드는 공백일 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "카카오 회원가입 세션이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH017",
+      message: "카카오 회원가입 세션이 유효하지 않습니다.",
+    },
+  })
+  @Post("kakao/signup")
+  public async completeKakaoSignup(
+    @Body() requestBody: KakaoCompleteSignupRequestDto,
+  ): Promise<ApiResponse<AccessTokenResponseDto>> {
+    const result = await authService.completeKakaoSignup(requestBody);
+    const { accessToken, refreshToken } = result;
+    this.setStatus(201);
     const cookieOption = this.getCookieOptions(1209600);
     const cookieName = this.getRefreshCookieName();
     this.setHeader(

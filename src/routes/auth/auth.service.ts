@@ -1,4 +1,5 @@
 import * as bcrypt from "bcrypt";
+import { randomUUID } from "crypto";
 import jwt from "jsonwebtoken";
 
 import { redisClient } from "../../config/redis";
@@ -16,11 +17,12 @@ import {
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
 import { authRepository } from "./auth.repository";
 import {
-  KakaoAuthRequestDto,
+  KakaoCallbackRequestDto,
+  KakaoCompleteSignupRequestDto,
   SignInRequestDto,
   SignUpRequestDto,
 } from "./dto/auth.req.dto";
-import { Gender, RegistrationType } from "./dto/auth.types";
+import { RegistrationType } from "./dto/auth.types";
 
 type KakaoUserResponse = {
   id?: number;
@@ -51,20 +53,19 @@ class AuthService {
     );
   }
 
-  async signInWithKakao(
-    requestBody: KakaoAuthRequestDto,
-  ): Promise<AuthTokenPair> {
-    const code = validateNonEmptyText(requestBody.code, ErrorCode.INVALID023);
-    const name = validateNonEmptyText(requestBody.name, ErrorCode.AUTH001);
-    const nickname = validateNonEmptyText(requestBody.nickname, ErrorCode.AUTH001);
-    validateNickname(nickname);
+  async handleKakaoCallback(
+    code: string,
+  ): Promise<{
+    needsSignup: boolean;
+    accessToken?: string;
+    refreshToken?: string;
+    sessionToken?: string;
+  }> {
+    const normalizedCode = validateNonEmptyText(code, ErrorCode.INVALID023);
 
-    const birthDate = this.parseClientBirthDate(requestBody.birthDate);
-    const gender = requestBody.gender;
+    await this.reserveKakaoAuthCode(normalizedCode);
 
-    await this.reserveKakaoAuthCode(code);
-
-    const accessToken = await this.exchangeKakaoCode(code);
+    const accessToken = await this.exchangeKakaoCode(normalizedCode);
     const kakaoProfile = await this.fetchKakaoProfile(accessToken);
 
     if (!kakaoProfile.id) {
@@ -77,10 +78,38 @@ class AuthService {
     );
 
     if (existingOauthAccount) {
-      return await this.generateAndSaveTokens({
+      const tokenPair = await this.generateAndSaveTokens({
         sub: existingOauthAccount.user_id,
       });
+
+      return {
+        needsSignup: false,
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+      };
     }
+
+    const sessionToken = randomUUID();
+    await this.saveKakaoSignupSession(sessionToken, kakaoId);
+
+    return {
+      needsSignup: true,
+      sessionToken,
+    };
+  }
+
+  async completeKakaoSignup(
+    requestBody: KakaoCompleteSignupRequestDto,
+  ): Promise<AuthTokenPair> {
+    const sessionToken = validateNonEmptyText(
+      requestBody.sessionToken,
+      ErrorCode.AUTH017,
+    );
+    const kakaoId = await this.consumeKakaoSignupSession(sessionToken);
+    const name = validateNonEmptyText(requestBody.name, ErrorCode.AUTH001);
+    const nickname = validateNonEmptyText(requestBody.nickname, ErrorCode.AUTH001);
+    validateNickname(nickname);
+    const birthDate = this.parseClientBirthDate(requestBody.birthDate);
 
     if (await usersRepository.findUserbyNickname(nickname)) {
       throw new HttpException(ErrorCode.AUTH002);
@@ -92,7 +121,7 @@ class AuthService {
       name,
       nickname,
       formattedBirthDate: birthDate,
-      gender,
+      gender: requestBody.gender,
       registrationType: RegistrationType.KAKAO,
       oauthId: kakaoId,
       profileImage: requestBody.profileImage ?? null,
@@ -254,6 +283,45 @@ class AuthService {
       console.error(`[Kakao Auth Code] Redis 저장 실패 - code: ${code}`, error);
       throw new HttpException(ErrorCode.AUTH005, { code });
     }
+  }
+
+  private async saveKakaoSignupSession(
+    sessionToken: string,
+    kakaoId: string,
+  ): Promise<void> {
+    try {
+      const result = await redisClient.set(
+        REDIS_KEYS.KAKAO_SIGNUP_SESSION(sessionToken),
+        kakaoId,
+        "EX",
+        300,
+        "NX",
+      );
+
+      if (result !== "OK") {
+        throw new HttpException(ErrorCode.AUTH015);
+      }
+    } catch (error) {
+      console.error(
+        `[Kakao Signup Session] Redis 저장 실패 - sessionToken: ${sessionToken}`,
+        error,
+      );
+      throw new HttpException(ErrorCode.AUTH005, { sessionToken });
+    }
+  }
+
+  private async consumeKakaoSignupSession(
+    sessionToken: string,
+  ): Promise<string> {
+    const key = REDIS_KEYS.KAKAO_SIGNUP_SESSION(sessionToken);
+    const kakaoId = await redisClient.get(key);
+
+    if (!kakaoId) {
+      throw new HttpException(ErrorCode.AUTH017);
+    }
+
+    await redisClient.del(key);
+    return kakaoId;
   }
 
   private async exchangeKakaoCode(code: string): Promise<string> {
