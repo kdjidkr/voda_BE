@@ -183,7 +183,7 @@ export class AuthController extends Controller {
 
   /**
    * @summary 카카오로 로그인/회원가입합니다.
-   * @description 카카오 authorization code를 교환해 카카오 id를 확인한 뒤, 클라이언트가 보낸 프로필 정보로 회원가입 또는 로그인 처리 후 access Token 발급, refresh Token 쿠키 설정
+   * @description 카카오 로그인 1단계: 클라이언트에서 받은 code로 카카오 인증을 진행합니다. 응답의 needsSignup이 true이면 sessionToken을 이용해 회원가입을 완료해야 합니다.
    */
   @SuccessResponse(200, "카카오 콜백 처리 성공")
   @Example<ApiResponse<KakaoAuthCallbackResponseDto>>({
@@ -251,7 +251,7 @@ export class AuthController extends Controller {
 
   /**
    * @summary 카카오 회원가입을 완료합니다.
-   * @description 카카오 callback에서 발급한 sessionToken과 클라이언트 입력값으로 사용자 계정을 생성합니다.
+   * @description 카카오 로그인 2단계: 추가 정보(닉네임 등)와 1단계에서 받은 sessionToken을 이용해 회원가입을 완료합니다.
    */
   @SuccessResponse(201, "카카오 회원가입 성공")
   @Example<ApiResponse<AccessTokenResponseDto>>({
