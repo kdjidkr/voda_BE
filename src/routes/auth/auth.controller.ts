@@ -222,7 +222,7 @@ export class AuthController extends Controller {
     const cookieOption = this.getCookieOptions(1209600);
     const cookieName = this.getRefreshCookieName();
 
-    if (result.accessToken) {
+    if (result.needsSignup === false) {
       this.setStatus(200);
       this.setHeader(
         "Set-Cookie",

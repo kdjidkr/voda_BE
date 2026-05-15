@@ -32,6 +32,17 @@ type KakaoUserResponse = {
   };
 };
 
+type KakaoLoginResult =
+  | {
+      needsSignup: false;
+      accessToken: string;
+      refreshToken: string;
+    }
+  | {
+      needsSignup: true;
+      sessionToken: string;
+    };
+
 class AuthService {
   private readonly SALT_ROUNDS = 10;
 
@@ -55,12 +66,7 @@ class AuthService {
 
   async handleKakaoCallback(
     code: string,
-  ): Promise<{
-    needsSignup: boolean;
-    accessToken?: string;
-    refreshToken?: string;
-    sessionToken?: string;
-  }> {
+  ): Promise<KakaoLoginResult> {
     const normalizedCode = validateNonEmptyText(code, ErrorCode.INVALID023);
 
     await this.reserveKakaoAuthCode(normalizedCode);
