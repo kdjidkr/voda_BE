@@ -318,14 +318,27 @@ class AuthService {
     sessionToken: string,
   ): Promise<string> {
     const key = REDIS_KEYS.KAKAO_SIGNUP_SESSION(sessionToken);
-    const kakaoId = await redisClient.get(key);
 
-    if (!kakaoId) {
-      throw new HttpException(ErrorCode.AUTH017);
+    try {
+      const kakaoId = await redisClient.get(key);
+
+      if (!kakaoId) {
+        throw new HttpException(ErrorCode.AUTH017);
+      }
+
+      await redisClient.del(key);
+      return kakaoId;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      console.error(
+        `[Kakao Signup Session] Redis 조회/삭제 실패`,
+        error,
+      );
+      throw new HttpException(ErrorCode.AUTH005);
     }
-
-    await redisClient.del(key);
-    return kakaoId;
   }
 
   private async exchangeKakaoCode(code: string): Promise<string> {
