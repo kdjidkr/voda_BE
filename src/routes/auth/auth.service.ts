@@ -302,6 +302,10 @@ class AuthService {
         throw new HttpException(ErrorCode.AUTH015);
       }
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       console.error(
         `[Kakao Signup Session] Redis 저장 실패 - sessionToken: ${sessionToken}`,
         error,
