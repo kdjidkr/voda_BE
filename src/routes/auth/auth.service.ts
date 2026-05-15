@@ -52,7 +52,7 @@ class AuthService {
     return await this.processSignup(
       requestBody,
       async (hashedPassword, formattedBirthDate) => {
-        const { password, birthDate, ...rest } = requestBody;
+        const { password: _password, birthDate: _birthDate, ...rest } = requestBody;
         const signUpInput: SignUpInput = {
           ...rest,
           hashedPassword,
