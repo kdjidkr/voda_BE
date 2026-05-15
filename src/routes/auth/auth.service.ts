@@ -280,8 +280,8 @@ class AuthService {
         throw error;
       }
 
-      console.error(`[Kakao Auth Code] Redis 저장 실패 - code: ${this.maskSensitiveData(code)}`, error);
-      throw new HttpException(ErrorCode.AUTH005, { code });
+      console.error(`[Kakao Auth Code] Redis 저장 실패`, error);
+      throw new HttpException(ErrorCode.AUTH005);
     }
   }
 
@@ -307,10 +307,10 @@ class AuthService {
       }
 
       console.error(
-        `[Kakao Signup Session] Redis 저장 실패 - sessionToken: ${this.maskSensitiveData(sessionToken)}`,
+        `[Kakao Signup Session] Redis 저장 실패`,
         error,
       );
-      throw new HttpException(ErrorCode.AUTH005, { sessionToken });
+      throw new HttpException(ErrorCode.AUTH005);
     }
   }
 
@@ -383,16 +383,6 @@ class AuthService {
     }
 
     return (await response.json()) as KakaoUserResponse;
-  }
-
-  private maskSensitiveData(value: string, visibleChars: number = 4): string {
-    if (value.length <= visibleChars * 2) {
-      return '*'.repeat(value.length);
-    }
-    const start = value.substring(0, visibleChars);
-    const end = value.substring(value.length - visibleChars);
-    const masked = '*'.repeat(value.length - visibleChars * 2);
-    return `${start}${masked}${end}`;
   }
 
   private parseClientBirthDate(birthDate: string): Date {
