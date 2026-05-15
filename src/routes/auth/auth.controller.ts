@@ -260,11 +260,11 @@ export class AuthController extends Controller {
       accessToken: "accessToken",
     },
   })
-  @Response<ApiResponse<null>>(400, "카카오 회원가입 유효성 검증 오류", {
+  @Response<ApiResponse<null>>(400, "카카오 회원가입 요청이 잘못된 경우", {
     success: false,
     error: {
-      code: "INVALID023",
-      message: "카카오 인증 코드는 공백일 수 없습니다.",
+      code: "AUTH001",
+      message: "잘못된 요청입니다.",
     },
   })
   @Response<ApiResponse<null>>(401, "카카오 회원가입 세션이 유효하지 않은 경우", {
