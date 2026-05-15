@@ -17,7 +17,6 @@ import {
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
 import { authRepository } from "./auth.repository";
 import {
-  KakaoCallbackRequestDto,
   KakaoCompleteSignupRequestDto,
   SignInRequestDto,
   SignUpRequestDto,
