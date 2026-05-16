@@ -18,6 +18,7 @@ import {
   MonthlyDiarySummaryDateGroupDto,
   MonthlyDiarySummaryResponseDto,
 } from "./dto/diaries.res.dto";
+import { kstDayjs } from "../../utils/date";
 
 export class DiariesService {
   constructor() {}
@@ -203,11 +204,7 @@ export class DiariesService {
   }
 
   private formatDateKey(date: Date): string {
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+    return kstDayjs(date).format("YYYY-MM-DD");
   }
 
   async createKeywords(
