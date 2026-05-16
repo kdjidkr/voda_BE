@@ -13,6 +13,7 @@ import {
   ToggleTodoStatusInput,
 } from "./todo.model";
 import { todoRepository } from "./todo.repository";
+import { kstDayjs } from "../../utils/date";
 
 class TodoService {
   private static readonly DEFAULT_TODO_PAGE_SIZE = 20;
@@ -196,13 +197,13 @@ class TodoService {
       return undefined;
     }
 
-    const dueToDate = new Date(value);
+    const dueToDate = kstDayjs(value);
 
-    if (Number.isNaN(dueToDate.getTime())) {
+    if (!dueToDate.isValid()) {
       throw new HttpException(ErrorCode.INVALID012);
     }
 
-    return dueToDate;
+    return dueToDate.toDate();
   }
 }
 

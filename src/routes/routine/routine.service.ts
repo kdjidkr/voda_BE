@@ -14,6 +14,7 @@ import {
   RoutineType,
 } from "./routine.model";
 import { routineRepository } from "./routine.repository";
+import { kstDayjs } from "../../utils/date";
 
 class RoutineService {
   async createRoutine(
@@ -67,7 +68,7 @@ class RoutineService {
     const normalizedTab = this.normalizeRoutineTab(tab);
     const routines =
       await routineRepository.findActiveRoutinesWithHistory(userId);
-    const today = this.getTodayUtcDate();
+    const today = kstDayjs().startOf("day").toDate();
 
     const routineItems = routines
       .map((routine) => {
@@ -118,7 +119,7 @@ class RoutineService {
       throw new HttpException(ErrorCode.ROUTINE001);
     }
 
-    const today = this.getTodayUtcDate();
+    const today = kstDayjs().startOf("day").toDate();
 
     if (!this.canToggleToday(routine, today)) {
       throw new HttpException(ErrorCode.INVALID022);
@@ -298,7 +299,7 @@ class RoutineService {
       return false;
     }
 
-    return today.getUTCDate() === routine.day_of_month;
+    return kstDayjs(today).date() === routine.day_of_month;
   }
 
   private findCompletionInCurrentCycle(
@@ -426,16 +427,14 @@ class RoutineService {
       return { state: "hidden" };
     }
 
-    const todayDate = today.getUTCDate();
+    const todayDate = kstDayjs(today).date();
 
     if (todayDate === dayOfMonth) {
       return { state: "incomplete" };
     }
 
     if (todayDate < dayOfMonth) {
-      const scheduledFor = new Date(
-        Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), dayOfMonth),
-      );
+      const scheduledFor = kstDayjs(today).date(dayOfMonth).startOf("day").toDate();
 
       return { state: "scheduled", scheduledFor };
     }
@@ -465,14 +464,11 @@ class RoutineService {
   }
 
   private getTodayUtcDate(): Date {
-    const now = new Date();
-    return new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-    );
+    return kstDayjs().startOf("day").toDate();
   }
 
   private getIsoWeekday(date: Date): number {
-    const day = date.getUTCDay();
+    const day = kstDayjs(date).day();
     return day === 0 ? 7 : day;
   }
 
@@ -485,32 +481,22 @@ class RoutineService {
   }
 
   private getMonthRange(date: Date): { start: Date; end: Date } {
-    const year = date.getUTCFullYear();
-    const month = date.getUTCMonth();
-    const start = new Date(Date.UTC(year, month, 1));
-    const end = new Date(Date.UTC(year, month + 1, 0));
+    const start = kstDayjs(date).startOf("month").toDate();
+    const end = kstDayjs(date).endOf("month").toDate();
 
     return { start, end };
   }
 
   private getDaysInMonth(date: Date): number {
-    return new Date(
-      Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0),
-    ).getUTCDate();
+    return kstDayjs(date).daysInMonth();
   }
 
   private addDays(date: Date, days: number): Date {
-    const next = new Date(date);
-    next.setUTCDate(next.getUTCDate() + days);
-    return next;
+    return kstDayjs(date).add(days, "day").toDate();
   }
 
   private toDateKey(date: Date): string {
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+    return kstDayjs(date).format("YYYY-MM-DD");
   }
 }
 

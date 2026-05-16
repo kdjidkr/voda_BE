@@ -16,6 +16,7 @@ import {
 } from "../utils/validators";
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
 import { authRepository } from "./auth.repository";
+import { kstDayjs } from "../../utils/date";
 import {
   KakaoCompleteSignupRequestDto,
   SignInRequestDto,
@@ -191,7 +192,7 @@ class AuthService {
     ) => Promise<SignUpOutput>,
   ): Promise<AuthTokenPair> {
     const { password, birthDate, registrationType } = requestBody;
-    const formattedBirthDate = new Date(`${birthDate}T00:00:00.000Z`);
+    const formattedBirthDate = kstDayjs(birthDate).startOf("day").toDate();
     const hashedPassword =
       password && registrationType === "EMAIL"
         ? await bcrypt.hash(password, this.SALT_ROUNDS)
@@ -414,7 +415,7 @@ class AuthService {
       throw new HttpException(ErrorCode.AUTH001, { birthDate });
     }
 
-    const parsedBirthDate = new Date(`${normalizedBirthDate}T00:00:00.000Z`);
+    const parsedBirthDate = kstDayjs(normalizedBirthDate).startOf("day").toDate();
 
     if (Number.isNaN(parsedBirthDate.getTime())) {
       throw new HttpException(ErrorCode.AUTH001, { birthDate });
