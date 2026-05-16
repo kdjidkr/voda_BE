@@ -14,6 +14,7 @@ class AuthRepository {
       gender,
       registrationType,
       oauthId,
+      profileImage,
     } = singUpInput;
 
     const result = await prisma.$transaction(async (tx) => {
@@ -22,11 +23,13 @@ class AuthRepository {
         data: {
           user_id: userId,
           email,
-          password: registrationType === "EMAIL" ? (hashedPassword ?? "") : "",
+          password:
+            registrationType === "EMAIL" ? (hashedPassword ?? null) : null,
           name,
           nickname,
           birth_date: formattedBirthDate,
           gender,
+          profile_image: profileImage,
         },
       });
 

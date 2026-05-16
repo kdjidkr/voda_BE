@@ -60,7 +60,31 @@ export const ErrorCode = {
     status: 401,
     message: "이메일 또는 비밀번호가 올바르지 않습니다.",
   },
-  
+  AUTH013: {
+    code: "AUTH013",
+    status: 401,
+    message: "카카오 인증 코드가 유효하지 않습니다.",
+  },
+  AUTH014: {
+    code: "AUTH014",
+    status: 502,
+    message: "카카오 사용자 정보를 조회할 수 없습니다.",
+  },
+  AUTH015: {
+    code: "AUTH015",
+    status: 409,
+    message: "이미 사용된 카카오 인증 코드입니다.",
+  },
+  AUTH016: {
+    code: "AUTH016",
+    status: 500,
+    message: "카카오 OAuth 환경변수가 설정되지 않았습니다.",
+  },
+  AUTH017: {
+    code: "AUTH017",
+    status: 401,
+    message: "카카오 회원가입 세션이 유효하지 않습니다.",
+  },
 
   // 업로드 관련
   UPLOAD001: {
@@ -194,6 +218,11 @@ export const ErrorCode = {
     code: "INVALID022",
     status: 400,
     message: "오늘은 이 루틴의 상태를 변경할 수 없습니다.",
+  },
+  INVALID023: {
+    code: "INVALID023",
+    status: 400,
+    message: "카카오 인증 코드는 공백일 수 없습니다.",
   },
 
 
