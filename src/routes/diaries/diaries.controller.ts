@@ -22,13 +22,13 @@ import { ApiResponse } from "../../interfaces/ApiResponse";
 import { diariesService } from "./diaries.service";
 import {
   CreateBasicDiaryRequestDto,
-  UpdateBasicDiaryRequestDto,
   CreateKeywordsRequestDto,
+  UpdateBasicDiaryRequestDto,
 } from "./dto/diaries.req.dto";
 import {
   CreateBasicDiaryResponseDto,
-  MonthlyDiarySummaryResponseDto,
   CreateKeywordResponseDto,
+  MonthlyDiarySummaryResponseDto,
 } from "./dto/diaries.res.dto";
 
 @Route("diaries")

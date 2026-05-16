@@ -171,7 +171,7 @@ class AuthService {
     } catch (error) {
       console.error(
         `[Refresh Token Read] Redis 조회 실패 - userId: ${userId}`,
-        error,
+        error instanceof Error ? error.message : error,
       );
       throw new HttpException(ErrorCode.AUTH005, { userId });
     }
@@ -264,10 +264,10 @@ class AuthService {
       );
     } catch (error) {
       console.error(
-        `[Refresh Token Storage] Redis 저장 실패 - userId: ${payload}`,
-        error,
+        `[Refresh Token Storage] Redis 저장 실패 - userId: ${payload.sub}`,
+        error instanceof Error ? error.message : error,
       );
-      throw new HttpException(ErrorCode.AUTH005, { payload });
+      throw new HttpException(ErrorCode.AUTH005, { sub: payload.sub });
     }
     return { accessToken, refreshToken };
   }
@@ -285,7 +285,7 @@ class AuthService {
         throw error;
       }
 
-      console.error(`[Kakao Auth Code] Redis 저장 실패`, error);
+      console.error(`[Kakao Auth Code] Redis 저장 실패`, error instanceof Error ? error.message : error);
       throw new HttpException(ErrorCode.AUTH005);
     }
   }
@@ -313,7 +313,7 @@ class AuthService {
 
       console.error(
         `[Kakao Signup Session] Redis 저장 실패`,
-        error,
+        error instanceof Error ? error.message : error,
       );
       throw new HttpException(ErrorCode.AUTH005);
     }
@@ -340,7 +340,7 @@ class AuthService {
 
       console.error(
         `[Kakao Signup Session] Redis 조회/삭제 실패`,
-        error,
+        error instanceof Error ? error.message : error,
       );
       throw new HttpException(ErrorCode.AUTH005);
     }
