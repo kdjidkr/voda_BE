@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Example,
+  Get,
   Post,
+  Query,
   Request,
   Response,
   Route,
@@ -15,8 +17,15 @@ import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { authService } from "./auth.service";
-import { SignInRequestDto, SignUpRequestDto } from "./dto/auth.req.dto";
-import { AccessTokenResponseDto } from "./dto/auth.res.dto";
+import {
+  KakaoCompleteSignupRequestDto,
+  SignInRequestDto,
+  SignUpRequestDto,
+} from "./dto/auth.req.dto";
+import {
+  AccessTokenResponseDto,
+  KakaoAuthCallbackResponseDto,
+} from "./dto/auth.res.dto";
 
 @Route("auth")
 @Tags("로그인, 회원가입 등 인증 기능을 담당합니다.")
@@ -157,6 +166,121 @@ export class AuthController extends Controller {
     const result = await authService.signIn(requestBody);
     const { accessToken, refreshToken } = result;
     this.setStatus(200);
+    const cookieOption = this.getCookieOptions(1209600);
+    const cookieName = this.getRefreshCookieName();
+    this.setHeader(
+      "Set-Cookie",
+      `${cookieName}=${refreshToken}; ${cookieOption}`,
+    );
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+      },
+    };
+  }
+
+  /**
+   * @summary 카카오로 로그인/회원가입합니다.
+   * @description 카카오 authorization code를 교환해 서버가 카카오 사용자 정보를 조회한 뒤, 기존 회원이면 로그인 처리 후 access Token 발급 및 refresh Token 쿠키를 설정하고, 미가입 회원이면 추가 회원가입이 필요함을 반환합니다.
+   */
+  @SuccessResponse(200, "카카오 콜백 처리 성공")
+  @Example<ApiResponse<KakaoAuthCallbackResponseDto>>({
+    success: true,
+    data: {
+      needsSignup: false,
+      accessToken: "accessToken",
+    },
+  })
+  @Example<ApiResponse<KakaoAuthCallbackResponseDto>>({
+    success: true,
+    data: {
+      needsSignup: true,
+      sessionToken: "session-token",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "카카오 콜백 유효성 검증 오류", {
+    success: false,
+    error: {
+      code: "INVALID023",
+      message: "카카오 인증 코드는 공백일 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "카카오 콜백 인증 실패", {
+    success: false,
+    error: {
+      code: "AUTH013",
+      message: "카카오 인증 코드가 유효하지 않습니다.",
+    },
+  })
+  @Get("kakao/callback")
+  public async kakaoCallback(
+    @Query() code: string,
+  ): Promise<ApiResponse<KakaoAuthCallbackResponseDto>> {
+    const result = await authService.handleKakaoCallback(code);
+    const cookieOption = this.getCookieOptions(1209600);
+    const cookieName = this.getRefreshCookieName();
+
+    if (result.needsSignup === false) {
+      this.setStatus(200);
+      this.setHeader(
+        "Set-Cookie",
+        `${cookieName}=${result.refreshToken}; ${cookieOption}`,
+      );
+
+      return {
+        success: true,
+        data: {
+          needsSignup: false,
+          accessToken: result.accessToken,
+        },
+      };
+    }
+
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: {
+        needsSignup: true,
+        sessionToken: result.sessionToken,
+      },
+    };
+  }
+
+  /**
+   * @summary 카카오 회원가입을 완료합니다.
+   * @description 카카오 로그인 2단계: 추가 정보(닉네임 등)와 1단계에서 받은 sessionToken을 이용해 회원가입을 완료합니다.
+   */
+  @SuccessResponse(201, "카카오 회원가입 성공")
+  @Example<ApiResponse<AccessTokenResponseDto>>({
+    success: true,
+    data: {
+      accessToken: "accessToken",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "카카오 회원가입 요청이 잘못된 경우", {
+    success: false,
+    error: {
+      code: "AUTH001",
+      message: "잘못된 요청입니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "카카오 회원가입 세션이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH017",
+      message: "카카오 회원가입 세션이 유효하지 않습니다.",
+    },
+  })
+  @Post("kakao/signup")
+  public async completeKakaoSignup(
+    @Body() requestBody: KakaoCompleteSignupRequestDto,
+  ): Promise<ApiResponse<AccessTokenResponseDto>> {
+    const result = await authService.completeKakaoSignup(requestBody);
+    const { accessToken, refreshToken } = result;
+    this.setStatus(201);
     const cookieOption = this.getCookieOptions(1209600);
     const cookieName = this.getRefreshCookieName();
     this.setHeader(

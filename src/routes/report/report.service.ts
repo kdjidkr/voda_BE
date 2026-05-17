@@ -9,6 +9,7 @@ import {
 } from "./dto/report.res.dto";
 import { CreateReportInput, ReportType } from "./report.model";
 import { reportRepository } from "./report.repository";
+import { kstDayjs } from "../../utils/date";
 
 class ReportService {
   private static readonly DEFAULT_REPORT_PAGE_SIZE = 20;
@@ -60,8 +61,8 @@ class ReportService {
     // 기존 같은 월의 레포트가 있는지 확인
     const existingReport = await reportRepository.findReportByMonth(
       userId,
-      baseDate.getUTCFullYear(),
-      baseDate.getUTCMonth() + 1,
+      kstDayjs(baseDate).year(),
+      kstDayjs(baseDate).month() + 1,
     );
 
     if (existingReport) {
@@ -411,28 +412,34 @@ class ReportService {
   }
 
   private parseAndValidateDate(dateString: string): Date {
-    const date = new Date(dateString);
+    const date = kstDayjs(dateString);
 
-    if (isNaN(date.getTime())) {
+    if (!date.isValid()) {
       throw new HttpException(ErrorCode.INVALID001);
     }
 
-    // 날짜를 UTC로 변환 (시간을 고려하지 않음)
-    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+    // 날짜를 KST로 변환 (해당 월의 1일)
+    return date.startOf("month").toDate();
   }
 
   private parseAndValidateDateForWeekly(dateString: string): Date {
-    const date = new Date(dateString);
+    const date = kstDayjs(dateString);
 
-    if (isNaN(date.getTime())) {
+    if (!date.isValid()) {
       throw new HttpException(ErrorCode.INVALID001);
     }
 
     // 월요일을 기준으로 주의 시작일 계산
-    const day = date.getUTCDay();
-    const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1); // Monday를 주의 시작으로
+    // dayjs().startOf('week')는 일요일이므로, isoWeek()를 쓰거나 명시적으로 계산
+    let startOfWeek = date.startOf("week");
+    if (date.day() === 0) {
+      // 일요일인 경우 저번주 월요일로
+      startOfWeek = startOfWeek.subtract(6, "day");
+    } else {
+      startOfWeek = startOfWeek.add(1, "day");
+    }
 
-    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), diff));
+    return startOfWeek.startOf("day").toDate();
   }
 
   private mapToResponseDto(

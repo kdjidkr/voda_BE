@@ -4,6 +4,8 @@
 import type { TsoaRoute } from '@tsoa/runtime';
 import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { VoiceSourcesController } from './routes/voice-sources/voice-sources.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UsersController } from './routes/users/users.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TodoController } from './routes/todo/todo.controller';
@@ -31,6 +33,53 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "CreateVoiceSourceResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "voiceId": {"dataType":"string","required":true},
+            "voiceText": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CreateVoiceSourceResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"CreateVoiceSourceResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_null_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"dataType":"enum","enums":[null]},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateVoiceSourceRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "voiceText": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CreateVoiceSourceResponseDto-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"CreateVoiceSourceResponseDto"}},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Gender": {
         "dataType": "refEnum",
         "enums": ["MALE","FEMALE","OTHER"],
@@ -40,7 +89,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "nickname": {"dataType":"string","required":true},
-            "email": {"dataType":"string","required":true},
+            "email": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "profile_image": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "gender": {"ref":"Gender","required":true},
             "age": {"dataType":"double","required":true},
@@ -78,16 +127,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "success": {"dataType":"boolean","required":true},
             "data": {"ref":"UserMeResponseDto"},
-            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ApiResponse_null_": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "data": {"dataType":"enum","enums":[null]},
             "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
         },
         "additionalProperties": false,
@@ -584,6 +623,39 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "KakaoAuthCallbackResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "needsSignup": {"dataType":"boolean","required":true},
+            "accessToken": {"dataType":"string"},
+            "sessionToken": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_KakaoAuthCallbackResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"KakaoAuthCallbackResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "KakaoCompleteSignupRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "sessionToken": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "nickname": {"dataType":"string","required":true},
+            "birthDate": {"dataType":"string","required":true},
+            "gender": {"ref":"Gender","required":true},
+            "profileImage": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new ExpressTemplateService(models, {"noImplicitAdditionalProperties":"silently-remove-extras","bodyCoercion":true});
 
@@ -602,6 +674,98 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
     const upload = opts?.multer ||  multer({"limits":{"fileSize":8388608}});
 
     
+        const argsVoiceSourcesController_createVoiceSource: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateVoiceSourceRequestDto"},
+        };
+        app.post('/voices',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(VoiceSourcesController)),
+            ...(fetchMiddlewares<RequestHandler>(VoiceSourcesController.prototype.createVoiceSource)),
+
+            async function VoiceSourcesController_createVoiceSource(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsVoiceSourcesController_createVoiceSource, request, response });
+
+                const controller = new VoiceSourcesController();
+
+              await templateService.apiHandler({
+                methodName: 'createVoiceSource',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsVoiceSourcesController_getVoiceSources: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/voices',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(VoiceSourcesController)),
+            ...(fetchMiddlewares<RequestHandler>(VoiceSourcesController.prototype.getVoiceSources)),
+
+            async function VoiceSourcesController_getVoiceSources(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsVoiceSourcesController_getVoiceSources, request, response });
+
+                const controller = new VoiceSourcesController();
+
+              await templateService.apiHandler({
+                methodName: 'getVoiceSources',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsVoiceSourcesController_getVoiceSourceById: Record<string, TsoaRoute.ParameterSchema> = {
+                voiceId: {"in":"path","name":"voiceId","required":true,"dataType":"string"},
+        };
+        app.get('/voices/:voiceId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(VoiceSourcesController)),
+            ...(fetchMiddlewares<RequestHandler>(VoiceSourcesController.prototype.getVoiceSourceById)),
+
+            async function VoiceSourcesController_getVoiceSourceById(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsVoiceSourcesController_getVoiceSourceById, request, response });
+
+                const controller = new VoiceSourcesController();
+
+              await templateService.apiHandler({
+                methodName: 'getVoiceSourceById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsUsersController_getMe: Record<string, TsoaRoute.ParameterSchema> = {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
@@ -1562,6 +1726,66 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 next,
                 validatedArgs,
                 successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_kakaoCallback: Record<string, TsoaRoute.ParameterSchema> = {
+                code: {"in":"query","name":"code","required":true,"dataType":"string"},
+        };
+        app.get('/auth/kakao/callback',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.kakaoCallback)),
+
+            async function AuthController_kakaoCallback(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_kakaoCallback, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'kakaoCallback',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_completeKakaoSignup: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"KakaoCompleteSignupRequestDto"},
+        };
+        app.post('/auth/kakao/signup',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.completeKakaoSignup)),
+
+            async function AuthController_completeKakaoSignup(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_completeKakaoSignup, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'completeKakaoSignup',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
               });
             } catch (err) {
                 return next(err);
