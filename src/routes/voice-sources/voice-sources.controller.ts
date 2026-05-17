@@ -39,7 +39,7 @@ export class VoiceSourcesController extends Controller {
         success: false,
         error: {
             code: "VOICE_SOURCE001",
-        message: "저장할 음성 소스 텍스트가 없습니다."
+            message: "저장할 음성 소스 텍스트가 없습니다."
         },
     })
     @Post("/")
@@ -56,12 +56,4 @@ export class VoiceSourcesController extends Controller {
             data: result
         };
     }
-
-
-
-
-
-
-
-
-    }
+  }

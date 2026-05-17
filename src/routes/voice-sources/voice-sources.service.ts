@@ -1,24 +1,22 @@
-import { HttpException } from "../../errors/HttpException";
 import { ErrorCode } from "../../errors/ErrorCodes";
-import { voiceSourcesRepository } from "./voice-sources.repository";
+import { validateNonEmptyText } from "../utils/validators";
 import { CreateVoiceSourceResponseDto } from "./dto/voice-sources.res.dto";
+import { voiceSourcesRepository } from "./voice-sources.repository";
 
 class VoiceSourcesService {
     async createVoiceSource(
         voiceText: string,
     ): Promise<CreateVoiceSourceResponseDto> {
 
-        if (!voiceText || voiceText.trim() === "") {
-            throw new HttpException(ErrorCode.VOICE_SOURCE001);
-        }
+        validateNonEmptyText(voiceText, ErrorCode.VOICE_SOURCE001)
 
-        const createdVoiceSources = await voiceSourcesRepository.createVoiceSource(
+        const createdVoiceSource = await voiceSourcesRepository.createVoiceSource(
             voiceText,
         );
 
         return {
-            voiceId: createdVoiceSources.voice_id,
-            voiceText: createdVoiceSources.voice_text,
+            voiceId: createdVoiceSource.voice_id,
+            voiceText: createdVoiceSource.voice_text,
         };
     }
 }

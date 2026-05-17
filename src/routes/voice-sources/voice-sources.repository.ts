@@ -3,7 +3,6 @@ import { VoiceSourceModel } from "./voice-sources.model";
 
 
 class VoiceSourcesRepository {
-    constructor() {}
 
     async createVoiceSource(
         voiceText: string,
