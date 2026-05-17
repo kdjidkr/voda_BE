@@ -24,7 +24,9 @@ class AuthRepository {
           user_id: userId,
           email,
           password:
-            registrationType === "EMAIL" ? (hashedPassword ?? null) : null,
+          registrationType === "EMAIL"
+            ? (hashedPassword ?? "")
+            : "",
           name,
           nickname,
           birth_date: formattedBirthDate,
