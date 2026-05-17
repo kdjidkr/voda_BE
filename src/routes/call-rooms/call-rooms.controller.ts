@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Example,
   Post,
   Response,
@@ -12,10 +11,9 @@ import {
 } from "tsoa";
 
 import { ApiResponse } from "../../interfaces/ApiResponse";
-
-import { CreateCallRoomResponseDto } from "./dto/call-rooms.res.dto";
-import { CreateCallRoomRequestDto } from "./dto/call-rooms.req.dto";
 import { callRoomsService } from "./call-rooms.service";
+import { CreateCallRoomRequestDto } from "./dto/call-rooms.req.dto";
+import { CreateCallRoomResponseDto } from "./dto/call-rooms.res.dto";
 
 @Route("call-rooms")
 @Tags("통화 내용 기록 관리")
@@ -54,11 +52,18 @@ export class CallRoomsController extends Controller {
       message: "통화 내용은 최소 1개 이상이어야 합니다.",
     },
   })
-  @Response<ApiResponse<null>>(400, "통화 내용은 공백일 수 없습니다.", {
+  @Response<ApiResponse<null>>(400, "통화 내용 텍스트는 공백일 수 없습니다.", {
     success: false,
     error: {
       code: "CALL_ROOM002",
-      message: "통화 내용은 공백일 수 없습니다.",
+      message: "통화 내용 텍스트는 공백일 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
     },
   })
   @Post("/")
