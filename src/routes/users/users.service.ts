@@ -4,6 +4,7 @@ import { registration_type, user_gender } from "../../generated/prisma/enums";
 import { Gender, RegistrationType } from "../auth/dto/auth.types";
 import { UserMeResponseDto } from "./dto/users.res.dto";
 import { usersRepository } from "./users.repository";
+import { kstDayjs } from "../../utils/date";
 
 class UsersService {
   async getMe(userId: string): Promise<UserMeResponseDto> {
@@ -67,57 +68,44 @@ class UsersService {
   }
 
   private calculateAge(birthDate: Date): number {
-    const now = new Date();
-    const currentYear = now.getUTCFullYear();
-    const birthYear = birthDate.getUTCFullYear();
-
-    const monthDiff = now.getUTCMonth() - birthDate.getUTCMonth();
-    const dayDiff = now.getUTCDate() - birthDate.getUTCDate();
-    const hasHadBirthdayThisYear =
-      monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0);
-
-    return hasHadBirthdayThisYear
-      ? currentYear - birthYear
-      : currentYear - birthYear - 1;
+    const now = kstDayjs();
+    const birth = kstDayjs(birthDate);
+    
+    return now.diff(birth, "year");
   }
 
   private calculateCurrentStreak(diaryDates: Date[]): number {
     if (diaryDates.length === 0) {
       return 0;
     }
-
+ 
     const dateSet = new Set(diaryDates.map((date) => this.toIsoDate(date)));
-    const today = new Date();
-    const todayKey = this.toIsoDate(today);
-    const yesterday = new Date(today);
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-    const yesterdayKey = this.toIsoDate(yesterday);
-
-    let cursor: Date;
+    const today = kstDayjs().startOf("day");
+    const todayKey = today.format("YYYY-MM-DD");
+    const yesterday = today.subtract(1, "day");
+    const yesterdayKey = yesterday.format("YYYY-MM-DD");
+ 
+    let cursor = today;
     if (dateSet.has(todayKey)) {
-      cursor = new Date(today);
+      cursor = today;
     } else if (dateSet.has(yesterdayKey)) {
-      cursor = new Date(yesterday);
+      cursor = yesterday;
     } else {
       return 0;
     }
-
+ 
     let streak = 0;
-
-    while (dateSet.has(this.toIsoDate(cursor))) {
+ 
+    while (dateSet.has(cursor.format("YYYY-MM-DD"))) {
       streak += 1;
-      cursor.setUTCDate(cursor.getUTCDate() - 1);
+      cursor = cursor.subtract(1, "day");
     }
-
+ 
     return streak;
   }
 
   private toIsoDate(date: Date): string {
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+    return kstDayjs(date).format("YYYY-MM-DD");
   }
 }
 

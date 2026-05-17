@@ -2,7 +2,7 @@ import { Gender, RegistrationType } from "../../auth/dto/auth.types";
 
 export class UserMeProfileDto {
   nickname!: string;
-  email!: string;
+  email!: string | null;
   profile_image!: string | null;
   gender!: Gender;
   age!: number;

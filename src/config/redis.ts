@@ -69,4 +69,7 @@ void connectRedis();
 
 export const REDIS_KEYS = {
   REFRESH_TOKEN: (userId: string) => `refreshToken:${userId}`,
+  KAKAO_AUTH_CODE: (code: string) => `kakaoAuthCode:${code}`,
+  KAKAO_SIGNUP_SESSION: (sessionToken: string) =>
+    `kakaoSignupSession:${sessionToken}`,
 };
