@@ -15,6 +15,18 @@ class VoiceSourcesRepository {
 
         return createdVoiceSource;
     }
+
+    async getVoiceSources(): Promise<VoiceSourceModel[]> {
+        return prisma.voice_source.findMany();
+    }
+
+    async getVoiceSourceById(voiceId: string): Promise<VoiceSourceModel | null> {
+        return prisma.voice_source.findUnique({
+            where: {
+                voice_id: voiceId,
+            },
+        });
+    }
 }
 
 export const voiceSourcesRepository = new VoiceSourcesRepository();

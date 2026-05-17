@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Example,
+  Get,
+  Path,
   Post,
   Response,
   Route,
@@ -31,7 +33,7 @@ export class VoiceSourcesController extends Controller {
     @Example<ApiResponse<CreateVoiceSourceResponseDto>>({
         success: true,
         data: {
-            voiceId: "uuid1234",
+            voiceId: "550e8400-e29b-41d4-a716-446655440000",
             voiceText: "오늘은 진짜 너무 피곤한 날이다. 진짜나 왜 월화수 9시 수업 신청했지..."
         }
     })
@@ -56,4 +58,60 @@ export class VoiceSourcesController extends Controller {
             data: result
         };
     }
+
+    /**
+    * @summary 저장된 음성 소스 목록을 조회합니다.
+    * @description 저장된 모든 음성 소스를 조회하는 API입니다.  
+    * @returns 저장된 음성 소스 목록
+    */
+    @Security("jwt")
+    @SuccessResponse(200, "음성 소스 목록 조회 성공")
+    @Example<ApiResponse<CreateVoiceSourceResponseDto[]>>({
+        success: true,
+        data: [
+          {
+            voiceId: "550e8400-e29b-41d4-a716-446655440000",
+            voiceText: "오늘은 진짜 너무 피곤한 날이다. 진짜나 왜 월화수 9시 수업 신청했지..."
+          },
+          {
+            voiceId: "550e8400-e29b-41d4-a716-446655440001",
+              voiceText: "과거의 나 진짜 너무 싫다."
+          }
+        ],
+      })
+    @Get("/")
+    public async getVoiceSources(): Promise<ApiResponse<CreateVoiceSourceResponseDto[]>> {
+      return await voiceSourcesService.getVoiceSources();
+    }
+
+    /**
+     * @summary 특정 음성 소스를 조회합니다.
+     * @description 음성 소스 ID를 기반으로 특정 음성 소스를 조회하는 API입니다.
+     * @param voiceId 조회할 음성 소스의 ID
+     * @return 조회된 음성 소스 정보
+     */
+
+    @Security("jwt")
+    @SuccessResponse(200, "음성 소스 조회 성공")
+    @Example<ApiResponse<CreateVoiceSourceResponseDto>>({
+        success: true,
+        data: {
+            voiceId: "550e8400-e29b-41d4-a716-446655440000",
+            voiceText: "오늘은 진짜 너무 피곤한 날이다. 진짜나 왜 월화수 9시 수업 신청했지..." 
+        },
+      })
+    @Response<ApiResponse<null>>(404, "음성 소스를 찾을 수 없는 경우", {
+        success: false,
+        error: {
+            code: "VOICE_SOURCE002",
+            message: "조회할 음성 소스를 찾을 수 없습니다."
+        },
+    })
+    @Get("/{voiceId}")
+    public async getVoiceSourceById(
+        @Path() voiceId: string,
+    ): Promise<ApiResponse<CreateVoiceSourceResponseDto>> {
+        return await voiceSourcesService.getVoiceSourceById(voiceId);
+    }
+    
   }

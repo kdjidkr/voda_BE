@@ -243,5 +243,10 @@ export const ErrorCode = {
     status: 400,
     message: "저장할 음성 소스 텍스트가 없습니다.",
   },
+  VOICE_SOURCE002: {
+    code: "VOICE_SOURCE002",
+    status: 404,
+    message: "조회할 음성 소스를 찾을 수 없습니다.",
+  },
 
 } as const;
