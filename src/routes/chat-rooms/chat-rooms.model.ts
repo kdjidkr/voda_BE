@@ -1,18 +1,5 @@
-export interface ChatTextInput {
+export interface ChatMessageInput {
+    chatRoomId: string;
     textContent: string;
 }
 
-export interface CreateChatRoomInput {
-    texts: ChatTextInput[];
-}
-
-export interface ChatMessageModel {
-    chatRoomId: string;
-    chatMessageId: string;
-    createdAt: Date;
-}
-
-export interface ChatRoomModel {
-    chatRoomId: string;
-    chatmessages: ChatMessageModel[];
-}

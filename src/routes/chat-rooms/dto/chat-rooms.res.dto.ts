@@ -1,11 +1,14 @@
+export interface CreateChatRoomRequestDto {
+    chatRoomId: string;
+}
+
 export interface ChatMessageResponseDto {
     chatMessageId: string;
-    chatRoomId: string;
     textContent: string;
     createdAt: Date;
 }
 
-export interface CreateChatRoomResponseDto {
+export interface GetChatRoomRequestDto {
     chatRoomId: string;
     chatMessages: ChatMessageResponseDto[];
 }

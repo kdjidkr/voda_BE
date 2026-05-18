@@ -1,43 +1,65 @@
-import { HttpException } from "../../errors/HttpException";
 import { ErrorCode } from "../../errors/ErrorCodes";
+import { HttpException } from "../../errors/HttpException";
 
-import { CreateChatRoomRequestDto } from "./dto/chat-rooms.req.dto"
-import { CreateChatRoomResponseDto } from "./dto/chat-rooms.res.dto";
+import { CreateChatMessageRequestDto } from "./dto/chat-rooms.req.dto"
+import { 
+  CreateChatRoomRequestDto,
+  ChatMessageResponseDto,
+  GetChatRoomRequestDto,
+} from "./dto/chat-rooms.res.dto";
 import { chatRoomsRepository } from "./chat-rooms.repository";
-import { CreateChatRoomInput } from "./chat-rooms.model";
+import { ChatMessageInput } from "./chat-rooms.model";
+
 
 export class ChatRoomsService {
-    async createChatRoom(requestBody: CreateChatRoomRequestDto) {
-        if (requestBody.texts.length === 0) {
-            throw new HttpException(ErrorCode.CHAT_ROOM001);
-        }
+  async createChatRoom(): Promise<CreateChatRoomRequestDto> {
+    const createdChatRoom = await chatRoomsRepository.createChatRoom();
 
-        for (const text of requestBody.texts) {
-            if (text.textContent.trim() === "") {
-                throw new HttpException(ErrorCode.CHAT_ROOM002);
-            }
-        }
+    return {
+      chatRoomId: createdChatRoom.chat_room_id,
+    };
+  }
 
-        const input: CreateChatRoomInput = {
-            texts: requestBody.texts,
-        };
+  async createChatMessage(
+    chatRoomId: string,
+    requestBody: CreateChatMessageRequestDto
+  ): Promise<ChatMessageResponseDto> {
+    if (requestBody.textContent.trim() === "") {
+    throw new HttpException(ErrorCode.CHAT_ROOM002);
+  }
 
-        const createdChatRoom = await chatRoomsRepository.createChatRoom(input);
+  const input: ChatMessageInput = {
+    chatRoomId,
+    textContent: requestBody.textContent,
+  };
 
-        // 응답 DTO로 변환
-        const responseDto: CreateChatRoomResponseDto = {
-            chatRoomId: createdChatRoom.chat_room_id,
-            chatMessages: createdChatRoom.chat_message.map((message) => ({
-                chatMessageId: message.chat_message_id,
-                chatRoomId: createdChatRoom.chat_room_id,
-                textContent: message.text_content,
-                createdAt: message.created_at,
-            })),
-        };
+  const createdMessage = await chatRoomsRepository.createChatMessage(input);
 
-        return responseDto;
-        
+    return{
+      chatMessageId: createdMessage.chat_message_id,
+      textContent: createdMessage.text_content,
+      createdAt: createdMessage.created_at,
+    };
+  }
+
+   async getChatRoom(chatRoomId: string): Promise<GetChatRoomRequestDto> {
+    const chatRoom = await chatRoomsRepository.findChatRoomById(chatRoomId);
+
+    if (!chatRoom) {
+      throw new HttpException(ErrorCode.CHAT_ROOM003);
     }
+
+    return {
+      chatRoomId: chatRoom.chat_room_id,
+      chatMessages: chatRoom.chat_message.map((message) => ({
+        chatMessageId: message.chat_message_id,
+        chatRoomId: message.chat_room_id,
+        textContent: message.text_content,
+        createdAt: message.created_at,
+      })),
+    }
+  }
+
 }
 
 export const chatRoomsService = new ChatRoomsService();

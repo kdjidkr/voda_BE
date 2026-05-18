@@ -1,7 +1,3 @@
-export interface ChatMessageRequestDto {
+export interface CreateChatMessageRequestDto {
     textContent: string;
-}
-
-export interface CreateChatRoomRequestDto {
-    texts: ChatMessageRequestDto[];
 }

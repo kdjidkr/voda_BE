@@ -265,4 +265,9 @@ export const ErrorCode = {
     status: 400,
     message: "채팅 내용 텍스트는 공백일 수 없습니다.",
   },
+  CHAT_ROOM003: {
+    code: "CHAT_ROOM003",
+    status: 404,
+    message: "존재하지 않는 채팅방입니다.",
+  },
 } as const;
