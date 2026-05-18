@@ -2,6 +2,7 @@ import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
 import type { report_type } from "../../generated/prisma/enums";
 import { CreateReportInput } from "./report.model";
+import { kstDayjs } from "../../utils/date";
 
 type ReportModel = Prisma.reportGetPayload<Record<string, never>>;
 
@@ -77,8 +78,8 @@ class ReportRepository {
     year: number,
     month: number,
   ): Promise<ReportModel | null> {
-    const startDate = new Date(Date.UTC(year, month - 1, 1));
-    const endDate = new Date(Date.UTC(year, month, 0));
+    const startDate = kstDayjs().year(year).month(month - 1).date(1).startOf("day").toDate();
+    const endDate = kstDayjs(startDate).endOf("month").toDate();
 
     return await prisma.report.findFirst({
       where: {
@@ -97,8 +98,7 @@ class ReportRepository {
     weekStartDate: Date,
   ): Promise<ReportModel | null> {
     // 주의 시작일(월요일)과 끝일(일요일) 계산
-    const weekEnd = new Date(weekStartDate);
-    weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
+    const weekEnd = kstDayjs(weekStartDate).add(6, "day").endOf("day").toDate();
 
     return await prisma.report.findFirst({
       where: {
