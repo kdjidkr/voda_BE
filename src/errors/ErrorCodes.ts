@@ -293,6 +293,8 @@ export const ErrorCode = {
     code: "CALL_ROOM002",
     status: 400,
     message: "통화 내용 텍스트는 공백일 수 없습니다.",
+  },
+  
   // 음성 소스 관련
   VOICE_SOURCE001: {
     code: "VOICE_SOURCE001",
