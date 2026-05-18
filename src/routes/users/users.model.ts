@@ -3,7 +3,7 @@ import { registration_type, user_gender } from "../../generated/prisma/enums";
 export type UserMeBaseProfile = {
   user_id: string;
   nickname: string;
-  email: string;
+  email: string | null;
   profile_image: string | null;
   gender: user_gender;
   birth_date: Date;

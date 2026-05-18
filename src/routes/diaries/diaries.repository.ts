@@ -8,6 +8,7 @@ import {
 import { 
   KeywordResponseDto, 
 } from "./dto/diaries.res.dto";
+import { kstDayjs } from "../../utils/date";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
   include: { diary_photo: true };
@@ -68,8 +69,8 @@ class DiariesRepository {
     year: number,
     month: number,
   ): Promise<MonthlyDiarySummaryInput[]> {
-    const startDate = new Date(Date.UTC(year, month - 1, 1));
-    const endDate = new Date(Date.UTC(year, month, 1));
+    const startDate = kstDayjs().year(year).month(month - 1).date(1).startOf("day").toDate();
+    const endDate = kstDayjs(startDate).add(1, "month").toDate();
 
     return await prisma.diary.findMany({
       where: {

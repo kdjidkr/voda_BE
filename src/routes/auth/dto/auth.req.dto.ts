@@ -15,3 +15,12 @@ export class SignInRequestDto {
   email!: string;
   password!: string;
 }
+
+export class KakaoCompleteSignupRequestDto {
+  sessionToken!: string;
+  name!: string;
+  nickname!: string;
+  birthDate!: string;
+  gender!: Gender;
+  profileImage?: string | null;
+}

@@ -45,7 +45,7 @@ class UsersRepository {
         oauth_id: oauthId,
       },
       select: {
-        user_oauth_account_id: true,
+        user_id: true,
       },
     });
   }
