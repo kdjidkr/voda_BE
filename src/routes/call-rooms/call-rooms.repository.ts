@@ -1,24 +1,36 @@
 import { prisma } from "../../config/prisma";
-import {
-  CreateCallRoomInput,
-} from "./call-rooms.model";
+import { CallTextInput } from "./call-rooms.model";
 
 
 export class CallRoomsRepository {
-  async createCallRoom( input: CreateCallRoomInput) {
+  async createCallRoom() {
     return await prisma.call_room.create({
+      data: {},
+    });
+  }
+
+  async createCallText(input: CallTextInput) {
+    return await prisma.call_text.create({
       data: {
-        call_text: {
-          create: input.texts.map((text) => ({
-            text_content: text.textContent,
-          })),
-        },
+        call_room_id: input.callRoomId,
+        text_content: input.textContent,
+      }
+    });
+  }
+
+  async findCallRoomById(callRoomId: string) {
+    return await prisma.call_room.findUnique({
+      where: {
+        call_room_id: callRoomId,
       },
       include: {
         call_text: true,
+          orderBy: {
+            created_at: "asc",
+          },
       },
     });
-  }
+  } 
 }
 
 export const callRoomsRepository = new CallRoomsRepository();

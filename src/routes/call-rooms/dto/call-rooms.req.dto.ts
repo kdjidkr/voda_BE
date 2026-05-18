@@ -1,7 +1,3 @@
-export interface CallTextRequestDto {
-    textContent: string;
-}
-
-export interface CreateCallRoomRequestDto {
-    texts: CallTextRequestDto[];
+export interface CreateCallTextRequestDto {
+  textContent: string;
 }

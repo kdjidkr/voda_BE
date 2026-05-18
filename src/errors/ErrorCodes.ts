@@ -265,5 +265,10 @@ export const ErrorCode = {
     status: 400,
     message: "통화 내용 텍스트는 공백일 수 없습니다.",
   },
+  CALL_ROOM003: {
+    code: "CALL_ROOM003",
+    status: 404,
+    message: "존재하지 않는 통화 방입니다.",
+  },
 
 } as const;

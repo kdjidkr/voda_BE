@@ -1,11 +1,14 @@
+export interface CreateCallRoomResponseDto {
+  callRoomId: string;
+}
+
 export interface CallTextResponseDto {
   callTextId: string;
-  callRoomId: string;
   textContent: string;
   createdAt: Date;
 }
 
-export interface CreateCallRoomResponseDto {
+export interface GetCallRoomResponseDto {
   callRoomId: string;
   callTexts: CallTextResponseDto[];
 }

@@ -1,44 +1,65 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 
-import { CreateCallRoomRequestDto } from "./dto/call-rooms.req.dto"
-import { CreateCallRoomResponseDto } from "./dto/call-rooms.res.dto";
+import { CreateCallTextRequestDto } from "./dto/call-rooms.req.dto"
+import { 
+  CallTextResponseDto, 
+  CreateCallRoomResponseDto,
+  GetCallRoomResponseDto,
+} from "./dto/call-rooms.res.dto";
 import { callRoomsRepository } from "./call-rooms.repository";
-import { CreateCallRoomInput } from "./call-rooms.model";
+import { CallTextInput } from "./call-rooms.model";
 
 
 export class CallRoomsService {
-  async createCallRoom(requestBody: CreateCallRoomRequestDto) {
-    if (requestBody.texts.length === 0) {
-      throw new HttpException(ErrorCode.CALL_ROOM001);
-    }
+  async createCallRoom(): Promise<CreateCallRoomResponseDto> {
+    const createdCallRoom = await callRoomsRepository.createCallRoom();
 
-    for (const text of requestBody.texts) {
-      if (text.textContent.trim() === "") {
-        throw new HttpException(ErrorCode.CALL_ROOM002);
-      }
-    }
-
-    const input: CreateCallRoomInput = {
-      texts: requestBody.texts,
-      };
-
-    const createdCallRoom = await callRoomsRepository.createCallRoom(input);
-
-    // 응답 DTO로 변환
-    const responseDto: CreateCallRoomResponseDto = {
+    return {
       callRoomId: createdCallRoom.call_room_id,
-      callTexts: createdCallRoom.call_text.map((text) => ({
+    };
+  }
+
+  async createCallText(
+    callRoomId: string,
+    requestBody: CreateCallTextRequestDto
+  ): Promise<CallTextResponseDto> {
+    if (requestBody.textContent.trim() === "") {
+    throw new HttpException(ErrorCode.CALL_ROOM002);
+  }
+
+  const input: CallTextInput = {
+    callRoomId,
+    textContent: requestBody.textContent,
+  };
+
+  const createdText = await callRoomsRepository.createCallText(input);
+
+    return{
+      callTextId: createdText.call_text_id,
+      textContent: createdText.text_content,
+      createdAt: createdText.created_at,
+    }
+  }
+
+   async getCallRoom(callRoomId: string): Promise<GetCallRoomResponseDto> {
+    const callRoom = await callRoomsRepository.findCallRoomById(callRoomId);
+
+    if (!callRoom) {
+      throw new HttpException(ErrorCode.CALL_ROOM003);
+    }
+
+    return {
+      callRoomId: callRoom.call_room_id,
+      callTexts: callRoom.call_text.map((text) => ({
         callTextId: text.call_text_id,
-        callRoomId: createdCallRoom.call_room_id,
+        callRoomId: text.call_room_id,
         textContent: text.text_content,
         createdAt: text.created_at,
       })),
-    };
-
-    return responseDto;
-        
+    }
   }
+
 }
 
 export const callRoomsService = new CallRoomsService();
