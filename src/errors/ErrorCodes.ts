@@ -283,6 +283,18 @@ export const ErrorCode = {
     message: "키워드는 최소 3개 이상이어야 합니다.",
   },
 
+  // 통화 내용 관련
+  CALL_ROOM001: {
+    code: "CALL_ROOM001",
+    status: 400,
+    message: "통화 내용은 최소 1개 이상이어야 합니다.",
+  },
+  CALL_ROOM002: {
+    code: "CALL_ROOM002",
+    status: 400,
+    message: "통화 내용 텍스트는 공백일 수 없습니다.",
+  },
+  
   // 음성 소스 관련
   VOICE_SOURCE001: {
     code: "VOICE_SOURCE001",
@@ -293,6 +305,11 @@ export const ErrorCode = {
     code: "VOICE_SOURCE002",
     status: 404,
     message: "조회할 음성 소스를 찾을 수 없습니다.",
+  },
+  CALL_ROOM003: {
+    code: "CALL_ROOM003",
+    status: 404,
+    message: "존재하지 않는 통화 방입니다.",
   },
 
 } as const;
