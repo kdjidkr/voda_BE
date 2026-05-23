@@ -70,7 +70,7 @@ class UsersService {
   private calculateAge(birthDate: Date): number {
     const now = kstDayjs();
     const birth = kstDayjs(birthDate);
-    
+
     return now.diff(birth, "year");
   }
 
@@ -78,13 +78,13 @@ class UsersService {
     if (diaryDates.length === 0) {
       return 0;
     }
- 
+
     const dateSet = new Set(diaryDates.map((date) => this.toIsoDate(date)));
     const today = kstDayjs().startOf("day");
     const todayKey = today.format("YYYY-MM-DD");
     const yesterday = today.subtract(1, "day");
     const yesterdayKey = yesterday.format("YYYY-MM-DD");
- 
+
     let cursor = today;
     if (dateSet.has(todayKey)) {
       cursor = today;
@@ -93,14 +93,14 @@ class UsersService {
     } else {
       return 0;
     }
- 
+
     let streak = 0;
- 
+
     while (dateSet.has(cursor.format("YYYY-MM-DD"))) {
       streak += 1;
       cursor = cursor.subtract(1, "day");
     }
- 
+
     return streak;
   }
 
