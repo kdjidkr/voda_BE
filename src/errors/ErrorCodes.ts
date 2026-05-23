@@ -225,7 +225,6 @@ export const ErrorCode = {
     message: "카카오 인증 코드는 공백일 수 없습니다.",
   },
 
-
   // 다이어리 관련
   DIARY001: {
     code: "DIARY001",
@@ -277,7 +276,7 @@ export const ErrorCode = {
   },
 
   // 키워드 관련
-   KEYWORD001: {
+  KEYWORD001: {
     code: "KEYWORD001",
     status: 400,
     message: "키워드는 최소 3개 이상이어야 합니다.",
@@ -294,5 +293,4 @@ export const ErrorCode = {
     status: 404,
     message: "조회할 음성 소스를 찾을 수 없습니다.",
   },
-
 } as const;

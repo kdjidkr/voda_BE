@@ -53,7 +53,11 @@ class AuthService {
     return await this.processSignup(
       requestBody,
       async (hashedPassword, formattedBirthDate) => {
-        const { password: _password, birthDate: _birthDate, ...rest } = requestBody;
+        const {
+          password: _password,
+          birthDate: _birthDate,
+          ...rest
+        } = requestBody;
         const signUpInput: SignUpInput = {
           ...rest,
           hashedPassword,
@@ -64,9 +68,7 @@ class AuthService {
     );
   }
 
-  async handleKakaoCallback(
-    code: string,
-  ): Promise<KakaoLoginResult> {
+  async handleKakaoCallback(code: string): Promise<KakaoLoginResult> {
     const normalizedCode = validateNonEmptyText(code, ErrorCode.INVALID023);
 
     await this.reserveKakaoAuthCode(normalizedCode);
@@ -79,9 +81,8 @@ class AuthService {
     }
 
     const kakaoId = String(kakaoProfile.id);
-    const existingOauthAccount = await usersRepository.findUserbyOauthId(
-      kakaoId,
-    );
+    const existingOauthAccount =
+      await usersRepository.findUserbyOauthId(kakaoId);
 
     if (existingOauthAccount) {
       const tokenPair = await this.generateAndSaveTokens({
@@ -113,7 +114,10 @@ class AuthService {
     );
     const kakaoId = await this.consumeKakaoSignupSession(sessionToken);
     const name = validateNonEmptyText(requestBody.name, ErrorCode.AUTH001);
-    const nickname = validateNonEmptyText(requestBody.nickname, ErrorCode.AUTH001);
+    const nickname = validateNonEmptyText(
+      requestBody.nickname,
+      ErrorCode.AUTH001,
+    );
     validateNickname(nickname);
     const birthDate = this.parseClientBirthDate(requestBody.birthDate);
 
@@ -286,7 +290,10 @@ class AuthService {
         throw error;
       }
 
-      console.error(`[Kakao Auth Code] Redis 저장 실패`, error instanceof Error ? error.message : error);
+      console.error(
+        `[Kakao Auth Code] Redis 저장 실패`,
+        error instanceof Error ? error.message : error,
+      );
       throw new HttpException(ErrorCode.AUTH005);
     }
   }
@@ -415,7 +422,9 @@ class AuthService {
       throw new HttpException(ErrorCode.AUTH001, { birthDate });
     }
 
-    const parsedBirthDate = kstDayjs(normalizedBirthDate).startOf("day").toDate();
+    const parsedBirthDate = kstDayjs(normalizedBirthDate)
+      .startOf("day")
+      .toDate();
 
     if (Number.isNaN(parsedBirthDate.getTime())) {
       throw new HttpException(ErrorCode.AUTH001, { birthDate });
