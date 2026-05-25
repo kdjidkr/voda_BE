@@ -225,6 +225,7 @@ export const ErrorCode = {
     message: "카카오 인증 코드는 공백일 수 없습니다.",
   },
 
+
   // 다이어리 관련
   DIARY001: {
     code: "DIARY001",
@@ -282,19 +283,24 @@ export const ErrorCode = {
     message: "키워드는 최소 3개 이상이어야 합니다.",
   },
 
-  // 음성 소스 관련
-  VOICE_SOURCE001: {
-    code: "VOICE_SOURCE001",
-    status: 400,
-    message: "저장할 음성 소스 텍스트가 없습니다.",
-  },
-  VOICE_SOURCE002: {
-    code: "VOICE_SOURCE002",
+  // 채팅 관련
+  CHAT_ROOM001: {
+    code: "CHAT_ROOM001",
     status: 404,
-    message: "조회할 음성 소스를 찾을 수 없습니다.",
+    message: "채팅 내용은 최소 1개 이상이어야 합니다.",
   },
-
-    // 통화 내용 관련
+  CHAT_ROOM002: {
+    code: "CHAT_ROOM002",
+    status: 400,
+    message: "채팅 내용 텍스트는 공백일 수 없습니다.",
+  },
+  CHAT_ROOM003: {
+    code: "CHAT_ROOM003",
+    status: 404,
+    message: "존재하지 않는 채팅방입니다.",
+  },
+  
+  // 통화 내용 관련
   CALL_ROOM001: {
     code: "CALL_ROOM001",
     status: 400,
@@ -308,7 +314,19 @@ export const ErrorCode = {
   CALL_ROOM003: {
     code: "CALL_ROOM003",
     status: 404,
-    message: "존재하지 않는 통화 방입니다.",
+    message: "존재하지 않는 통화방입니다.",
+  },
+  
+  // 음성 소스 관련
+  VOICE_SOURCE001: {
+    code: "VOICE_SOURCE001",
+    status: 400,
+    message: "저장할 음성 소스 텍스트가 없습니다.",
+  },
+  VOICE_SOURCE002: {
+    code: "VOICE_SOURCE002",
+    status: 404,
+    message: "조회할 음성 소스를 찾을 수 없습니다.",
   },
 
 } as const;
