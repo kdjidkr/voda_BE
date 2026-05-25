@@ -24,10 +24,11 @@ export class ChatRoomsRepository {
         chat_room_id: chatRoomId,
       },
       include: {
-        chat_message: true,
+        chat_message: {
           orderBy: {
             created_at: "asc",
           },
+        }
       },
     });
   } 
