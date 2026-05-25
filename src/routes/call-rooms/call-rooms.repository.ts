@@ -24,10 +24,11 @@ export class CallRoomsRepository {
         call_room_id: callRoomId,
       },
       include: {
-        call_text: true,
+        call_text: {
           orderBy: {
             created_at: "asc",
           },
+        },
       },
     });
   } 

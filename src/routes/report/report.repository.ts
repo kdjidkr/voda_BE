@@ -57,10 +57,7 @@ class ReportRepository {
         user_id: userId,
         ...(reportType && { report_type: reportType }),
       },
-      orderBy: [
-        { base_date: "desc" },
-        { report_id: "desc" },
-      ],
+      orderBy: [{ base_date: "desc" }, { report_id: "desc" }],
       ...(cursor
         ? {
             cursor: {
@@ -78,7 +75,12 @@ class ReportRepository {
     year: number,
     month: number,
   ): Promise<ReportModel | null> {
-    const startDate = kstDayjs().year(year).month(month - 1).date(1).startOf("day").toDate();
+    const startDate = kstDayjs()
+      .year(year)
+      .month(month - 1)
+      .date(1)
+      .startOf("day")
+      .toDate();
     const endDate = kstDayjs(startDate).endOf("month").toDate();
 
     return await prisma.report.findFirst({

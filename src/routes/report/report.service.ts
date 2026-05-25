@@ -46,7 +46,10 @@ class ReportService {
     }
 
     // detailsJson 검증
-    if (!requestBody.detailsJson || typeof requestBody.detailsJson !== "object") {
+    if (
+      !requestBody.detailsJson ||
+      typeof requestBody.detailsJson !== "object"
+    ) {
       throw new HttpException(ErrorCode.INVALID001);
     }
 
@@ -148,7 +151,9 @@ class ReportService {
 
     const parsed = Number.parseInt(limit, 10);
     const isInvalid =
-      Number.isNaN(parsed) || parsed < 1 || parsed > ReportService.MAX_REPORT_PAGE_SIZE;
+      Number.isNaN(parsed) ||
+      parsed < 1 ||
+      parsed > ReportService.MAX_REPORT_PAGE_SIZE;
 
     if (isInvalid) {
       throw new HttpException(ErrorCode.INVALID100, { limit });
@@ -178,7 +183,11 @@ class ReportService {
       throw new HttpException(ErrorCode.INVALID010);
     }
 
-    const report = await reportRepository.findReportByMonth(userId, year, month);
+    const report = await reportRepository.findReportByMonth(
+      userId,
+      year,
+      month,
+    );
 
     if (!report) {
       throw new HttpException(ErrorCode.REPORT001);
@@ -189,7 +198,10 @@ class ReportService {
 
   async deleteReport(userId: string, reportId: string): Promise<void> {
     const normalizedReportId = validateUuid(reportId, ErrorCode.INVALID007);
-    const report = await reportRepository.findReportById(userId, normalizedReportId);
+    const report = await reportRepository.findReportById(
+      userId,
+      normalizedReportId,
+    );
 
     if (!report || report.report_type !== "MONTHLY") {
       throw new HttpException(ErrorCode.REPORT001);
@@ -237,7 +249,10 @@ class ReportService {
     }
 
     // detailsJson 검증 (weeklyBreakdown 포함)
-    if (!requestBody.detailsJson || typeof requestBody.detailsJson !== "object") {
+    if (
+      !requestBody.detailsJson ||
+      typeof requestBody.detailsJson !== "object"
+    ) {
       throw new HttpException(ErrorCode.INVALID001);
     }
 
@@ -305,7 +320,10 @@ class ReportService {
 
   async deleteWeeklyReport(userId: string, reportId: string): Promise<void> {
     const normalizedReportId = validateUuid(reportId, ErrorCode.INVALID007);
-    const report = await reportRepository.findReportById(userId, normalizedReportId);
+    const report = await reportRepository.findReportById(
+      userId,
+      normalizedReportId,
+    );
 
     if (!report || report.report_type !== "WEEKLY") {
       throw new HttpException(ErrorCode.REPORT001);
@@ -391,10 +409,7 @@ class ReportService {
       }
 
       // dailyAnalysis 검증
-      validateNonEmptyText(
-        dayRecord.dailyAnalysis,
-        ErrorCode.INVALID001,
-      );
+      validateNonEmptyText(dayRecord.dailyAnalysis, ErrorCode.INVALID001);
 
       // photos 검증
       if (!Array.isArray(dayRecord.photos)) {
