@@ -212,7 +212,6 @@ export class DiariesService {
     diaryId: string,
     keywordTexts: string[],
   ): Promise<CreateKeywordResponseDto> {
-
     // UUID 형식 검증
     const validDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
 

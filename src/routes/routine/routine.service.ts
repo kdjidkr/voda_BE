@@ -434,7 +434,10 @@ class RoutineService {
     }
 
     if (todayDate < dayOfMonth) {
-      const scheduledFor = kstDayjs(today).date(dayOfMonth).startOf("day").toDate();
+      const scheduledFor = kstDayjs(today)
+        .date(dayOfMonth)
+        .startOf("day")
+        .toDate();
 
       return { state: "scheduled", scheduledFor };
     }
