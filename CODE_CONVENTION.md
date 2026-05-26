@@ -196,4 +196,3 @@ Model과 DTO는 비슷해 보이지만 책임이 다릅니다.
 - PR 머지 완료 후 작업 브랜치는 삭제합니다.
 - 원격 브랜치 삭제: `git push origin --delete <branch-name>`
 - 로컬 브랜치 삭제: `git branch -d <branch-name>`
-

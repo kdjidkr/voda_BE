@@ -1,0 +1,23 @@
+import { Gender, RegistrationType } from "./dto/auth.types";
+
+export class SignUpInput {
+  email!: string | null;
+  hashedPassword?: string | null | undefined;
+  name!: string;
+  nickname!: string;
+  formattedBirthDate!: Date;
+  gender!: Gender;
+  registrationType!: RegistrationType;
+  oauthId?: string;
+  profileImage?: string | null;
+}
+
+export class SignUpOutput {
+  id!: string;
+  nickname!: string;
+}
+
+export class AuthTokenPair {
+  accessToken!: string;
+  refreshToken!: string;
+}
