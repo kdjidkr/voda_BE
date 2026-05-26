@@ -1,5 +1,5 @@
 export interface ChatMessageInput {
-    chatRoomId: string;
-    textContent: string;
+  chatRoomId: string;
+  textContent: string;
 }
 
