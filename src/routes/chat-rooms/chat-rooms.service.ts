@@ -3,16 +3,16 @@ import { HttpException } from "../../errors/HttpException";
 
 import { CreateChatMessageRequestDto } from "./dto/chat-rooms.req.dto"
 import { 
-  CreateChatRoomRequestDto,
+  CreateChatRoomResponseDto,
   ChatMessageResponseDto,
-  GetChatRoomRequestDto,
+  GetChatRoomResponseDto,
 } from "./dto/chat-rooms.res.dto";
 import { chatRoomsRepository } from "./chat-rooms.repository";
 import { ChatMessageInput } from "./chat-rooms.model";
 
 
 export class ChatRoomsService {
-  async createChatRoom(): Promise<CreateChatRoomRequestDto> {
+  async createChatRoom(): Promise<CreateChatRoomResponseDto> {
     const createdChatRoom = await chatRoomsRepository.createChatRoom();
 
     return {
@@ -42,7 +42,7 @@ export class ChatRoomsService {
     };
   }
 
-   async getChatRoom(chatRoomId: string): Promise<GetChatRoomRequestDto> {
+   async getChatRoom(chatRoomId: string): Promise<GetChatRoomResponseDto> {
     const chatRoom = await chatRoomsRepository.findChatRoomById(chatRoomId);
 
     if (!chatRoom) {
