@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
+import { kstDayjs } from "../../utils/date";
 import {
   CreateTodoInput,
   TodoStatusFilter,
@@ -126,6 +127,41 @@ class TodoRepository {
     });
 
     return result.count > 0;
+  }
+
+  async findTodosByDate(userId: string, date: Date): Promise<TodoModel[]> {
+    const targetDay = kstDayjs(date).startOf("day");
+    const startOfDay = targetDay.toDate();
+    const endOfDay = targetDay.endOf("day").toDate();
+
+    return await prisma.todo_list.findMany({
+      where: {
+        user_id: userId,
+        OR: [
+          {
+            due_to: {
+              gte: startOfDay,
+              lte: endOfDay,
+            },
+          },
+          {
+            created_at: {
+              gte: startOfDay,
+              lte: endOfDay,
+            },
+          },
+          {
+            completed_at: {
+              gte: startOfDay,
+              lte: endOfDay,
+            },
+          },
+        ],
+      },
+      orderBy: {
+        created_at: "asc",
+      },
+    });
   }
 }
 
