@@ -1,6 +1,7 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import {
+  validateDateString,
   validateNonEmptyText,
   validatePhotoUrls,
   validateUuid,
@@ -20,6 +21,7 @@ import {
   CreateKeywordResponseDto,
   MonthlyDiarySummaryDateGroupDto,
   MonthlyDiarySummaryResponseDto,
+  PredictDiaryResponseDto,
 } from "./dto/diaries.res.dto";
 import { kstDayjs } from "../../utils/date";
 
@@ -244,8 +246,9 @@ export class DiariesService {
   async predictDiary(
     userId: string,
     requestBody: PredictDiaryRequestDto,
-  ): Promise<any> {
-    const { targetDate } = requestBody;
+  ): Promise<PredictDiaryResponseDto> {
+    const { targetDate: rawTargetDate } = requestBody;
+    const targetDate = validateDateString(rawTargetDate, ErrorCode.INVALID024);
 
     // 1. 사용자 정보 조회 및 나이/성별 가공
     const userProfile = await usersRepository.findUserMeBaseProfile(userId);
@@ -306,9 +309,12 @@ export class DiariesService {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(
+          `AI API 호출에 실패했습니다: Status=${response.status}, StatusText=${response.statusText}, Body=${errorText}`,
+        );
         throw new HttpException(
           502,
-          `AI API 호출에 실패했습니다: ${response.statusText} (${errorText})`,
+          "AI API 호출에 실패했습니다.",
           "AI_API_ERROR",
         );
       }
@@ -316,13 +322,24 @@ export class DiariesService {
       const aiResponse = await response.json();
 
       // 8. AI 응답에서 일기 내용 추출 (확정된 응답 규격 반영)
-      const diaryContent = aiResponse.data?.predicted_diary ?? "";
+      const diaryContent = aiResponse.data?.predicted_diary;
+
+      if (!diaryContent || typeof diaryContent !== "string" || diaryContent.trim() === "") {
+        console.error(`AI API 응답에 예측된 일기 내용이 없습니다: ${JSON.stringify(aiResponse)}`);
+        throw new HttpException(
+          502,
+          "AI API의 응답 형식이 올바르지 않거나 예측된 일기 내용이 비어있습니다.",
+          "AI_API_ERROR",
+        );
+      }
+
+      const trimmedDiaryContent = diaryContent.trim();
 
       // 9. DB에 AI 예측 일기 자동 저장 (DiariesRepository 위임)
       const saved = await diariesRepository.createAiPredictedDiary(
         userId,
         `${targetDate}의 일기`,
-        diaryContent,
+        trimmedDiaryContent,
         targetDay.toDate(),
       );
 
