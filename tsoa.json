@@ -1,20 +1,12 @@
 {
   "entryFile": "src/app.ts",
-  "noImplicitAdditionalProperties": "silently-remove-extras",
-  "controllerPathGlobs": ["src/routes/**/*.controller.ts"],
+  "noImplicitAdditionalProperties": "throw-all",
+  "controllerPathGlobs": ["src/**/*Controller.ts"],
   "spec": {
     "outputDirectory": "build",
-    "specVersion": 3,
-    "securityDefinitions": {
-      "jwt": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
+    "specVersion": 3
   },
   "routes": {
-    "authenticationModule": "./src/routes/auth/authentication.ts",
     "routesDir": "src"
   }
 }
