@@ -199,6 +199,7 @@ class DiariesRepository {
     userId: string,
     title: string,
     content: string,
+    initialDraft: string,
     diaryDate: Date,
     inputType: "AI" | "VOICE" = "AI",
   ): Promise<any> {
@@ -207,7 +208,7 @@ class DiariesRepository {
         user_id: userId,
         title,
         content,
-        initial_draft: content,
+        initial_draft: initialDraft,
         diary_date: diaryDate,
         analysis: {},
         input_type: inputType,

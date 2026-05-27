@@ -6,7 +6,12 @@ import multerS3 from "multer-s3";
 import path from "path";
 
 // 1. S3 사용 여부 확인 (환경변수 존재 여부)
-const useS3 = !!(process.env.S3_ACCESS_KEY_ID && process.env.AWS_S3_BUCKET_NAME);
+const useS3 = !!(
+  process.env.S3_ACCESS_KEY_ID &&
+  process.env.S3_SECRET_ACCESS_KEY &&
+  process.env.S3_REGION &&
+  process.env.AWS_S3_BUCKET_NAME
+);
 
 let storage: multer.StorageEngine;
 let s3Client: S3Client | undefined;

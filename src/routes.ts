@@ -507,6 +507,7 @@ const models: TsoaRoute.Models = {
             "status": {"dataType":"string","required":true},
             "predicted_date": {"dataType":"string","required":true},
             "predicted_diary": {"dataType":"string","required":true},
+            "stt_text": {"dataType":"string"},
         },
         "additionalProperties": false,
     },

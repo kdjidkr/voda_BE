@@ -340,6 +340,7 @@ export class DiariesService {
         userId,
         `${targetDate}의 일기`,
         trimmedDiaryContent,
+        trimmedDiaryContent, // initialDraft for text-based AI prediction
         targetDay.toDate(),
       );
 
@@ -448,17 +449,23 @@ export class DiariesService {
       throw error;
     }
 
+    clearTimeout(timeoutId);
+
     // 3. 변환된 STT 텍스트를 이용해 일기 생성
     let diaryContent = "";
+    
+    const diaryController = new AbortController();
+    const diaryTimeoutId = setTimeout(() => diaryController.abort(), 30000); // 새로운 30초 대기
+
     try {
       const diaryResponse = await fetch("https://voda-ai-api.p-e.kr/diaries/from-texts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ texts: [sttText] }),
-        signal: controller.signal,
+        signal: diaryController.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(diaryTimeoutId);
 
       if (!diaryResponse.ok) {
         const errorText = await diaryResponse.text();
@@ -491,7 +498,7 @@ export class DiariesService {
         throw new HttpException(502, "AI 일기 생성 API에서 빈 텍스트를 반환했습니다.", "AI_API_ERROR");
       }
     } catch (error: any) {
-      clearTimeout(timeoutId);
+      clearTimeout(diaryTimeoutId);
       if (error.name === "AbortError" || error.message?.includes("aborted")) {
         throw new HttpException(504, "AI 일기 생성 API 요청 시간이 초과되었습니다.", "AI_API_TIMEOUT");
       }
@@ -505,6 +512,7 @@ export class DiariesService {
       userId,
       `${validatedTargetDate}의 일기`,
       trimmedDiaryContent,
+      sttText,
       targetDay.toDate(),
       "VOICE"
     );
