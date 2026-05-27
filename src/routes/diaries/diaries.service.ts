@@ -383,9 +383,25 @@ export class DiariesService {
     const targetDay = kstDayjs(validatedTargetDate).startOf("day");
     
     // 2. 음성 파일을 AI 서버로 전송 (STT)
+    const fs = require("fs");
+    let fileBuffer: Buffer;
+    if (file.buffer) {
+      fileBuffer = file.buffer;
+    } else if ((file as any).location) {
+      // multer-s3를 통해 S3에 업로드된 경우 URL에서 다운로드
+      const s3Url = (file as any).location;
+      const s3Response = await fetch(s3Url);
+      if (!s3Response.ok) throw new HttpException(500, "S3에서 음성 파일을 가져오지 못했습니다.", "FILE_ERROR");
+      fileBuffer = Buffer.from(await s3Response.arrayBuffer());
+    } else if (file.path && fs.existsSync(file.path)) {
+      fileBuffer = fs.readFileSync(file.path);
+    } else {
+      throw new HttpException(400, "파일 데이터를 찾을 수 없습니다.", "INVALID_REQUEST");
+    }
+
     const formData = new FormData();
-    const blob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
-    formData.append("file", blob, file.originalname || "voice_record.m4a");
+    const fileObj = new File([new Uint8Array(fileBuffer)], file.originalname || "voice_record.mp3", { type: file.mimetype });
+    formData.append("file", fileObj);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30초 대기
