@@ -367,6 +367,118 @@ export class DiariesService {
       throw error;
     }
   }
+  public async predictDiaryFromVoice(
+    userId: string,
+    file: Express.Multer.File,
+    targetDate: string,
+  ): Promise<any> {
+    const validatedTargetDate = validateDateString(targetDate, ErrorCode.INVALID024);
+
+    // 1. 사용자 정보 조회 (기본 유효성 검사)
+    const userProfile = await usersRepository.findUserMeBaseProfile(userId);
+    if (!userProfile) {
+      throw new HttpException(ErrorCode.USER001);
+    }
+    
+    const targetDay = kstDayjs(validatedTargetDate).startOf("day");
+    
+    // 2. 음성 파일을 AI 서버로 전송 (STT)
+    const formData = new FormData();
+    const blob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
+    formData.append("file", blob, file.originalname || "voice_record.m4a");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30초 대기
+
+    let sttText = "";
+    try {
+      const voiceResponse = await fetch("https://voda-ai-api.p-e.kr/voices", {
+        method: "POST",
+        body: formData as any,
+        signal: controller.signal,
+      });
+
+      if (!voiceResponse.ok) {
+        const errorText = await voiceResponse.text();
+        console.error(`AI STT API 호출 실패: Status=${voiceResponse.status}, Body=${errorText}`);
+        throw new HttpException(502, "AI STT API 호출에 실패했습니다.", "AI_API_ERROR");
+      }
+      
+      sttText = await voiceResponse.json();
+      if (!sttText || typeof sttText !== "string") {
+        throw new HttpException(502, "AI STT 응답 형식이 올바르지 않습니다.", "AI_API_ERROR");
+      }
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === "AbortError" || error.message?.includes("aborted")) {
+        throw new HttpException(504, "AI STT API 요청 시간이 초과되었습니다.", "AI_API_TIMEOUT");
+      }
+      throw error;
+    }
+
+    // 3. 변환된 STT 텍스트를 이용해 일기 생성
+    let diaryContent = "";
+    try {
+      const diaryResponse = await fetch("https://voda-ai-api.p-e.kr/diaries/from-texts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texts: [sttText] }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!diaryResponse.ok) {
+        const errorText = await diaryResponse.text();
+        console.error(`AI 일기 생성 API 호출 실패: Status=${diaryResponse.status}, Body=${errorText}`);
+        throw new HttpException(502, "AI 일기 생성 API 호출에 실패했습니다.", "AI_API_ERROR");
+      }
+
+      diaryContent = await diaryResponse.json();
+
+      if (!diaryContent || typeof diaryContent !== "string" || diaryContent.trim() === "") {
+        throw new HttpException(502, "AI 일기 생성 API의 응답 형식이 올바르지 않거나 내용이 비어있습니다.", "AI_API_ERROR");
+      }
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === "AbortError" || error.message?.includes("aborted")) {
+        throw new HttpException(504, "AI 일기 생성 API 요청 시간이 초과되었습니다.", "AI_API_TIMEOUT");
+      }
+      throw error;
+    }
+
+    const trimmedDiaryContent = diaryContent.trim();
+
+    // 4. DB에 일기 저장
+    const saved = await diariesRepository.createAiPredictedDiary(
+      userId,
+      `${validatedTargetDate}의 일기`,
+      trimmedDiaryContent,
+      targetDay.toDate(),
+      "VOICE"
+    );
+
+    // 5. 프론트엔드로 즉시 반환
+    return {
+      prediction: {
+        success: true,
+        data: {
+          status: "success",
+          predicted_date: validatedTargetDate,
+          predicted_diary: trimmedDiaryContent,
+          stt_text: sttText
+        }
+      },
+      savedDiary: {
+        diaryId: saved.diary_id,
+        title: saved.title,
+        content: saved.content,
+        diaryDate: saved.diary_date,
+        inputType: saved.input_type,
+        createdAt: saved.created_at,
+      },
+    };
+  }
 }
 
 export const diariesService = new DiariesService();

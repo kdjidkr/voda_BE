@@ -14,6 +14,8 @@ import {
   Security,
   SuccessResponse,
   Tags,
+  UploadedFile,
+  FormField,
 } from "tsoa";
 
 import { ErrorCode } from "../../errors/ErrorCodes";
@@ -543,6 +545,76 @@ export class DiariesController extends Controller {
     }
 
     const result = await diariesService.predictDiary(userId, requestBody);
+    this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+  /**
+   * @summary 음성 파일을 기반으로 일기를 예측하고 자동으로 저장합니다.
+   * @description 
+   * 음성 파일(`file`)과 대상 날짜(`targetDate`)를 multipart/form-data로 전달받아 다음의 프로세스를 수행합니다:
+   * 1. 사용자의 프로필 정보 조회 및 가공
+   * 2. 외부 AI API(`https://voda-ai-api.p-e.kr/voices`)를 호출해 STT 변환
+   * 3. 외부 AI 예측 엔진(`https://voda-ai-api.p-e.kr/diaries/from-texts`)으로 변환된 텍스트 전달
+   * 4. AI가 예측하여 반환한 일기 텍스트를 백엔드 DB의 `diary` 테이블에 자동 저장(저장 시 입력 타입: `VOICE`)
+   * 5. 결과 반환
+   * 
+   * @returns 예측 성공 결과 및 자동 저장된 일기 상세 정보
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "음성 일기 예측 및 자동 저장 성공")
+  @Response<ApiResponse<null>>(400, "음성 파일이 누락된 경우", {
+    success: false,
+    error: {
+      code: "INVALID_REQUEST",
+      message: "음성 파일이 필요합니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 없거나 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(502, "외부 AI API 서버 호출에 실패한 경우", {
+    success: false,
+    error: {
+      code: "AI_API_ERROR",
+      message: "AI API 호출에 실패했습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(504, "외부 AI API 요청 시간이 초과된 경우", {
+    success: false,
+    error: {
+      code: "AI_API_TIMEOUT",
+      message: "AI API 요청 시간이 초과되었습니다.",
+    },
+  })
+  @Post("voice-predict")
+  public async predictDiaryFromVoice(
+    @UploadedFile() file: Express.Multer.File,
+    @FormField() targetDate: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<PredictDiaryResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    if (!file) {
+      throw new HttpException(400, "음성 파일이 필요합니다.", "INVALID_REQUEST");
+    }
+
+    const result = await diariesService.predictDiaryFromVoice(
+      userId,
+      file,
+      targetDate,
+    );
     this.setStatus(200);
 
     return {

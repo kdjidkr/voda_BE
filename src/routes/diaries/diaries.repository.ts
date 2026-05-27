@@ -200,6 +200,7 @@ class DiariesRepository {
     title: string,
     content: string,
     diaryDate: Date,
+    inputType: "AI" | "VOICE" = "AI",
   ): Promise<any> {
     return await prisma.diary.create({
       data: {
@@ -209,7 +210,7 @@ class DiariesRepository {
         initial_draft: content,
         diary_date: diaryDate,
         analysis: {},
-        input_type: "AI",
+        input_type: inputType,
       },
     });
   }
