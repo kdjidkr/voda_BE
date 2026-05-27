@@ -430,6 +430,8 @@ export class DiariesService {
 
       if (typeof rawSttData === "string") {
         sttText = rawSttData;
+      } else if (rawSttData && typeof rawSttData.transcript === "string") {
+        sttText = rawSttData.transcript;
       } else if (rawSttData && typeof rawSttData.text === "string") {
         sttText = rawSttData.text;
       } else if (rawSttData && typeof rawSttData.data === "string") {
