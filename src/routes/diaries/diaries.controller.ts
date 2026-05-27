@@ -30,6 +30,7 @@ import {
   CreateBasicDiaryResponseDto,
   CreateKeywordResponseDto,
   MonthlyDiarySummaryResponseDto,
+  PredictDiaryResponseDto,
 } from "./dto/diaries.res.dto";
 
 @Route("diaries")
@@ -481,7 +482,7 @@ export class DiariesController extends Controller {
    */
   @Security("jwt")
   @SuccessResponse(200, "일기 예측 및 자동 저장 성공")
-  @Example<ApiResponse<any>>({
+  @Example<ApiResponse<PredictDiaryResponseDto>>({
     success: true,
     data: {
       prediction: {
@@ -534,7 +535,7 @@ export class DiariesController extends Controller {
   public async predictDiary(
     @Body() requestBody: PredictDiaryRequestDto,
     @Request() req: any,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<PredictDiaryResponseDto>> {
     const userId = req.user?.sub;
 
     if (!userId) {
