@@ -476,6 +476,8 @@ export class DiariesService {
 
       if (typeof rawDiaryData === "string") {
         diaryContent = rawDiaryData;
+      } else if (rawDiaryData && typeof rawDiaryData.generated_diary === "string") {
+        diaryContent = rawDiaryData.generated_diary;
       } else if (rawDiaryData && typeof rawDiaryData.text === "string") {
         diaryContent = rawDiaryData.text;
       } else if (rawDiaryData && typeof rawDiaryData.data === "string") {
