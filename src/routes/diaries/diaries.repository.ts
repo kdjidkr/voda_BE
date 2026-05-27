@@ -183,9 +183,14 @@ class DiariesRepository {
           lt: beforeDate,
         },
       },
-      orderBy: {
-        diary_date: "desc",
-      },
+      orderBy: [
+        {
+          diary_date: "desc",
+        },
+        {
+          created_at: "desc",
+        },
+      ],
       take: limit,
     });
   }
