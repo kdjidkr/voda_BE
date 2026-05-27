@@ -163,8 +163,46 @@ class DiariesRepository {
       keywordId: createdKeyword.keyword_id,
       keyword: createdKeyword.keyword_text,
     }));
-}
-  
+  }
+
+  async findRecentDiariesBeforeDate(
+    userId: string,
+    beforeDate: Date,
+    limit: number,
+  ): Promise<any[]> {
+    return await prisma.diary.findMany({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+        diary_date: {
+          lt: beforeDate,
+        },
+      },
+      orderBy: {
+        diary_date: "desc",
+      },
+      take: limit,
+    });
+  }
+
+  async createAiPredictedDiary(
+    userId: string,
+    title: string,
+    content: string,
+    diaryDate: Date,
+  ): Promise<any> {
+    return await prisma.diary.create({
+      data: {
+        user_id: userId,
+        title,
+        content,
+        initial_draft: content,
+        diary_date: diaryDate,
+        analysis: {},
+        input_type: "AI",
+      },
+    });
+  }
 }
 
 export const diariesRepository = new DiariesRepository();

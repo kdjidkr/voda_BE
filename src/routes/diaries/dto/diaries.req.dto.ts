@@ -12,3 +12,7 @@ export class UpdateBasicDiaryRequestDto {
 export class CreateKeywordsRequestDto {
   keywords!: string[];
 }
+
+export class PredictDiaryRequestDto {
+  targetDate!: string;
+}

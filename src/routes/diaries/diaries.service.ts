@@ -10,8 +10,11 @@ import { BasicDiaryInput, UpdateBasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
 import {
   CreateBasicDiaryRequestDto,
+  PredictDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
 } from "./dto/diaries.req.dto";
+import { usersRepository } from "../users/users.repository";
+import { todoRepository } from "../todo/todo.repository";
 import {
   CreateBasicDiaryResponseDto,
   CreateKeywordResponseDto,
@@ -237,6 +240,116 @@ export class DiariesService {
     return {
       keywords: result,
     };
+  }
+
+  async predictDiary(
+    userId: string,
+    requestBody: PredictDiaryRequestDto,
+  ): Promise<any> {
+    const { targetDate } = requestBody;
+
+    // 1. 사용자 정보 조회 및 나이/성별 가공
+    const userProfile = await usersRepository.findUserMeBaseProfile(userId);
+    if (!userProfile) {
+      throw new HttpException(ErrorCode.USER001);
+    }
+
+    const age = kstDayjs().diff(kstDayjs(userProfile.birth_date), "year");
+    const gender = userProfile.gender;
+
+    // 2. targetDate 기준 KST 하루 범위 계산
+    const targetDay = kstDayjs(targetDate).startOf("day");
+
+    // 3. 해당 날짜의 할 일(Todo) 목록 및 상태 조회 (TodoRepository 위임)
+    const todos = await todoRepository.findTodosByDate(userId, targetDay.toDate());
+
+    // 4. targetDate 이전의 최근 10개 일기 조회 및 연대순 정렬 (DiariesRepository 위임)
+    const rawDiaries = await diariesRepository.findRecentDiariesBeforeDate(
+      userId,
+      targetDay.toDate(),
+      10,
+    );
+
+    const diaries = rawDiaries.reverse().map((d) => d.content);
+
+    // 5. 할 일 목록을 문자열 배열 형태로 가공
+    const todoStrings = todos.map(
+      (t) => `[${t.status ? "완료" : "미완료"}] ${t.content}`,
+    );
+
+    // 6. 외부 AI API 전송용 페이로드 구성
+    const requestPayload = {
+      targetDate,
+      userInfo: {
+        gender,
+        age,
+      },
+      diaries,
+      todos: todoStrings,
+      routineHistory: [], // 루틴 기능 폐기로 빈 배열 설정
+    };
+
+    // 7. 외부 AI API 호출 (15초 타임아웃 적용)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const response = await fetch("https://voda-ai-api.p-e.kr/diaries/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestPayload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new HttpException(
+          502,
+          `AI API 호출에 실패했습니다: ${response.statusText} (${errorText})`,
+          "AI_API_ERROR",
+        );
+      }
+
+      const aiResponse = await response.json();
+
+      // 8. AI 응답에서 일기 내용 추출 (확정된 응답 규격 반영)
+      const diaryContent = aiResponse.data?.predicted_diary ?? "";
+
+      // 9. DB에 AI 예측 일기 자동 저장 (DiariesRepository 위임)
+      const saved = await diariesRepository.createAiPredictedDiary(
+        userId,
+        `${targetDate}의 일기`,
+        diaryContent,
+        targetDay.toDate(),
+      );
+
+      // 10. AI 응답 원본과 DB 저장 정보를 결합하여 프론트엔드로 즉시 반환
+      return {
+        prediction: aiResponse,
+        savedDiary: {
+          diaryId: saved.diary_id,
+          title: saved.title,
+          content: saved.content,
+          diaryDate: saved.diary_date,
+          inputType: saved.input_type,
+          createdAt: saved.created_at,
+        },
+      };
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === "AbortError" || error.message?.includes("aborted")) {
+        throw new HttpException(
+          504,
+          "AI API 요청 시간이 초과되었습니다.",
+          "AI_API_TIMEOUT",
+        );
+      }
+      throw error;
+    }
   }
 }
 

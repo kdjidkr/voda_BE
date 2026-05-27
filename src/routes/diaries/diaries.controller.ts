@@ -23,6 +23,7 @@ import { diariesService } from "./diaries.service";
 import {
   CreateBasicDiaryRequestDto,
   CreateKeywordsRequestDto,
+  PredictDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
 } from "./dto/diaries.req.dto";
 import {
@@ -452,6 +453,92 @@ export class DiariesController extends Controller {
       requestBody.keywords,
     );
     this.setStatus(201);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
+   * @summary 일기를 예측하고 자동으로 저장합니다.
+   * @description 
+   * 대상 날짜(`targetDate`)를 본체 바디로 전달받아 다음의 프로세스를 수행합니다:
+   * 1. 사용자의 프로필 정보(나이, 성별) 조회 및 가공
+   * 2. 대상 날짜에 예약, 생성 혹은 완료된 할 일(Todo) 목록 및 상태 조회
+   * 3. 대상 날짜 이전의 최근 작성된 일기 기록 10개 조회 및 시간대순 정렬
+   * 4. 준비된 페이로드를 외부 AI 예측 엔진(`https://voda-ai-api.p-e.kr/diaries/predict`)으로 전달
+   * 5. AI가 예측하여 반환한 일기 텍스트를 파싱하여 백엔드 DB의 `diary` 테이블에 자동 저장(저장 시 제목 포맷: `{날짜}의 일기`, 입력 타입: `AI`)
+   * 6. AI 원본 분석 응답과 DB에 자동 저장된 일기 레코드 정보(`savedDiary`)를 동기적으로 결합하여 즉시 반환
+   * 
+   * 프론트엔드는 이 API를 호출하는 동안 로딩 스피너(예: "AI가 일기를 쓰고 저장하는 중입니다...")를 표시하고, 응답이 성공적으로 오면 생성된 `diaryId`를 활용하여 상세 화면으로 즉시 리다이렉트 처리하기에 최적입니다.
+   * 
+   * @returns 예측 성공 결과 및 자동 저장된 일기 상세 정보
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "일기 예측 및 자동 저장 성공")
+  @Example<ApiResponse<any>>({
+    success: true,
+    data: {
+      prediction: {
+        success: true,
+        data: {
+          status: "success",
+          predicted_date: "2026-05-27",
+          predicted_diary: "푸르른 5월의 막바지, 오늘도 계획했던 일들을 차근차근 해내며 보람찬 하루를 보냈다. 오전의 상쾌한 공기를 마시며 시작한 루틴이 몸과 마음을 가볍게 해주었고, 몰입해서 업무를 처리하다 보니 어느새 창밖으로 노을이 깔리고 있었다. 사소한 성취들이 모여 나를 조금 더 단단하게 만드는 기분이 든다. 저녁에는 따뜻한 차 한 잔과 함께 오늘을 되돌아보며 온전한 휴식을 취했다. 내일도 오늘처럼만 평온하고 단단한 하루가 되기를 바란다."
+        }
+      },
+      savedDiary: {
+        diaryId: "dbf94c44-359c-4f4b-8ac9-cd5c6de2b06f",
+        title: "2026-05-27의 일기",
+        content: "푸르른 5월의 막바지, 오늘도 계획했던 일들을 차근차근 해내며 보람찬 하루를 보냈다. 오전의 상쾌한 공기를 마시며 시작한 루틴이 몸과 마음을 가볍게 해주었고, 몰입해서 업무를 처리하다 보니 어느새 창밖으로 노을이 깔리고 있었다. 사소한 성취들이 모여 나를 조금 더 단단하게 만드는 기분이 든다. 저녁에는 따뜻한 차 한 잔과 함께 오늘을 되돌아보며 온전한 휴식을 취했다. 내일도 오늘처럼만 평온하고 단단한 하루가 되기를 바란다.",
+        diaryDate: new Date("2026-05-27T00:00:00.000Z"),
+        inputType: "AI",
+        createdAt: new Date("2026-05-27T02:40:00.000Z")
+      }
+    }
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 없거나 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(404, "사용자 프로필이 DB에 존재하지 않는 경우", {
+    success: false,
+    error: {
+      code: "USER001",
+      message: "사용자 정보를 찾을 수 없습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(502, "외부 AI API 서버 호출에 실패한 경우", {
+    success: false,
+    error: {
+      code: "AI_API_ERROR",
+      message: "AI API 호출에 실패했습니다: Method Not Allowed",
+    },
+  })
+  @Response<ApiResponse<null>>(504, "외부 AI API 요청 시간이 15초를 초과한 경우", {
+    success: false,
+    error: {
+      code: "AI_API_TIMEOUT",
+      message: "AI API 요청 시간이 초과되었습니다.",
+    },
+  })
+  @Post("predict")
+  public async predictDiary(
+    @Body() requestBody: PredictDiaryRequestDto,
+    @Request() req: any,
+  ): Promise<ApiResponse<any>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await diariesService.predictDiary(userId, requestBody);
+    this.setStatus(200);
 
     return {
       success: true,
