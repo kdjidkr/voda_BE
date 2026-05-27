@@ -404,9 +404,23 @@ export class DiariesService {
         throw new HttpException(502, "AI STT API 호출에 실패했습니다.", "AI_API_ERROR");
       }
       
-      sttText = await voiceResponse.json();
-      if (!sttText || typeof sttText !== "string") {
-        throw new HttpException(502, "AI STT 응답 형식이 올바르지 않습니다.", "AI_API_ERROR");
+      let rawSttData: any;
+      const responseText = await voiceResponse.text();
+      try {
+        rawSttData = JSON.parse(responseText);
+      } catch (e) {
+        rawSttData = responseText;
+      }
+
+      if (typeof rawSttData === "string") {
+        sttText = rawSttData;
+      } else if (rawSttData && typeof rawSttData.text === "string") {
+        sttText = rawSttData.text;
+      } else if (rawSttData && typeof rawSttData.data === "string") {
+        sttText = rawSttData.data;
+      } else {
+        console.error("AI STT 응답 파싱 실패:", rawSttData);
+        throw new HttpException(502, `AI STT 응답 형식이 올바르지 않습니다. (받은 값: ${JSON.stringify(rawSttData)})`, "AI_API_ERROR");
       }
     } catch (error: any) {
       clearTimeout(timeoutId);
@@ -434,10 +448,27 @@ export class DiariesService {
         throw new HttpException(502, "AI 일기 생성 API 호출에 실패했습니다.", "AI_API_ERROR");
       }
 
-      diaryContent = await diaryResponse.json();
+      let rawDiaryData: any;
+      const diaryResponseText = await diaryResponse.text();
+      try {
+        rawDiaryData = JSON.parse(diaryResponseText);
+      } catch (e) {
+        rawDiaryData = diaryResponseText;
+      }
 
-      if (!diaryContent || typeof diaryContent !== "string" || diaryContent.trim() === "") {
-        throw new HttpException(502, "AI 일기 생성 API의 응답 형식이 올바르지 않거나 내용이 비어있습니다.", "AI_API_ERROR");
+      if (typeof rawDiaryData === "string") {
+        diaryContent = rawDiaryData;
+      } else if (rawDiaryData && typeof rawDiaryData.text === "string") {
+        diaryContent = rawDiaryData.text;
+      } else if (rawDiaryData && typeof rawDiaryData.data === "string") {
+        diaryContent = rawDiaryData.data;
+      } else {
+        console.error("AI 일기 생성 API 응답 파싱 실패:", rawDiaryData);
+        throw new HttpException(502, `AI 일기 생성 API의 응답 형식이 올바르지 않습니다. (받은 값: ${JSON.stringify(rawDiaryData)})`, "AI_API_ERROR");
+      }
+
+      if (!diaryContent || diaryContent.trim() === "") {
+        throw new HttpException(502, "AI 일기 생성 API에서 빈 텍스트를 반환했습니다.", "AI_API_ERROR");
       }
     } catch (error: any) {
       clearTimeout(timeoutId);
