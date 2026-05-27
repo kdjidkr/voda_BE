@@ -5,9 +5,7 @@ import {
   MonthlyDiarySummaryInput,
   UpdateBasicDiaryInput,
 } from "./diaries.model";
-import { 
-  KeywordResponseDto, 
-} from "./dto/diaries.res.dto";
+import { KeywordResponseDto } from "./dto/diaries.res.dto";
 import { kstDayjs } from "../../utils/date";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
@@ -69,7 +67,12 @@ class DiariesRepository {
     year: number,
     month: number,
   ): Promise<MonthlyDiarySummaryInput[]> {
-    const startDate = kstDayjs().year(year).month(month - 1).date(1).startOf("day").toDate();
+    const startDate = kstDayjs()
+      .year(year)
+      .month(month - 1)
+      .date(1)
+      .startOf("day")
+      .toDate();
     const endDate = kstDayjs(startDate).add(1, "month").toDate();
 
     return await prisma.diary.findMany({
@@ -146,7 +149,9 @@ class DiariesRepository {
     return result.count > 0;
   }
 
-  async createKeywords( diaryId: string, keywords: string[],
+  async createKeywords(
+    diaryId: string,
+    keywords: string[],
   ): Promise<KeywordResponseDto[]> {
     const createdKeywords = await prisma.$transaction(
       keywords.map((keyword) =>
@@ -155,8 +160,8 @@ class DiariesRepository {
             diary_id: diaryId,
             keyword_text: keyword,
           },
-        })
-      )
+        }),
+      ),
     );
 
     return createdKeywords.map((createdKeyword) => ({

@@ -267,13 +267,17 @@ export class AuthController extends Controller {
       message: "잘못된 요청입니다.",
     },
   })
-  @Response<ApiResponse<null>>(401, "카카오 회원가입 세션이 유효하지 않은 경우", {
-    success: false,
-    error: {
-      code: "AUTH017",
-      message: "카카오 회원가입 세션이 유효하지 않습니다.",
+  @Response<ApiResponse<null>>(
+    401,
+    "카카오 회원가입 세션이 유효하지 않은 경우",
+    {
+      success: false,
+      error: {
+        code: "AUTH017",
+        message: "카카오 회원가입 세션이 유효하지 않습니다.",
+      },
     },
-  })
+  )
   @Post("kakao/signup")
   public async completeKakaoSignup(
     @Body() requestBody: KakaoCompleteSignupRequestDto,

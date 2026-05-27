@@ -428,13 +428,17 @@ export class DiariesController extends Controller {
       message: "액세스 토큰이 유효하지 않습니다.",
     },
   })
-  @Response<ApiResponse<null>>(404, "일기를 찾을 수 없거나 접근 권한이 없는 경우", {
-    success: false,
-    error: {
-      code: "DIARY002",
-      message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+  @Response<ApiResponse<null>>(
+    404,
+    "일기를 찾을 수 없거나 접근 권한이 없는 경우",
+    {
+      success: false,
+      error: {
+        code: "DIARY002",
+        message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+      },
     },
-  })
+  )
   @Post("{diaryId}/keywords")
   public async createKeywords(
     @Path() diaryId: string,

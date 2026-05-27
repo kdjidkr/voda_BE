@@ -18,6 +18,10 @@ import { DiariesController } from './routes/diaries/diaries.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UploadController } from './routes/common/upload.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { ChatRoomsController } from './routes/chat-rooms/chat-rooms.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { CallRoomsController } from './routes/call-rooms/call-rooms.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthController } from './routes/auth/auth.controller';
 import { expressAuthentication } from './routes/auth/authentication';
 // @ts-ignore - no great way to install types from subpackage
@@ -551,6 +555,136 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateChatRoomResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "chatRoomId": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CreateChatRoomResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"CreateChatRoomResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatMessageResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "chatMessageId": {"dataType":"string","required":true},
+            "textContent": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_ChatMessageResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"ChatMessageResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateChatMessageRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "textContent": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GetChatRoomResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "chatRoomId": {"dataType":"string","required":true},
+            "chatMessages": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatMessageResponseDto"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_GetChatRoomResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"GetChatRoomResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateCallRoomResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "callRoomId": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CreateCallRoomResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"CreateCallRoomResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CallTextResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "callTextId": {"dataType":"string","required":true},
+            "textContent": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_CallTextResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"CallTextResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateCallTextRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "textContent": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GetCallRoomResponseDto": {
+        "dataType": "refObject",
+        "properties": {
+            "callRoomId": {"dataType":"string","required":true},
+            "callTexts": {"dataType":"array","array":{"dataType":"refObject","ref":"CallTextResponseDto"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_GetCallRoomResponseDto_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "data": {"ref":"GetCallRoomResponseDto"},
+            "error": {"dataType":"nestedObjectLiteral","nestedProperties":{"details":{"dataType":"any"},"message":{"dataType":"string","required":true},"code":{"dataType":"string","required":true}}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AccessTokenResponseDto": {
         "dataType": "refObject",
         "properties": {
@@ -1054,6 +1188,135 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsReportController_createWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateReportRequestDto"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.post('/report/weekly',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ReportController)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.createWeeklyReport)),
+
+            async function ReportController_createWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_createWeeklyReport, request, response });
+
+                const controller = new ReportController();
+
+              await templateService.apiHandler({
+                methodName: 'createWeeklyReport',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsReportController_getWeeklyReports: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                limit: {"in":"query","name":"limit","dataType":"string"},
+                cursor: {"in":"query","name":"cursor","dataType":"string"},
+        };
+        app.get('/report/weekly',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ReportController)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getWeeklyReports)),
+
+            async function ReportController_getWeeklyReports(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_getWeeklyReports, request, response });
+
+                const controller = new ReportController();
+
+              await templateService.apiHandler({
+                methodName: 'getWeeklyReports',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsReportController_deleteWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
+                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.delete('/report/weekly/:reportId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ReportController)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.deleteWeeklyReport)),
+
+            async function ReportController_deleteWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_deleteWeeklyReport, request, response });
+
+                const controller = new ReportController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteWeeklyReport',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsReportController_getWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
+                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.get('/report/weekly/:reportId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ReportController)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getWeeklyReport)),
+
+            async function ReportController_getWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_getWeeklyReport, request, response });
+
+                const controller = new ReportController();
+
+              await templateService.apiHandler({
+                methodName: 'getWeeklyReport',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsReportController_createReport: Record<string, TsoaRoute.ParameterSchema> = {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateReportRequestDto"},
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
@@ -1205,135 +1468,6 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'deleteReport',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_deleteWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
-                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
-                req: {"in":"request","name":"req","required":true,"dataType":"object"},
-        };
-        app.delete('/report/weekly/:reportId',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.deleteWeeklyReport)),
-
-            async function ReportController_deleteWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_deleteWeeklyReport, request, response });
-
-                const controller = new ReportController();
-
-              await templateService.apiHandler({
-                methodName: 'deleteWeeklyReport',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_createWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateReportRequestDto"},
-                req: {"in":"request","name":"req","required":true,"dataType":"object"},
-        };
-        app.post('/report/weekly',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.createWeeklyReport)),
-
-            async function ReportController_createWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_createWeeklyReport, request, response });
-
-                const controller = new ReportController();
-
-              await templateService.apiHandler({
-                methodName: 'createWeeklyReport',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 201,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_getWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
-                reportId: {"in":"path","name":"reportId","required":true,"dataType":"string"},
-                req: {"in":"request","name":"req","required":true,"dataType":"object"},
-        };
-        app.get('/report/weekly/:reportId',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getWeeklyReport)),
-
-            async function ReportController_getWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_getWeeklyReport, request, response });
-
-                const controller = new ReportController();
-
-              await templateService.apiHandler({
-                methodName: 'getWeeklyReport',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_getWeeklyReports: Record<string, TsoaRoute.ParameterSchema> = {
-                req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                limit: {"in":"query","name":"limit","dataType":"string"},
-                cursor: {"in":"query","name":"cursor","dataType":"string"},
-        };
-        app.get('/report/weekly',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.getWeeklyReports)),
-
-            async function ReportController_getWeeklyReports(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_getWeeklyReports, request, response });
-
-                const controller = new ReportController();
-
-              await templateService.apiHandler({
-                methodName: 'getWeeklyReports',
                 controller,
                 response,
                 next,
@@ -1637,6 +1771,192 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
                 next,
                 validatedArgs,
                 successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsChatRoomsController_createChatRoom: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.post('/chat-rooms',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ChatRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(ChatRoomsController.prototype.createChatRoom)),
+
+            async function ChatRoomsController_createChatRoom(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsChatRoomsController_createChatRoom, request, response });
+
+                const controller = new ChatRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'createChatRoom',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsChatRoomsController_createChatMessage: Record<string, TsoaRoute.ParameterSchema> = {
+                chatRoomId: {"in":"path","name":"chatRoomId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateChatMessageRequestDto"},
+        };
+        app.post('/chat-rooms/:chatRoomId/messages',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ChatRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(ChatRoomsController.prototype.createChatMessage)),
+
+            async function ChatRoomsController_createChatMessage(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsChatRoomsController_createChatMessage, request, response });
+
+                const controller = new ChatRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'createChatMessage',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsChatRoomsController_getChatRoom: Record<string, TsoaRoute.ParameterSchema> = {
+                chatRoomId: {"in":"path","name":"chatRoomId","required":true,"dataType":"string"},
+        };
+        app.get('/chat-rooms/:chatRoomId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ChatRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(ChatRoomsController.prototype.getChatRoom)),
+
+            async function ChatRoomsController_getChatRoom(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsChatRoomsController_getChatRoom, request, response });
+
+                const controller = new ChatRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'getChatRoom',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCallRoomsController_createCallRoom: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.post('/call-rooms',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController.prototype.createCallRoom)),
+
+            async function CallRoomsController_createCallRoom(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCallRoomsController_createCallRoom, request, response });
+
+                const controller = new CallRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'createCallRoom',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCallRoomsController_createCallText: Record<string, TsoaRoute.ParameterSchema> = {
+                callRoomId: {"in":"path","name":"callRoomId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateCallTextRequestDto"},
+        };
+        app.post('/call-rooms/:callRoomId/texts',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController.prototype.createCallText)),
+
+            async function CallRoomsController_createCallText(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCallRoomsController_createCallText, request, response });
+
+                const controller = new CallRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'createCallText',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCallRoomsController_getCallRoom: Record<string, TsoaRoute.ParameterSchema> = {
+                callRoomId: {"in":"path","name":"callRoomId","required":true,"dataType":"string"},
+        };
+        app.get('/call-rooms/:callRoomId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController)),
+            ...(fetchMiddlewares<RequestHandler>(CallRoomsController.prototype.getCallRoom)),
+
+            async function CallRoomsController_getCallRoom(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCallRoomsController_getCallRoom, request, response });
+
+                const controller = new CallRoomsController();
+
+              await templateService.apiHandler({
+                methodName: 'getCallRoom',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
               });
             } catch (err) {
                 return next(err);

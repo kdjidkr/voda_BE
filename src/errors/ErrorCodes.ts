@@ -277,12 +277,46 @@ export const ErrorCode = {
   },
 
   // 키워드 관련
-   KEYWORD001: {
+  KEYWORD001: {
     code: "KEYWORD001",
     status: 400,
     message: "키워드는 최소 3개 이상이어야 합니다.",
   },
 
+  // 채팅 관련
+  CHAT_ROOM001: {
+    code: "CHAT_ROOM001",
+    status: 404,
+    message: "채팅 내용은 최소 1개 이상이어야 합니다.",
+  },
+  CHAT_ROOM002: {
+    code: "CHAT_ROOM002",
+    status: 400,
+    message: "채팅 내용 텍스트는 공백일 수 없습니다.",
+  },
+  CHAT_ROOM003: {
+    code: "CHAT_ROOM003",
+    status: 404,
+    message: "존재하지 않는 채팅방입니다.",
+  },
+  
+  // 통화 내용 관련
+  CALL_ROOM001: {
+    code: "CALL_ROOM001",
+    status: 400,
+    message: "통화 내용은 최소 1개 이상이어야 합니다.",
+  },
+  CALL_ROOM002: {
+    code: "CALL_ROOM002",
+    status: 400,
+    message: "통화 내용 텍스트는 공백일 수 없습니다.",
+  },
+  CALL_ROOM003: {
+    code: "CALL_ROOM003",
+    status: 404,
+    message: "존재하지 않는 통화방입니다.",
+  },
+  
   // 음성 소스 관련
   VOICE_SOURCE001: {
     code: "VOICE_SOURCE001",

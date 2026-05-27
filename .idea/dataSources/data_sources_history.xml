@@ -1,0 +1,71 @@
+<DataSourcesHistory>
+  <DataSourceFromHistory isRemovedFromProject="false">
+    <data-source source="LOCAL" name="보다 DB" uuid="b59decda-baa2-406d-bc4f-f8cc05683fc8">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="POSTGRES" />
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/vodaDB</jdbc-url>
+      <secret-storage>master_key</secret-storage>
+      <user-name>voda_admin</user-name>
+      <schema-mapping />
+      <working-dir>$ProjectFileDir$</working-dir>
+      <ssh-properties>
+        <enabled>true</enabled>
+        <ssh-config-id>58a29013-6923-453f-891f-6004074d0935</ssh-config-id>
+      </ssh-properties>
+    </data-source>
+  </DataSourceFromHistory>
+  <DataSourceFromHistory isRemovedFromProject="true">
+    <data-source source="LOCAL" name="보다 DB" uuid="385c568f-9d34-4f64-83e0-977925fb5f55">
+      <database-info product="PostgreSQL" version="15.17 (Debian 15.17-1.pgdg13+1)" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.7.3" dbms="POSTGRES" exact-version="15.17" exact-driver-version="42.7">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="lower" quoted-identifiers="exact" />
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/vodaDB</jdbc-url>
+      <secret-storage>master_key</secret-storage>
+      <user-name>voda_admin</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="@">
+            <node kind="schema" qname="@" />
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+      <working-dir>$ProjectFileDir$</working-dir>
+      <ssh-properties>
+        <enabled>true</enabled>
+        <ssh-config-id>58a29013-6923-453f-891f-6004074d0935</ssh-config-id>
+      </ssh-properties>
+    </data-source>
+  </DataSourceFromHistory>
+  <DataSourceFromHistory isRemovedFromProject="false">
+    <data-source source="LOCAL" name="vodaDB@localhost" uuid="ae041377-84fc-4522-8440-a297d579b802">
+      <database-info product="PostgreSQL" version="15.17 (Debian 15.17-1.pgdg13+1)" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.7.3" dbms="POSTGRES" exact-version="15.17" exact-driver-version="42.7">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="lower" quoted-identifiers="exact" />
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/vodaDB</jdbc-url>
+      <secret-storage>master_key</secret-storage>
+      <user-name>voda_admin</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="@">
+            <node kind="schema" qname="@" />
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+      <working-dir>$ProjectFileDir$</working-dir>
+      <ssh-properties>
+        <enabled>true</enabled>
+        <ssh-config-id>58a29013-6923-453f-891f-6004074d0935</ssh-config-id>
+      </ssh-properties>
+    </data-source>
+  </DataSourceFromHistory>
+</DataSourcesHistory>
