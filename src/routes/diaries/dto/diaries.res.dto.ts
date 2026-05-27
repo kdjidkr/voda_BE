@@ -44,6 +44,7 @@ export class PredictDiaryAiPredictionDataDto {
   status!: string;
   predicted_date!: string;
   predicted_diary!: string;
+  stt_text?: string;
 }
 
 export class PredictDiaryAiPredictionDto {

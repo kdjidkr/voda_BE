@@ -199,17 +199,19 @@ class DiariesRepository {
     userId: string,
     title: string,
     content: string,
+    initialDraft: string,
     diaryDate: Date,
+    inputType: "AI" | "VOICE" = "AI",
   ): Promise<any> {
     return await prisma.diary.create({
       data: {
         user_id: userId,
         title,
         content,
-        initial_draft: content,
+        initial_draft: initialDraft,
         diary_date: diaryDate,
         analysis: {},
-        input_type: "AI",
+        input_type: inputType,
       },
     });
   }

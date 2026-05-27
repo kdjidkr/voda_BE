@@ -340,6 +340,7 @@ export class DiariesService {
         userId,
         `${targetDate}의 일기`,
         trimmedDiaryContent,
+        trimmedDiaryContent, // initialDraft for text-based AI prediction
         targetDay.toDate(),
       );
 
@@ -366,6 +367,176 @@ export class DiariesService {
       }
       throw error;
     }
+  }
+  public async predictDiaryFromVoice(
+    userId: string,
+    file: Express.Multer.File,
+    targetDate: string,
+  ): Promise<any> {
+    const validatedTargetDate = validateDateString(targetDate, ErrorCode.INVALID024);
+
+    // 1. 사용자 정보 조회 (기본 유효성 검사)
+    const userProfile = await usersRepository.findUserMeBaseProfile(userId);
+    if (!userProfile) {
+      throw new HttpException(ErrorCode.USER001);
+    }
+    
+    const targetDay = kstDayjs(validatedTargetDate).startOf("day");
+    
+    // 2. 음성 파일을 AI 서버로 전송 (STT)
+    const fs = require("fs");
+    let fileBuffer: Buffer;
+    if (file.buffer) {
+      fileBuffer = file.buffer;
+    } else if ((file as any).location) {
+      // multer-s3를 통해 S3에 업로드된 경우 URL에서 다운로드
+      const s3Url = (file as any).location;
+      const s3Response = await fetch(s3Url);
+      if (!s3Response.ok) throw new HttpException(500, "S3에서 음성 파일을 가져오지 못했습니다.", "FILE_ERROR");
+      fileBuffer = Buffer.from(await s3Response.arrayBuffer());
+    } else if (file.path && fs.existsSync(file.path)) {
+      fileBuffer = fs.readFileSync(file.path);
+    } else {
+      throw new HttpException(400, "파일 데이터를 찾을 수 없습니다.", "INVALID_REQUEST");
+    }
+
+    const formData = new FormData();
+    const fileObj = new File([new Uint8Array(fileBuffer)], file.originalname || "voice_record.mp3", { type: file.mimetype });
+    formData.append("file", fileObj);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30초 대기
+
+    let sttText = "";
+    try {
+      const voiceResponse = await fetch("https://voda-ai-api.p-e.kr/voices", {
+        method: "POST",
+        body: formData as any,
+        signal: controller.signal,
+      });
+
+      if (!voiceResponse.ok) {
+        const errorText = await voiceResponse.text();
+        console.error(`AI STT API 호출 실패: Status=${voiceResponse.status}, Body=${errorText}`);
+        throw new HttpException(502, "AI STT API 호출에 실패했습니다.", "AI_API_ERROR");
+      }
+      
+      let rawSttData: any;
+      const responseText = await voiceResponse.text();
+      try {
+        rawSttData = JSON.parse(responseText);
+      } catch (e) {
+        rawSttData = responseText;
+      }
+
+      if (typeof rawSttData === "string") {
+        sttText = rawSttData;
+      } else if (rawSttData && typeof rawSttData.transcript === "string") {
+        sttText = rawSttData.transcript;
+      } else if (rawSttData && typeof rawSttData.text === "string") {
+        sttText = rawSttData.text;
+      } else if (rawSttData && typeof rawSttData.data === "string") {
+        sttText = rawSttData.data;
+      } else {
+        console.error("AI STT 응답 파싱 실패:", rawSttData);
+        throw new HttpException(502, `AI STT 응답 형식이 올바르지 않습니다. (받은 값: ${JSON.stringify(rawSttData)})`, "AI_API_ERROR");
+      }
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === "AbortError" || error.message?.includes("aborted")) {
+        throw new HttpException(504, "AI STT API 요청 시간이 초과되었습니다.", "AI_API_TIMEOUT");
+      }
+      throw error;
+    }
+
+    clearTimeout(timeoutId);
+
+    // 3. 변환된 STT 텍스트를 이용해 일기 생성
+    let diaryContent = "";
+    
+    const diaryController = new AbortController();
+    const diaryTimeoutId = setTimeout(() => diaryController.abort(), 30000); // 새로운 30초 대기
+
+    try {
+      const diaryResponse = await fetch("https://voda-ai-api.p-e.kr/diaries/from-texts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texts: [sttText] }),
+        signal: diaryController.signal,
+      });
+
+      clearTimeout(diaryTimeoutId);
+
+      if (!diaryResponse.ok) {
+        const errorText = await diaryResponse.text();
+        console.error(`AI 일기 생성 API 호출 실패: Status=${diaryResponse.status}, Body=${errorText}`);
+        throw new HttpException(502, "AI 일기 생성 API 호출에 실패했습니다.", "AI_API_ERROR");
+      }
+
+      let rawDiaryData: any;
+      const diaryResponseText = await diaryResponse.text();
+      try {
+        rawDiaryData = JSON.parse(diaryResponseText);
+      } catch (e) {
+        rawDiaryData = diaryResponseText;
+      }
+
+      if (typeof rawDiaryData === "string") {
+        diaryContent = rawDiaryData;
+      } else if (rawDiaryData && typeof rawDiaryData.generated_diary === "string") {
+        diaryContent = rawDiaryData.generated_diary;
+      } else if (rawDiaryData && typeof rawDiaryData.text === "string") {
+        diaryContent = rawDiaryData.text;
+      } else if (rawDiaryData && typeof rawDiaryData.data === "string") {
+        diaryContent = rawDiaryData.data;
+      } else {
+        console.error("AI 일기 생성 API 응답 파싱 실패:", rawDiaryData);
+        throw new HttpException(502, `AI 일기 생성 API의 응답 형식이 올바르지 않습니다. (받은 값: ${JSON.stringify(rawDiaryData)})`, "AI_API_ERROR");
+      }
+
+      if (!diaryContent || diaryContent.trim() === "") {
+        throw new HttpException(502, "AI 일기 생성 API에서 빈 텍스트를 반환했습니다.", "AI_API_ERROR");
+      }
+    } catch (error: any) {
+      clearTimeout(diaryTimeoutId);
+      if (error.name === "AbortError" || error.message?.includes("aborted")) {
+        throw new HttpException(504, "AI 일기 생성 API 요청 시간이 초과되었습니다.", "AI_API_TIMEOUT");
+      }
+      throw error;
+    }
+
+    const trimmedDiaryContent = diaryContent.trim();
+
+    // 4. DB에 일기 저장
+    const saved = await diariesRepository.createAiPredictedDiary(
+      userId,
+      `${validatedTargetDate}의 일기`,
+      trimmedDiaryContent,
+      sttText,
+      targetDay.toDate(),
+      "VOICE"
+    );
+
+    // 5. 프론트엔드로 즉시 반환
+    return {
+      prediction: {
+        success: true,
+        data: {
+          status: "success",
+          predicted_date: validatedTargetDate,
+          predicted_diary: trimmedDiaryContent,
+          stt_text: sttText
+        }
+      },
+      savedDiary: {
+        diaryId: saved.diary_id,
+        title: saved.title,
+        content: saved.content,
+        diaryDate: saved.diary_date,
+        inputType: saved.input_type,
+        createdAt: saved.created_at,
+      },
+    };
   }
 }
 
