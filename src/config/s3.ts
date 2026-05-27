@@ -9,9 +9,10 @@ import path from "path";
 const useS3 = !!(process.env.S3_ACCESS_KEY_ID && process.env.AWS_S3_BUCKET_NAME);
 
 let storage: multer.StorageEngine;
+let s3Client: S3Client | undefined;
 
 if (useS3) {
-  const s3Client = new S3Client({
+  s3Client = new S3Client({
     region: process.env.S3_REGION,
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY_ID!,
