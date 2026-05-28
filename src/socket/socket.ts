@@ -1,3 +1,4 @@
+import { HttpException } from "../errors/HttpException";
 import { Server } from "socket.io";
 
 import { callRoomsService } from "../routes/call-rooms/call-rooms.service";
@@ -16,7 +17,17 @@ async function requestAiReply (message: string) : Promise<string> {
   });
 
   if (!response.ok){
-    throw new Error("AI 서버 요청 실패"); // 에러 핸들링 보류
+    const errorText = await response.text();
+
+    console.error(`AI 응답 API 호출 실패: Status=${response.status}, Body=${errorText}`,);
+
+    throw new HttpException(502, "AI 응답 API 호출에 실패했습니다.", "AI_API_ERROR",);
+  }
+
+  const aiReply = await response.text();
+
+  if(!aiReply.trim()) {
+    throw new HttpException(502, "AI 응답이 비어 있습니다.", "AI_EMPTY_RESPONSE",);
   }
 
   return await response.text();
