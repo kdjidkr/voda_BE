@@ -3,14 +3,26 @@ import { Server } from "socket.io";
 import { callRoomsService } from "../routes/call-rooms/call-rooms.service";
 import { chatRoomsService } from "../routes/chat-rooms/chat-rooms.service";
 
-type ConversationType = "chat" | "call";
+// AI 답변 요청
+async function requestAiReply (message: string) : Promise<string> {
+  const response = await fetch ("https://voda-ai-api.p-e.kr/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      user_text: message,
+    }),
+  });
 
-type ConversationMessage = {
-  role: "user" | "ai";
-  message: string;
+  if (!response.ok){
+    throw new Error("AI 서버 요청 실패"); // 에러 핸들링 보류
+  }
+
+  return await response.text();
 }
 
-const buffers = new Map<string, ConversationMessage[]>();
+type ConversationType = "chat" | "call";
 
 export function initSocket(io: Server) {
   io.on("connection", (socket) => {
@@ -32,7 +44,7 @@ export function initSocket(io: Server) {
 
         socket.join(roomId);
 
-        socket.emit("conversation: started", {
+        socket.emit("conversation:started", {
           type,
           roomId,
         });
@@ -55,9 +67,7 @@ export function initSocket(io: Server) {
             });
           }
 
-          // AI는 임시임
-          // TODO: AI 서버 요청으로 교체
-          const aiReply = `AI 응답 테스트: ${message}`;
+          const aiReply = await requestAiReply(message);
           const aiText = `AI: ${aiReply}`;
 
           if (type === "chat") {
@@ -96,7 +106,3 @@ export function initSocket(io: Server) {
     });
   });
 }
-          
-           
-
-            
