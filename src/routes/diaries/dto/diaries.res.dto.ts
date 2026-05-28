@@ -39,3 +39,29 @@ export class KeywordResponseDto {
 export class CreateKeywordResponseDto {
   keywords!: KeywordResponseDto[];
 }
+
+export class PredictDiaryAiPredictionDataDto {
+  status!: string;
+  predicted_date!: string;
+  predicted_diary!: string;
+  stt_text?: string;
+}
+
+export class PredictDiaryAiPredictionDto {
+  success!: boolean;
+  data!: PredictDiaryAiPredictionDataDto;
+}
+
+export class PredictDiarySavedDiaryDto {
+  diaryId!: string;
+  title!: string;
+  content!: string;
+  diaryDate!: Date;
+  inputType!: string;
+  createdAt!: Date;
+}
+
+export class PredictDiaryResponseDto {
+  prediction!: PredictDiaryAiPredictionDto;
+  savedDiary!: PredictDiarySavedDiaryDto;
+}

@@ -224,6 +224,11 @@ export const ErrorCode = {
     status: 400,
     message: "카카오 인증 코드는 공백일 수 없습니다.",
   },
+  INVALID024: {
+    code: "INVALID024",
+    status: 400,
+    message: "날짜 형식이 올바르지 않습니다.",
+  },
 
 
   // 다이어리 관련

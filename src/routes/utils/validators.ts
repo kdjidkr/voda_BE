@@ -1,5 +1,6 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
+import { kstDayjs } from "../../utils/date";
 
 export const validateNickname = (nickname: string): void => {
   // 닉네임 규칙 : 한글, 영문, 언더스코어(_)만 허용, 2자 이상 8자 이하
@@ -89,4 +90,22 @@ export const validateYearMonth = (
   const normalizedMonth = Number.parseInt(trimmedMonth, 10);
 
   return { year: normalizedYear, month: normalizedMonth };
+};
+
+export const validateDateString = (
+  dateStr: string,
+  errorCode: (typeof ErrorCode)[keyof typeof ErrorCode],
+): string => {
+  const normalized = dateStr.trim();
+  const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  if (!dateRegex.test(normalized)) {
+    throw new HttpException(errorCode, { dateStr });
+  }
+
+  const parsed = kstDayjs(normalized);
+  if (!parsed.isValid()) {
+    throw new HttpException(errorCode, { dateStr });
+  }
+
+  return normalized;
 };
