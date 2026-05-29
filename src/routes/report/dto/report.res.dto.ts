@@ -1,7 +1,7 @@
 export interface CreateReportResponseDto {
   reportId: string;
   reportType: string;
-  baseDate: Date;
+  baseDate: string;
   summary: {
     text: string;
     photoCount: number;
@@ -19,7 +19,7 @@ export interface CreateReportResponseDto {
 export interface GetReportResponseDto {
   reportId: string;
   reportType: string;
-  baseDate: Date;
+  baseDate: string;
   summary: {
     text: string;
     photoCount: number;
@@ -36,7 +36,7 @@ export interface GetReportResponseDto {
 
 export interface ReportListItemDto {
   reportId: string;
-  baseDate: Date;
+  baseDate: string;
 }
 
 export interface GetReportListResponseDto {

@@ -43,7 +43,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "WEEKLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "이번 주는 4개의 일기를 작성했어요",
         photoCount: 3,
@@ -126,11 +126,11 @@ export class ReportController extends Controller {
       reports: [
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          baseDate: new Date("2025-09-01"),
+          baseDate: "2025-09-01",
         },
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          baseDate: new Date("2025-08-25"),
+          baseDate: "2025-08-25",
         },
       ],
     },
@@ -217,7 +217,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "WEEKLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "(닉네임)의 첫째 주 분석 텍스트...",
         photoCount: 3,
@@ -303,7 +303,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "이번 달은 15개의 일기를 작성했어요",
         photoCount: 3,
@@ -385,11 +385,11 @@ export class ReportController extends Controller {
       reports: [
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          baseDate: new Date("2025-09-01"),
+          baseDate: "2025-09-01",
         },
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          baseDate: new Date("2025-08-01"),
+          baseDate: "2025-08-01",
         },
       ],
     },
@@ -433,7 +433,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "(닉네임)의 한 달 분석 텍스트...",
         photoCount: 3,
@@ -510,7 +510,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "(닉네임)의 한 달 분석 텍스트...",
         photoCount: 3,

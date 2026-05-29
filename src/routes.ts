@@ -294,7 +294,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "reportId": {"dataType":"string","required":true},
             "reportType": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
+            "baseDate": {"dataType":"string","required":true},
             "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
             "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string"},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
             "createdAt": {"dataType":"datetime","required":true},
@@ -324,7 +324,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "reportId": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
+            "baseDate": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -355,7 +355,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "reportId": {"dataType":"string","required":true},
             "reportType": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
+            "baseDate": {"dataType":"string","required":true},
             "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
             "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string"},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
             "createdAt": {"dataType":"datetime","required":true},

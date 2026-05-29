@@ -1,6 +1,6 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
-import { kstDayjs } from "../../utils/date";
+import { formatKstDate, kstDayjs } from "../../utils/date";
 import { diariesRepository } from "../diaries/diaries.repository";
 import { usersRepository } from "../users/users.repository";
 import { validateUuid } from "../utils/validators";
@@ -321,7 +321,7 @@ class ReportService {
 
     const reportItems = pageReports.map((report) => ({
       reportId: report.report_id,
-      baseDate: report.base_date,
+      baseDate: formatKstDate(report.base_date),
     }));
 
     const nextCursor = hasNextPage
@@ -467,7 +467,7 @@ class ReportService {
 
     const reportItems = pageReports.map((report) => ({
       reportId: report.report_id,
-      baseDate: report.base_date,
+      baseDate: formatKstDate(report.base_date),
     }));
 
     const nextCursor = hasNextPage
@@ -515,7 +515,7 @@ class ReportService {
     return {
       reportId: report.report_id,
       reportType: report.report_type,
-      baseDate: report.base_date,
+      baseDate: formatKstDate(report.base_date),
       summary: report.summary,
       detailsJson: report.details_json,
       createdAt: report.created_at,
