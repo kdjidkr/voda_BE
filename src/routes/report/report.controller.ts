@@ -30,7 +30,7 @@ import { reportService } from "./report.service";
 @Tags("보고서 기능")
 export class ReportController extends Controller {
   /**
-   * @summary 주간 보고서를 생성합니다.
+   * @summary 주간 보고서를 생성합니다. (baseDate: 생성할 주차에 포함된 임의의 날짜 'YYYY-MM-DD')
    * @description AI 백엔드를 호출하여 주간 보고서를 생성하고 저장합니다. 같은 주의 보고서가 이미 있으면 오류가 발생합니다.
    */
   @Security("jwt")
@@ -290,7 +290,7 @@ export class ReportController extends Controller {
     };
   }
   /**
-   * @summary 월간 보고서를 생성합니다.
+   * @summary 월간 보고서를 생성합니다. (baseDate: 생성할 월에 포함된 임의의 날짜 'YYYY-MM-DD')
    * @description AI 백엔드를 호출하여 월간 보고서를 생성하고 저장합니다. 같은 월의 보고서가 이미 있으면 오류가 발생합니다.
    */
   @Security("jwt")
