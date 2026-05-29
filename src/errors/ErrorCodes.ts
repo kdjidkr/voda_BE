@@ -273,6 +273,11 @@ export const ErrorCode = {
     status: 502,
     message: "AI 서버와의 통신에 실패했습니다.",
   },
+  REPORT004: {
+    code: "REPORT004",
+    status: 500,
+    message: "AI API 환경변수가 설정되지 않았습니다.",
+  },
   INVALID100: {
     code: "INVALID100",
     status: 400,

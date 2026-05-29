@@ -13,7 +13,7 @@ import {
 import { CreateReportInput } from "./report.model";
 import { reportRepository } from "./report.repository";
 
-const AI_API_URL = process.env.AI_API_URL || "https://voda-ai-api.p-e.kr/reports/generate";
+const AI_API_URL = process.env.AI_API_URL;
 
 class ReportService {
   private static readonly DEFAULT_REPORT_PAGE_SIZE = 20;
@@ -23,6 +23,9 @@ class ReportService {
     userId: string,
     requestBody: GenerateReportRequestDto,
   ): Promise<CreateReportResponseDto> {
+    if (!AI_API_URL) {
+      throw new HttpException(ErrorCode.REPORT004);
+    }
     const baseDate = this.parseAndValidateDate(requestBody.baseDate);
     const targetYear = kstDayjs(baseDate).year();
     const targetMonth = kstDayjs(baseDate).month() + 1;
@@ -134,6 +137,9 @@ class ReportService {
     userId: string,
     requestBody: GenerateReportRequestDto,
   ): Promise<CreateReportResponseDto> {
+    if (!AI_API_URL) {
+      throw new HttpException(ErrorCode.REPORT004);
+    }
     const baseDate = this.parseAndValidateDateForWeekly(requestBody.baseDate);
 
     const existingReport = await reportRepository.findReportByWeek(userId, baseDate);
@@ -257,6 +263,9 @@ class ReportService {
   }
 
   private async callAiBackend(payload: any): Promise<any> {
+    if (!AI_API_URL) {
+      throw new HttpException(ErrorCode.REPORT004);
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000);
 
