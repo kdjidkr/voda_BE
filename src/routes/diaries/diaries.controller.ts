@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Example,
+  FormField,
   Get,
   Patch,
   Path,
@@ -15,7 +16,6 @@ import {
   SuccessResponse,
   Tags,
   UploadedFile,
-  FormField,
 } from "tsoa";
 
 import { ErrorCode } from "../../errors/ErrorCodes";

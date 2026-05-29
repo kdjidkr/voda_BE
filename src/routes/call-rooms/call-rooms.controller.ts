@@ -14,12 +14,12 @@ import {
 
 import { ApiResponse } from "../../interfaces/ApiResponse";
 import { callRoomsService } from "./call-rooms.service";
+import { CreateCallTextRequestDto } from "./dto/call-rooms.req.dto";
 import { 
-  CreateCallRoomResponseDto, 
   CallTextResponseDto,
+  CreateCallRoomResponseDto, 
   GetCallRoomResponseDto,
 } from "./dto/call-rooms.res.dto";
-import { CreateCallTextRequestDto } from "./dto/call-rooms.req.dto";
 
 @Route("call-rooms")
 @Tags("통화 내용 기록 관리")

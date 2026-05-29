@@ -1,7 +1,10 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
-import { validateNonEmptyText, validateUuid } from "../utils/validators";
-import { CreateReportRequestDto } from "./dto/report.req.dto";
+import { kstDayjs } from "../../utils/date";
+import { diariesRepository } from "../diaries/diaries.repository";
+import { usersRepository } from "../users/users.repository";
+import { validateUuid } from "../utils/validators";
+import { GenerateReportRequestDto } from "./dto/report.req.dto";
 import {
   CreateReportResponseDto,
   GetReportListResponseDto,
@@ -9,87 +12,256 @@ import {
 } from "./dto/report.res.dto";
 import { CreateReportInput, ReportType } from "./report.model";
 import { reportRepository } from "./report.repository";
-import { kstDayjs } from "../../utils/date";
+
+const AI_API_URL = "https://voda-ai-api.p-e.kr/reports/generate";
 
 class ReportService {
   private static readonly DEFAULT_REPORT_PAGE_SIZE = 20;
   private static readonly MAX_REPORT_PAGE_SIZE = 100;
-  async createReport(
+
+  async generateMonthlyReport(
     userId: string,
-    requestBody: CreateReportRequestDto,
+    requestBody: GenerateReportRequestDto,
   ): Promise<CreateReportResponseDto> {
-    // baseDate 파싱 및 검증
     const baseDate = this.parseAndValidateDate(requestBody.baseDate);
+    const targetYear = kstDayjs(baseDate).year();
+    const targetMonth = kstDayjs(baseDate).month() + 1;
 
-    // summary 검증
-    if (!requestBody.summary || typeof requestBody.summary !== "object") {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    const summaryText = validateNonEmptyText(
-      requestBody.summary.text,
-      ErrorCode.INVALID001,
-    );
-
-    if (
-      !Number.isInteger(requestBody.summary.photoCount) ||
-      requestBody.summary.photoCount < 0
-    ) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    if (
-      !Number.isInteger(requestBody.summary.diaryCount) ||
-      requestBody.summary.diaryCount < 0
-    ) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    // detailsJson 검증
-    if (
-      !requestBody.detailsJson ||
-      typeof requestBody.detailsJson !== "object"
-    ) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    if (!Array.isArray(requestBody.detailsJson.photos)) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    if (!Array.isArray(requestBody.detailsJson.diaryIds)) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    // 기존 같은 월의 레포트가 있는지 확인
     const existingReport = await reportRepository.findReportByMonth(
       userId,
-      kstDayjs(baseDate).year(),
-      kstDayjs(baseDate).month() + 1,
+      targetYear,
+      targetMonth,
     );
-
     if (existingReport) {
       throw new HttpException(ErrorCode.REPORT002);
     }
+
+    const userProfile = await usersRepository.findUserMeBaseProfile(userId);
+    if (!userProfile) {
+      throw new HttpException(ErrorCode.AUTH008); 
+    }
+    const age = kstDayjs().diff(kstDayjs(userProfile.birth_date), "year");
+
+    const startDate = kstDayjs(baseDate).startOf("month").toDate();
+    const endDate = kstDayjs(baseDate).endOf("month").toDate();
+
+    const diaries = await diariesRepository.findDiariesByDateRange(userId, startDate, endDate);
+    const diaryCount = diaries.length;
+    const photoCount = diaries.reduce((acc, cur) => acc + cur.diary_photo.length, 0);
+
+    let previousReportData = {};
+    if (targetMonth === 1) {
+      const prev = await reportRepository.findReportByMonth(userId, targetYear - 1, 12);
+      if (prev) {
+        previousReportData = {
+          diaryCount: (prev.summary as any)?.diaryCount || 0,
+          overallSentiment: (prev.details_json as any)?.overallSentiment || "",
+          topTheme: (prev.details_json as any)?.topTheme || "",
+        };
+      }
+    } else {
+      const prev = await reportRepository.findReportByMonth(userId, targetYear, targetMonth - 1);
+      if (prev) {
+        previousReportData = {
+          diaryCount: (prev.summary as any)?.diaryCount || 0,
+          overallSentiment: (prev.details_json as any)?.overallSentiment || "",
+          topTheme: (prev.details_json as any)?.topTheme || "",
+        };
+      }
+    }
+
+    const dayOfWeekMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const diaryList = diaries.map((d) => ({
+      diaryId: d.diary_id,
+      date: kstDayjs(d.diary_date).format("YYYY-MM-DD"),
+      dayOfWeek: dayOfWeekMap[kstDayjs(d.diary_date).day()],
+      title: d.title,
+      content: d.content,
+    }));
+
+    const aiPayload = {
+      reportType: "MONTHLY",
+      baseDate: kstDayjs(baseDate).format("YYYY-MM-DD"),
+      userInfo: {
+        nickname: userProfile.nickname,
+        gender: userProfile.gender || "UNKNOWN",
+        age,
+      },
+      stats: {
+        diaryCount,
+        photoCount,
+      },
+      previousReport: previousReportData,
+      diaries: diaryList,
+    };
+
+    const aiResponse = await this.callAiBackend(aiPayload);
+    if (!aiResponse.success || !aiResponse.data) {
+       throw new HttpException(ErrorCode.INVALID001); // Using INVALID001 as generic fallback or similar
+    }
+
+    const photos = diaries.flatMap((d) => d.diary_photo.map((p) => p.image_url)).slice(0, 5);
+    const diaryIds = diaries.map((d) => d.diary_id);
 
     const createReportInput: CreateReportInput = {
       userId,
       reportType: "MONTHLY",
       baseDate,
       summary: {
-        text: summaryText,
-        photoCount: requestBody.summary.photoCount,
-        diaryCount: requestBody.summary.diaryCount,
+        text: `이번 달은 ${diaryCount}개의 일기를 작성했어요`,
+        photoCount,
+        diaryCount,
       },
       detailsJson: {
-        ...requestBody.detailsJson,
-        aiAnalysis: requestBody.detailsJson.aiAnalysis || "",
+        photos,
+        topTheme: aiResponse.data.topTheme,
+        overallSentiment: aiResponse.data.overallSentiment,
+        weeklyEvents: aiResponse.data.weeklyEvents,
+        aiAnalysis: aiResponse.data.aiAnalysis,
+        diaryIds,
       },
     };
 
     const result = await reportRepository.createReport(createReportInput);
-
     return this.mapToResponseDto(result);
+  }
+
+  async generateWeeklyReport(
+    userId: string,
+    requestBody: GenerateReportRequestDto,
+  ): Promise<CreateReportResponseDto> {
+    const baseDate = this.parseAndValidateDateForWeekly(requestBody.baseDate);
+
+    const existingReport = await reportRepository.findReportByWeek(userId, baseDate);
+    if (existingReport) {
+      throw new HttpException(ErrorCode.REPORT002);
+    }
+
+    const userProfile = await usersRepository.findUserMeBaseProfile(userId);
+    if (!userProfile) {
+      throw new HttpException(ErrorCode.AUTH008); 
+    }
+    const age = kstDayjs().diff(kstDayjs(userProfile.birth_date), "year");
+
+    const endDate = kstDayjs(baseDate).add(6, "day").endOf("day").toDate();
+
+    const diaries = await diariesRepository.findDiariesByDateRange(userId, baseDate, endDate);
+    const diaryCount = diaries.length;
+    const photoCount = diaries.reduce((acc, cur) => acc + cur.diary_photo.length, 0);
+
+    const prevWeekStart = kstDayjs(baseDate).subtract(7, "day").toDate();
+    const prev = await reportRepository.findReportByWeek(userId, prevWeekStart);
+    let previousReportData = {};
+    if (prev) {
+      previousReportData = {
+        diaryCount: (prev.summary as any)?.diaryCount || 0,
+        overallSentiment: (prev.details_json as any)?.overallSentiment || "", 
+      };
+    }
+
+    const dayOfWeekMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const diaryList = diaries.map((d) => ({
+      diaryId: d.diary_id,
+      date: kstDayjs(d.diary_date).format("YYYY-MM-DD"),
+      dayOfWeek: dayOfWeekMap[kstDayjs(d.diary_date).day()],
+      title: d.title,
+      content: d.content,
+    }));
+
+    const aiPayload = {
+      reportType: "WEEKLY",
+      baseDate: kstDayjs(baseDate).format("YYYY-MM-DD"),
+      userInfo: {
+        nickname: userProfile.nickname,
+        gender: userProfile.gender || "UNKNOWN",
+        age,
+      },
+      stats: {
+        diaryCount,
+        photoCount,
+      },
+      previousReport: previousReportData,
+      diaries: diaryList,
+    };
+
+    const aiResponse = await this.callAiBackend(aiPayload);
+    if (!aiResponse.success || !aiResponse.data) {
+       throw new HttpException(ErrorCode.INVALID001);
+    }
+
+    const breakdownMap = new Map<string, any>();
+    
+    for (const aiDaily of (aiResponse.data.dailyAnalysisList || [])) {
+      const targetIds = aiDaily.diaryId ? aiDaily.diaryId.split(",") : [];
+      const matchedDiaries = diaries.filter((d) => targetIds.includes(d.diary_id));
+      const photos = matchedDiaries.flatMap((d) => d.diary_photo.map((p) => p.image_url));
+
+      if (!breakdownMap.has(aiDaily.date)) {
+        breakdownMap.set(aiDaily.date, {
+          date: aiDaily.date,
+          dayOfWeek: aiDaily.dayOfWeek,
+          dailyAnalysis: aiDaily.analysis,
+          photos: [...photos],
+          diaryId: targetIds[0] || "",
+        });
+      } else {
+        const existing = breakdownMap.get(aiDaily.date);
+        existing.dailyAnalysis += `\n\n${aiDaily.analysis}`;
+        existing.photos.push(...photos);
+      }
+    }
+
+    const weeklyBreakdown = Array.from(breakdownMap.values()).map(item => ({
+      date: item.date,
+      dayOfWeek: item.dayOfWeek,
+      dailyAnalysis: item.dailyAnalysis,
+      photos: Array.from(new Set(item.photos)),
+      diaryId: item.diaryId,
+    }));
+
+    const photos = diaries.flatMap((d) => d.diary_photo.map((p) => p.image_url)).slice(0, 5);
+    const diaryIds = diaries.map((d) => d.diary_id);
+
+    const createReportInput: CreateReportInput = {
+      userId,
+      reportType: "WEEKLY",
+      baseDate,
+      summary: {
+        text: `이번 주는 ${diaryCount}개의 일기를 작성했어요`,
+        photoCount,
+        diaryCount,
+      },
+      detailsJson: {
+        photos,
+        weeklyBreakdown,
+        diaryIds,
+      },
+    };
+
+    const result = await reportRepository.createReport(createReportInput);
+    return this.mapToResponseDto(result);
+  }
+
+  private async callAiBackend(payload: any): Promise<any> {
+    try {
+      const response = await fetch(AI_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        console.error("AI API Error:", await response.text());
+        return { success: false };
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("AI API Request Failed:", error);
+      return { success: false };
+    }
   }
 
   async getReport(
@@ -217,90 +389,6 @@ class ReportService {
     }
   }
 
-  async createWeeklyReport(
-    userId: string,
-    requestBody: CreateReportRequestDto,
-  ): Promise<CreateReportResponseDto> {
-    // baseDate 파싱 및 검증 (Monday를 기준으로)
-    const baseDate = this.parseAndValidateDateForWeekly(requestBody.baseDate);
-
-    // summary 검증
-    if (!requestBody.summary || typeof requestBody.summary !== "object") {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    const summaryText = validateNonEmptyText(
-      requestBody.summary.text,
-      ErrorCode.INVALID001,
-    );
-
-    if (
-      !Number.isInteger(requestBody.summary.photoCount) ||
-      requestBody.summary.photoCount < 0
-    ) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    if (
-      !Number.isInteger(requestBody.summary.diaryCount) ||
-      requestBody.summary.diaryCount < 0
-    ) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    // detailsJson 검증 (weeklyBreakdown 포함)
-    if (
-      !requestBody.detailsJson ||
-      typeof requestBody.detailsJson !== "object"
-    ) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    if (!Array.isArray(requestBody.detailsJson.photos)) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    if (!Array.isArray(requestBody.detailsJson.diaryIds)) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    // weeklyBreakdown 검증
-    if (!Array.isArray(requestBody.detailsJson.weeklyBreakdown)) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    this.validateWeeklyBreakdown(requestBody.detailsJson.weeklyBreakdown);
-
-    // 기존 같은 주의 레포트가 있는지 확인
-    const existingReport = await reportRepository.findReportByWeek(
-      userId,
-      baseDate,
-    );
-
-    if (existingReport) {
-      throw new HttpException(ErrorCode.REPORT002);
-    }
-
-    const createReportInput: CreateReportInput = {
-      userId,
-      reportType: "WEEKLY",
-      baseDate,
-      summary: {
-        text: summaryText,
-        photoCount: requestBody.summary.photoCount,
-        diaryCount: requestBody.summary.diaryCount,
-      },
-      detailsJson: {
-        ...requestBody.detailsJson,
-        aiAnalysis: requestBody.detailsJson.aiAnalysis || "",
-      },
-    };
-
-    const result = await reportRepository.createReport(createReportInput);
-
-    return this.mapToResponseDto(result);
-  }
-
   async getWeeklyReport(
     userId: string,
     reportId: string,
@@ -374,58 +462,6 @@ class ReportService {
     };
   }
 
-  private validateWeeklyBreakdown(weeklyBreakdown: any[]): void {
-    if (weeklyBreakdown.length === 0) {
-      throw new HttpException(ErrorCode.INVALID001);
-    }
-
-    for (const dayRecord of weeklyBreakdown) {
-      if (!dayRecord || typeof dayRecord !== "object") {
-        throw new HttpException(ErrorCode.INVALID001);
-      }
-
-      // date 검증 (YYYY-MM-DD 형식)
-      if (!dayRecord.date || typeof dayRecord.date !== "string") {
-        throw new HttpException(ErrorCode.INVALID001);
-      }
-
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(dayRecord.date)) {
-        throw new HttpException(ErrorCode.INVALID001);
-      }
-
-      // dayOfWeek 검증
-      const validDays = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ];
-      if (!dayRecord.dayOfWeek || !validDays.includes(dayRecord.dayOfWeek)) {
-        throw new HttpException(ErrorCode.INVALID001);
-      }
-
-      // dailyAnalysis 검증
-      validateNonEmptyText(dayRecord.dailyAnalysis, ErrorCode.INVALID001);
-
-      // photos 검증
-      if (!Array.isArray(dayRecord.photos)) {
-        throw new HttpException(ErrorCode.INVALID001);
-      }
-
-      // diaryId 검증 (optional but if provided must be valid UUID)
-      if (dayRecord.diaryId !== undefined && dayRecord.diaryId !== null) {
-        if (typeof dayRecord.diaryId !== "string") {
-          throw new HttpException(ErrorCode.INVALID001);
-        }
-        validateUuid(dayRecord.diaryId, ErrorCode.INVALID001);
-      }
-    }
-  }
-
   private parseAndValidateDate(dateString: string): Date {
     const date = kstDayjs(dateString);
 
@@ -433,7 +469,6 @@ class ReportService {
       throw new HttpException(ErrorCode.INVALID001);
     }
 
-    // 날짜를 KST로 변환 (해당 월의 1일)
     return date.startOf("month").toDate();
   }
 
@@ -444,11 +479,8 @@ class ReportService {
       throw new HttpException(ErrorCode.INVALID001);
     }
 
-    // 월요일을 기준으로 주의 시작일 계산
-    // dayjs().startOf('week')는 일요일이므로, isoWeek()를 쓰거나 명시적으로 계산
     let startOfWeek = date.startOf("week");
     if (date.day() === 0) {
-      // 일요일인 경우 저번주 월요일로
       startOfWeek = startOfWeek.subtract(6, "day");
     } else {
       startOfWeek = startOfWeek.add(1, "day");

@@ -9,7 +9,7 @@ export interface CreateReportResponseDto {
   };
   detailsJson: {
     photos: string[];
-    aiAnalysis: string;
+    aiAnalysis?: string;
     diaryIds: string[];
     [key: string]: any;
   };
@@ -27,7 +27,7 @@ export interface GetReportResponseDto {
   };
   detailsJson: {
     photos: string[];
-    aiAnalysis: string;
+    aiAnalysis?: string;
     diaryIds: string[];
     [key: string]: any;
   };

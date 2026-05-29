@@ -13,14 +13,13 @@ import {
 } from "tsoa";
 
 import { ApiResponse } from "../../interfaces/ApiResponse";
-
+import { chatRoomsService } from "./chat-rooms.service";
+import { CreateChatMessageRequestDto } from "./dto/chat-rooms.req.dto";
 import { 
-  CreateChatRoomResponseDto,
   ChatMessageResponseDto,
+  CreateChatRoomResponseDto,
   GetChatRoomResponseDto,
  } from "./dto/chat-rooms.res.dto";
-import { CreateChatMessageRequestDto } from "./dto/chat-rooms.req.dto";
-import { chatRoomsService } from "./chat-rooms.service";
 
 @Route("chat-rooms")
 @Tags("채팅 내용 기록 관리")
