@@ -10,10 +10,10 @@ import {
   GetReportListResponseDto,
   GetReportResponseDto,
 } from "./dto/report.res.dto";
-import { CreateReportInput, ReportType } from "./report.model";
+import { CreateReportInput } from "./report.model";
 import { reportRepository } from "./report.repository";
 
-const AI_API_URL = "https://voda-ai-api.p-e.kr/reports/generate";
+const AI_API_URL = process.env.AI_API_URL || "https://voda-ai-api.p-e.kr/reports/generate";
 
 class ReportService {
   private static readonly DEFAULT_REPORT_PAGE_SIZE = 20;
@@ -49,7 +49,11 @@ class ReportService {
     const diaryCount = diaries.length;
     const photoCount = diaries.reduce((acc, cur) => acc + cur.diary_photo.length, 0);
 
-    let previousReportData = {};
+    let previousReportData = {
+      diaryCount: 0,
+      overallSentiment: "",
+      topTheme: "",
+    };
     if (targetMonth === 1) {
       const prev = await reportRepository.findReportByMonth(userId, targetYear - 1, 12);
       if (prev) {
@@ -96,8 +100,8 @@ class ReportService {
     };
 
     const aiResponse = await this.callAiBackend(aiPayload);
-    if (!aiResponse.success || !aiResponse.data) {
-       throw new HttpException(ErrorCode.INVALID001); // Using INVALID001 as generic fallback or similar
+    if (!aiResponse?.success || !aiResponse?.data) {
+       throw new HttpException(ErrorCode.REPORT003);
     }
 
     const photos = diaries.flatMap((d) => d.diary_photo.map((p) => p.image_url)).slice(0, 5);
@@ -151,7 +155,10 @@ class ReportService {
 
     const prevWeekStart = kstDayjs(baseDate).subtract(7, "day").toDate();
     const prev = await reportRepository.findReportByWeek(userId, prevWeekStart);
-    let previousReportData = {};
+    let previousReportData = {
+      diaryCount: 0,
+      overallSentiment: "",
+    };
     if (prev) {
       previousReportData = {
         diaryCount: (prev.summary as any)?.diaryCount || 0,
@@ -185,14 +192,19 @@ class ReportService {
     };
 
     const aiResponse = await this.callAiBackend(aiPayload);
-    if (!aiResponse.success || !aiResponse.data) {
-       throw new HttpException(ErrorCode.INVALID001);
+    if (!aiResponse?.success || !aiResponse?.data) {
+       throw new HttpException(ErrorCode.REPORT003);
     }
 
     const breakdownMap = new Map<string, any>();
     
     for (const aiDaily of (aiResponse.data.dailyAnalysisList || [])) {
-      const targetIds = aiDaily.diaryId ? aiDaily.diaryId.split(",") : [];
+      const targetIds = aiDaily.diaryId
+        ? aiDaily.diaryId
+            .split(",")
+            .map((id: string) => id.trim())
+            .filter(Boolean)
+        : [];
       const matchedDiaries = diaries.filter((d) => targetIds.includes(d.diary_id));
       const photos = matchedDiaries.flatMap((d) => d.diary_photo.map((p) => p.image_url));
 
@@ -211,13 +223,15 @@ class ReportService {
       }
     }
 
-    const weeklyBreakdown = Array.from(breakdownMap.values()).map(item => ({
-      date: item.date,
-      dayOfWeek: item.dayOfWeek,
-      dailyAnalysis: item.dailyAnalysis,
-      photos: Array.from(new Set(item.photos)),
-      diaryId: item.diaryId,
-    }));
+    const weeklyBreakdown = Array.from(breakdownMap.values())
+      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((item: any) => ({
+        date: item.date,
+        dayOfWeek: item.dayOfWeek,
+        dailyAnalysis: item.dailyAnalysis,
+        photos: Array.from(new Set(item.photos)),
+        diaryId: item.diaryId,
+      }));
 
     const photos = diaries.flatMap((d) => d.diary_photo.map((p) => p.image_url)).slice(0, 5);
     const diaryIds = diaries.map((d) => d.diary_id);
@@ -243,6 +257,9 @@ class ReportService {
   }
 
   private async callAiBackend(payload: any): Promise<any> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+
     try {
       const response = await fetch(AI_API_URL, {
         method: "POST",
@@ -250,7 +267,9 @@ class ReportService {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       if (!response.ok) {
         console.error("AI API Error:", await response.text());
@@ -259,6 +278,7 @@ class ReportService {
 
       return await response.json();
     } catch (error) {
+      clearTimeout(timeout);
       console.error("AI API Request Failed:", error);
       return { success: false };
     }

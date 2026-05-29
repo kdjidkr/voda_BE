@@ -268,6 +268,11 @@ export const ErrorCode = {
     status: 409,
     message: "해당 보고서가 이미 존재합니다.",
   },
+  REPORT003: {
+    code: "REPORT003",
+    status: 502,
+    message: "AI 서버와의 통신에 실패했습니다.",
+  },
   INVALID100: {
     code: "INVALID100",
     status: 400,
