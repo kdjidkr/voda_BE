@@ -7,6 +7,7 @@ import { REDIS_KEYS } from "../../config/redis";
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { JwtPayload } from "../../types/jwt-payload";
+import { kstDayjs } from "../../utils/date";
 import { usersRepository } from "../users/users.repository";
 import {
   validateEmail,
@@ -16,7 +17,6 @@ import {
 } from "../utils/validators";
 import { AuthTokenPair, SignUpInput, SignUpOutput } from "./auth.model";
 import { authRepository } from "./auth.repository";
-import { kstDayjs } from "../../utils/date";
 import {
   KakaoCompleteSignupRequestDto,
   SignInRequestDto,

@@ -11,7 +11,7 @@ export interface CreateReportInput {
   };
   detailsJson: {
     photos: string[];
-    aiAnalysis: string;
+    aiAnalysis?: string;
     diaryIds: string[];
     [key: string]: any;
   };

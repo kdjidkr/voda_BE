@@ -1,5 +1,6 @@
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
+import { kstDayjs } from "../../utils/date";
 import { validateNonEmptyText, validateUuid } from "../utils/validators";
 import { CreateTodoRequestDto } from "./dto/todo.req.dto";
 import {
@@ -13,7 +14,6 @@ import {
   ToggleTodoStatusInput,
 } from "./todo.model";
 import { todoRepository } from "./todo.repository";
-import { kstDayjs } from "../../utils/date";
 
 class TodoService {
   private static readonly DEFAULT_TODO_PAGE_SIZE = 20;

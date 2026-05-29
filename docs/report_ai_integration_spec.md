@@ -38,12 +38,11 @@
 
 ## 3. 최종 완성된 AI 서버 연동 API 스펙
 
-### 3.1 Request (우리 백엔드 -> AI 분석 서버)
-백엔드가 직접 데이터베이스에서 해당 기간의 일기와 사진 데이터를 집계하여 원문을 실어 보냅니다.
-
+### 3.1 Request (일반 백엔드 -> AI 분석 서버)
+백엔드가 직접 데이터베이스에서 해당 기간의 일기와 사진 데이터를 집계하여 원문을 실어 보냅니다. 
+#### [월간 레포트 요청 시 - MONTHLY]
 ```json
 {
-  "userId": "dbf94c44-359c-4f4b-8ac9-cd5c6de2b06f",
   "reportType": "MONTHLY", // "WEEKLY" 또는 "MONTHLY"
   "baseDate": "2026-05-01",
   "userInfo": {
@@ -54,6 +53,11 @@
   "stats": {
     "diaryCount": 17,
     "photoCount": 5
+  },
+  "previousReport": {
+    "diaryCount": 12,
+    "overallSentiment": "불안정하고 감정 기복이 심했어요 🌪️",
+    "topTheme": "회사 스트레스 😭"
   },
   "diaries": [
     {
@@ -81,7 +85,53 @@
 }
 ```
 
-### 3.2 Response (AI 분석 서버 -> 우리 백엔드)
+#### [주간 레포트 요청 시 - WEEKLY]
+```json
+{
+  "reportType": "WEEKLY", // "WEEKLY" 또는 "MONTHLY"
+  "baseDate": "2026-05-25",
+  "userInfo": {
+    "nickname": "코딩초보",
+    "gender": "FEMALE",
+    "age": 24
+  },
+  "stats": {
+    "diaryCount": 3,
+    "photoCount": 2
+  },
+  "previousReport": {
+    "diaryCount": 5,
+    "overallSentiment": "평온하고 즐거웠어요 🧘"
+  },
+  "diaries": [
+    {
+      "diaryId": "diary-uuid-1",
+      "date": "2026-05-25",
+      "dayOfWeek": "Monday",
+      "title": "월요일 일기",
+      "content": "월요일에는 친구랑 훠궈를 먹었다. 너무 맛있어서 하루 시작이 행복했다."
+    },
+    {
+      "diaryId": "diary-uuid-2",
+      "date": "2026-05-26",
+      "dayOfWeek": "Tuesday",
+      "title": "회사에서 실수한 날",
+      "content": "화요일은 회사에서 큰 실수를 해서 부장님께 혼났다. 너무 슬프고 우울해서 울 뻔했다."
+    },
+    {
+      "diaryId": "diary-uuid-3",
+      "date": "2026-05-29",
+      "dayOfWeek": "Friday",
+      "title": "친구들과 불금!",
+      "content": "금요일 퇴근하고 오랜만에 고등학교 친구들을 만나 술을 마셨다. 너무 즐겁고 신나게 놀아서 스트레스가 다 풀렸다."
+    }
+  ]
+}
+```
+
+
+
+### 3.2 Response (AI 분석 서버 -> 일반 백엔드)
 AI는 요소를 정독하고 화면 UI 텍스트로 그대로 치환해 뿌릴 수 있도록 고정된 키값으로 정교하게 응답합니다.
 
 #### [월간 레포트 응답 시 - MONTHLY]

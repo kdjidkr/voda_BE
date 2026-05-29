@@ -294,9 +294,9 @@ const models: TsoaRoute.Models = {
         "properties": {
             "reportId": {"dataType":"string","required":true},
             "reportType": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
+            "baseDate": {"dataType":"string","required":true},
             "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
-            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string","required":true},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
+            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string"},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
             "createdAt": {"dataType":"datetime","required":true},
         },
         "additionalProperties": false,
@@ -312,12 +312,10 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CreateReportRequestDto": {
+    "GenerateReportRequestDto": {
         "dataType": "refObject",
         "properties": {
             "baseDate": {"dataType":"string","required":true},
-            "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
-            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string","required":true},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -326,7 +324,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "reportId": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
+            "baseDate": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -357,9 +355,9 @@ const models: TsoaRoute.Models = {
         "properties": {
             "reportId": {"dataType":"string","required":true},
             "reportType": {"dataType":"string","required":true},
-            "baseDate": {"dataType":"datetime","required":true},
+            "baseDate": {"dataType":"string","required":true},
             "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryCount":{"dataType":"double","required":true},"photoCount":{"dataType":"double","required":true},"text":{"dataType":"string","required":true}},"required":true},
-            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string","required":true},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
+            "detailsJson": {"dataType":"nestedObjectLiteral","nestedProperties":{"diaryIds":{"dataType":"array","array":{"dataType":"string"},"required":true},"aiAnalysis":{"dataType":"string"},"photos":{"dataType":"array","array":{"dataType":"string"},"required":true}},"additionalProperties":{"dataType":"any"},"required":true},
             "createdAt": {"dataType":"datetime","required":true},
         },
         "additionalProperties": false,
@@ -1230,27 +1228,27 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_createWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateReportRequestDto"},
+        const argsReportController_generateWeeklyReport: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"GenerateReportRequestDto"},
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
-        app.post('/report/weekly',
+        app.post('/report/generate/weekly',
             authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.createWeeklyReport)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.generateWeeklyReport)),
 
-            async function ReportController_createWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
+            async function ReportController_generateWeeklyReport(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_createWeeklyReport, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_generateWeeklyReport, request, response });
 
                 const controller = new ReportController();
 
               await templateService.apiHandler({
-                methodName: 'createWeeklyReport',
+                methodName: 'generateWeeklyReport',
                 controller,
                 response,
                 next,
@@ -1359,27 +1357,27 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsReportController_createReport: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateReportRequestDto"},
+        const argsReportController_generateMonthlyReport: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"GenerateReportRequestDto"},
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
-        app.post('/report',
+        app.post('/report/generate/monthly',
             authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(ReportController)),
-            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.createReport)),
+            ...(fetchMiddlewares<RequestHandler>(ReportController.prototype.generateMonthlyReport)),
 
-            async function ReportController_createReport(request: ExRequest, response: ExResponse, next: any) {
+            async function ReportController_generateMonthlyReport(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_createReport, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsReportController_generateMonthlyReport, request, response });
 
                 const controller = new ReportController();
 
               await templateService.apiHandler({
-                methodName: 'createReport',
+                methodName: 'generateMonthlyReport',
                 controller,
                 response,
                 next,

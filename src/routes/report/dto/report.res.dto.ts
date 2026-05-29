@@ -1,7 +1,7 @@
 export interface CreateReportResponseDto {
   reportId: string;
   reportType: string;
-  baseDate: Date;
+  baseDate: string;
   summary: {
     text: string;
     photoCount: number;
@@ -9,7 +9,7 @@ export interface CreateReportResponseDto {
   };
   detailsJson: {
     photos: string[];
-    aiAnalysis: string;
+    aiAnalysis?: string;
     diaryIds: string[];
     [key: string]: any;
   };
@@ -19,7 +19,7 @@ export interface CreateReportResponseDto {
 export interface GetReportResponseDto {
   reportId: string;
   reportType: string;
-  baseDate: Date;
+  baseDate: string;
   summary: {
     text: string;
     photoCount: number;
@@ -27,7 +27,7 @@ export interface GetReportResponseDto {
   };
   detailsJson: {
     photos: string[];
-    aiAnalysis: string;
+    aiAnalysis?: string;
     diaryIds: string[];
     [key: string]: any;
   };
@@ -36,7 +36,7 @@ export interface GetReportResponseDto {
 
 export interface ReportListItemDto {
   reportId: string;
-  baseDate: Date;
+  baseDate: string;
 }
 
 export interface GetReportListResponseDto {

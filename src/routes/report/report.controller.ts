@@ -18,7 +18,7 @@ import {
 import { ErrorCode } from "../../errors/ErrorCodes";
 import { HttpException } from "../../errors/HttpException";
 import { ApiResponse } from "../../interfaces/ApiResponse";
-import { CreateReportRequestDto } from "./dto/report.req.dto";
+import { GenerateReportRequestDto } from "./dto/report.req.dto";
 import {
   CreateReportResponseDto,
   GetReportListResponseDto,
@@ -30,64 +30,22 @@ import { reportService } from "./report.service";
 @Tags("보고서 기능")
 export class ReportController extends Controller {
   /**
-   * @summary 주간 보고서를 생성합니다.
-   * @description AI가 생성한 분석 내용을 받아 주간 보고서를 저장합니다. 같은 주의 보고서가 이미 있으면 오류가 발생합니다.
+   * @summary 주간 보고서를 생성합니다. (baseDate: 생성할 주차에 포함된 임의의 날짜 'YYYY-MM-DD')
+   * @description AI 백엔드를 호출하여 주간 보고서를 생성하고 저장합니다. 같은 주의 보고서가 이미 있으면 오류가 발생합니다.
    */
   @Security("jwt")
   @SuccessResponse(201, "주간 보고서 생성 성공")
-  @Example<CreateReportRequestDto>({
+  @Example<GenerateReportRequestDto>({
     baseDate: "2025-09-01",
-    summary: {
-      text: "(닉네임)의 첫째 주 분석 텍스트...",
-      photoCount: 3,
-      diaryCount: 4,
-    },
-    detailsJson: {
-      photos: [
-        "https://s3.../photo1.jpg",
-        "https://s3.../photo2.jpg",
-        "https://s3.../photo3.jpg",
-      ],
-      aiAnalysis: "AI가 바라본 9월 첫째 주의 분석...",
-      diaryIds: [
-        "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-        "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-        "58d5db0b-5837-4933-b2d4-f032cb7a8a66",
-        "58d5db0b-5837-4933-b2d4-f032cb7a8a67",
-      ],
-      weeklyBreakdown: [
-        {
-          date: "2025-09-01",
-          dayOfWeek: "Monday",
-          dailyAnalysis: "훠궈를 드셨네요 맛있어서 행복했던 날이에요! 🍜",
-          photos: ["https://s3.../photo1.jpg"],
-          diaryId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-        },
-        {
-          date: "2025-09-02",
-          dayOfWeek: "Tuesday",
-          dailyAnalysis: "회사에서 실수해서 많이 우울했던 날이에요 ☔",
-          photos: ["https://s3.../photo2.jpg"],
-          diaryId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-        },
-        {
-          date: "2025-09-05",
-          dayOfWeek: "Friday",
-          dailyAnalysis: "친구들이랑 만나서 신나게 놀았어요🥴",
-          photos: ["https://s3.../photo3.jpg"],
-          diaryId: "58d5db0b-5837-4933-b2d4-f032cb7a8a67",
-        },
-      ],
-    },
   })
   @Example<ApiResponse<CreateReportResponseDto>>({
     success: true,
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "WEEKLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
-        text: "(닉네임)의 첫째 주 분석 텍스트...",
+        text: "이번 주는 4개의 일기를 작성했어요",
         photoCount: 3,
         diaryCount: 4,
       },
@@ -97,13 +55,6 @@ export class ReportController extends Controller {
           "https://s3.../photo2.jpg",
           "https://s3.../photo3.jpg",
         ],
-        aiAnalysis: "AI가 바라본 9월 첫째 주의 분석...",
-        diaryIds: [
-          "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          "58d5db0b-5837-4933-b2d4-f032cb7a8a66",
-          "58d5db0b-5837-4933-b2d4-f032cb7a8a67",
-        ],
         weeklyBreakdown: [
           {
             date: "2025-09-01",
@@ -112,21 +63,10 @@ export class ReportController extends Controller {
             photos: ["https://s3.../photo1.jpg"],
             diaryId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
           },
-          {
-            date: "2025-09-02",
-            dayOfWeek: "Tuesday",
-            dailyAnalysis: "회사에서 실수해서 많이 우울했던 날이에요 ☔",
-            photos: ["https://s3.../photo2.jpg"],
-            diaryId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          },
-          {
-            date: "2025-09-05",
-            dayOfWeek: "Friday",
-            dailyAnalysis: "친구들이랑 만나서 신나게 놀았어요🥴",
-            photos: ["https://s3.../photo3.jpg"],
-            diaryId: "58d5db0b-5837-4933-b2d4-f032cb7a8a67",
-          },
         ],
+        diaryIds: [
+          "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
+        ]
       },
       createdAt: new Date("2026-04-30T09:00:00.000Z"),
     },
@@ -152,9 +92,9 @@ export class ReportController extends Controller {
       message: "액세스 토큰이 유효하지 않습니다.",
     },
   })
-  @Post("/weekly")
-  public async createWeeklyReport(
-    @Body() requestBody: CreateReportRequestDto,
+  @Post("/generate/weekly")
+  public async generateWeeklyReport(
+    @Body() requestBody: GenerateReportRequestDto,
     @Request() req: any,
   ): Promise<ApiResponse<CreateReportResponseDto>> {
     const userId = req.user?.sub;
@@ -163,7 +103,7 @@ export class ReportController extends Controller {
       throw new HttpException(ErrorCode.AUTH008);
     }
 
-    const result = await reportService.createWeeklyReport(userId, requestBody);
+    const result = await reportService.generateWeeklyReport(userId, requestBody);
     this.setStatus(201);
 
     return {
@@ -186,11 +126,11 @@ export class ReportController extends Controller {
       reports: [
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          baseDate: new Date("2025-09-01"),
+          baseDate: "2025-09-01",
         },
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          baseDate: new Date("2025-08-25"),
+          baseDate: "2025-08-25",
         },
       ],
     },
@@ -277,7 +217,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "WEEKLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "(닉네임)의 첫째 주 분석 텍스트...",
         photoCount: 3,
@@ -350,39 +290,22 @@ export class ReportController extends Controller {
     };
   }
   /**
-   * @summary 월간 보고서를 생성합니다.
-   * @description AI가 생성한 분석 내용을 받아 월간 보고서를 저장합니다. 같은 월의 보고서가 이미 있으면 오류가 발생합니다.
+   * @summary 월간 보고서를 생성합니다. (baseDate: 생성할 월에 포함된 임의의 날짜 'YYYY-MM-DD')
+   * @description AI 백엔드를 호출하여 월간 보고서를 생성하고 저장합니다. 같은 월의 보고서가 이미 있으면 오류가 발생합니다.
    */
   @Security("jwt")
   @SuccessResponse(201, "월간 보고서 생성 성공")
-  @Example<CreateReportRequestDto>({
+  @Example<GenerateReportRequestDto>({
     baseDate: "2025-09-01",
-    summary: {
-      text: "(닉네임)의 한 달 분석 텍스트...",
-      photoCount: 3,
-      diaryCount: 15,
-    },
-    detailsJson: {
-      photos: [
-        "https://s3.../photo1.jpg",
-        "https://s3.../photo2.jpg",
-        "https://s3.../photo3.jpg",
-      ],
-      aiAnalysis: "AI가 바라본 9월의 분석...",
-      diaryIds: [
-        "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-        "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-      ],
-    },
   })
   @Example<ApiResponse<CreateReportResponseDto>>({
     success: true,
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
-        text: "(닉네임)의 한 달 분석 텍스트...",
+        text: "이번 달은 15개의 일기를 작성했어요",
         photoCount: 3,
         diaryCount: 15,
       },
@@ -391,6 +314,11 @@ export class ReportController extends Controller {
           "https://s3.../photo1.jpg",
           "https://s3.../photo2.jpg",
           "https://s3.../photo3.jpg",
+        ],
+        topTheme: "음식이었어요 🍔🍕",
+        overallSentiment: "안정적이었어요 🧘",
+        weeklyEvents: [
+          "첫째 주에는 친구와 함께 하이디라오를 다녀오셨네요 🍲",
         ],
         aiAnalysis: "AI가 바라본 9월의 분석...",
         diaryIds: [
@@ -422,9 +350,9 @@ export class ReportController extends Controller {
       message: "액세스 토큰이 유효하지 않습니다.",
     },
   })
-  @Post("/")
-  public async createReport(
-    @Body() requestBody: CreateReportRequestDto,
+  @Post("/generate/monthly")
+  public async generateMonthlyReport(
+    @Body() requestBody: GenerateReportRequestDto,
     @Request() req: any,
   ): Promise<ApiResponse<CreateReportResponseDto>> {
     const userId = req.user?.sub;
@@ -433,7 +361,7 @@ export class ReportController extends Controller {
       throw new HttpException(ErrorCode.AUTH008);
     }
 
-    const result = await reportService.createReport(userId, requestBody);
+    const result = await reportService.generateMonthlyReport(userId, requestBody);
     this.setStatus(201);
 
     return {
@@ -457,11 +385,11 @@ export class ReportController extends Controller {
       reports: [
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
-          baseDate: new Date("2025-09-01"),
+          baseDate: "2025-09-01",
         },
         {
           reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a65",
-          baseDate: new Date("2025-08-01"),
+          baseDate: "2025-08-01",
         },
       ],
     },
@@ -505,7 +433,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "(닉네임)의 한 달 분석 텍스트...",
         photoCount: 3,
@@ -582,7 +510,7 @@ export class ReportController extends Controller {
     data: {
       reportId: "58d5db0b-5837-4933-b2d4-f032cb7a8a64",
       reportType: "MONTHLY",
-      baseDate: new Date("2025-09-01"),
+      baseDate: "2025-09-01",
       summary: {
         text: "(닉네임)의 한 달 분석 텍스트...",
         photoCount: 3,

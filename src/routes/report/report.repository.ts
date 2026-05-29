@@ -1,8 +1,8 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
 import type { report_type } from "../../generated/prisma/enums";
-import { CreateReportInput } from "./report.model";
 import { kstDayjs } from "../../utils/date";
+import { CreateReportInput } from "./report.model";
 
 type ReportModel = Prisma.reportGetPayload<Record<string, never>>;
 

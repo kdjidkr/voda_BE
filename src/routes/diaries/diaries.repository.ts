@@ -1,12 +1,12 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
+import { kstDayjs } from "../../utils/date";
 import {
   BasicDiaryInput,
   MonthlyDiarySummaryInput,
   UpdateBasicDiaryInput,
 } from "./diaries.model";
 import { KeywordResponseDto } from "./dto/diaries.res.dto";
-import { kstDayjs } from "../../utils/date";
 
 type DiaryWithPhotos = Prisma.diaryGetPayload<{
   include: { diary_photo: true };
@@ -212,6 +212,33 @@ class DiariesRepository {
         diary_date: diaryDate,
         analysis: {},
         input_type: inputType,
+      },
+    });
+  }
+
+  async findDiariesByDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<DiaryWithPhotos[]> {
+    return await prisma.diary.findMany({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+        diary_date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: {
+        diary_photo: {
+          orderBy: {
+            sort_order: "asc",
+          },
+        },
+      },
+      orderBy: {
+        diary_date: "asc",
       },
     });
   }
