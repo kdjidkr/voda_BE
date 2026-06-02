@@ -30,7 +30,7 @@ async function requestAiReply (message: string) : Promise<string> {
     throw new HttpException(502, "AI 응답이 비어 있습니다.", "AI_EMPTY_RESPONSE",);
   }
 
-  return await response.text();
+  return aiReply;
 }
 
 type ConversationType = "chat" | "call";
@@ -66,37 +66,45 @@ export function initSocket(io: Server) {
     socket.on("conversation:message",
       async ({roomId, type, message,} : {
         type: ConversationType; roomId: string; message: string;}) => {
-          const userText = `USER: ${message}`;
+          try{
+            const userText = `USER: ${message}`;
 
-          if (type === "chat") {
-            await chatRoomsService.createChatMessage(roomId, {
-              textContent: userText,
+            if (type === "chat") {
+              await chatRoomsService.createChatMessage(roomId, {
+                textContent: userText,
+              });
+            } else {
+              await callRoomsService.createCallText(roomId, {
+                textContent: userText,
+              });
+            }
+
+            const aiReply = await requestAiReply(message);
+            const aiText = `AI: ${aiReply}`;
+
+            if (type === "chat") {
+              await chatRoomsService.createChatMessage(roomId, {
+                textContent: aiText,
+              });
+            } else {
+              await callRoomsService.createCallText(roomId, {
+                textContent: aiText,
+              });
+            }
+
+            // AI 답장
+            io.to(roomId).emit("conversation:reply", {
+              message: aiReply,
             });
-          } else {
-            await callRoomsService.createCallText(roomId, {
-              textContent: userText,
+          } catch (error) {
+            console.error("conversation:message error: ", error);
+
+            socket.emit("conversation:error", {
+              message: "메세지 처리 중 오류가 발생했습니다.",
             });
           }
-
-          const aiReply = await requestAiReply(message);
-          const aiText = `AI: ${aiReply}`;
-
-          if (type === "chat") {
-            await chatRoomsService.createChatMessage(roomId, {
-              textContent: aiText,
-            });
-          } else {
-            await callRoomsService.createCallText(roomId, {
-              textContent: aiText,
-            });
-          }
-
-          // AI 답장
-          io.to(roomId).emit("conversation:reply", {
-            message: aiReply,
-          });
-      },
-    );
+        },
+      );
     
     // 대화 종료
     socket.on("conversation:end", 
