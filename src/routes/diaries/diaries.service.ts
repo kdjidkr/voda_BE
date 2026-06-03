@@ -321,11 +321,19 @@ export class DiariesService {
 
       const aiResponse = await response.json();
 
-      // 8. AI 응답에서 일기 내용 추출 (확정된 응답 규격 반영)
-      const diaryContent = aiResponse.data?.predicted_diary;
+      // 8. AI 응답에서 일기 내용 추출 (top-level / nested data 모두 허용)
+      const predictionSource = aiResponse?.data ?? aiResponse;
+      const diaryContent =
+        predictionSource?.predicted_diary ?? predictionSource?.predictedDiary;
 
-      if (!diaryContent || typeof diaryContent !== "string" || diaryContent.trim() === "") {
-        console.error(`AI API 응답에 예측된 일기 내용이 없습니다: ${JSON.stringify(aiResponse)}`);
+      if (
+        !diaryContent ||
+        typeof diaryContent !== "string" ||
+        diaryContent.trim() === ""
+      ) {
+        console.error(
+          `AI API 응답에 예측된 일기 내용이 없습니다: ${JSON.stringify(aiResponse)}`,
+        );
         throw new HttpException(
           502,
           "AI API의 응답 형식이 올바르지 않거나 예측된 일기 내용이 비어있습니다.",
@@ -334,6 +342,21 @@ export class DiariesService {
       }
 
       const trimmedDiaryContent = diaryContent.trim();
+      const normalizedPrediction = {
+        success:
+          typeof aiResponse?.success === "boolean" ? aiResponse.success : true,
+        data: {
+          status: predictionSource?.status ?? "success",
+          predicted_date:
+            predictionSource?.predicted_date ??
+            predictionSource?.predictedDate ??
+            targetDate,
+          predicted_diary: trimmedDiaryContent,
+          ...(typeof predictionSource?.stt_text === "string"
+            ? { stt_text: predictionSource.stt_text }
+            : {}),
+        },
+      };
 
       // 9. DB에 AI 예측 일기 자동 저장 (DiariesRepository 위임)
       const saved = await diariesRepository.createAiPredictedDiary(
@@ -346,7 +369,7 @@ export class DiariesService {
 
       // 10. AI 응답 원본과 DB 저장 정보를 결합하여 프론트엔드로 즉시 반환
       return {
-        prediction: aiResponse,
+        prediction: normalizedPrediction,
         savedDiary: {
           diaryId: saved.diary_id,
           title: saved.title,
