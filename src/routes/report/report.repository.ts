@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
 import type { report_type } from "../../generated/prisma/enums";
-import { kstDayjs } from "../../utils/date";
+import { kstDayjs, toDbDate } from "../../utils/date";
 import { CreateReportInput } from "./report.model";
 
 type ReportModel = Prisma.reportGetPayload<Record<string, never>>;
@@ -12,7 +12,7 @@ class ReportRepository {
       data: {
         user_id: input.userId,
         report_type: input.reportType,
-        base_date: input.baseDate,
+        base_date: toDbDate(input.baseDate),
         summary: input.summary,
         details_json: input.detailsJson,
       },
@@ -88,8 +88,8 @@ class ReportRepository {
         user_id: userId,
         report_type: "MONTHLY",
         base_date: {
-          gte: startDate,
-          lte: endDate,
+          gte: toDbDate(startDate),
+          lte: toDbDate(endDate),
         },
       },
     });
@@ -107,8 +107,8 @@ class ReportRepository {
         user_id: userId,
         report_type: "WEEKLY",
         base_date: {
-          gte: weekStartDate,
-          lte: weekEnd,
+          gte: toDbDate(weekStartDate),
+          lte: toDbDate(weekEnd),
         },
       },
     });

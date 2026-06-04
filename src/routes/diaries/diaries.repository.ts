@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
-import { kstDayjs } from "../../utils/date";
+import { kstDayjs, toDbDate } from "../../utils/date";
 import {
   BasicDiaryInput,
   MonthlyDiarySummaryInput,
@@ -25,6 +25,7 @@ class DiariesRepository {
         title,
         content: content || "",
         initial_draft: content || "",
+        diary_date: toDbDate(),
         analysis: {},
         input_type: "MANUAL",
         ...(photos && photos.length > 0
@@ -67,13 +68,12 @@ class DiariesRepository {
     year: number,
     month: number,
   ): Promise<MonthlyDiarySummaryInput[]> {
-    const startDate = kstDayjs()
+    const startKst = kstDayjs()
       .year(year)
       .month(month - 1)
-      .date(1)
-      .startOf("day")
-      .toDate();
-    const endDate = kstDayjs(startDate).add(1, "month").toDate();
+      .date(1);
+    const startDate = toDbDate(startKst.toDate());
+    const endDate = toDbDate(startKst.add(1, "month").toDate());
 
     return await prisma.diary.findMany({
       where: {
@@ -180,7 +180,7 @@ class DiariesRepository {
         user_id: userId,
         deleted_at: null,
         diary_date: {
-          lt: beforeDate,
+          lt: toDbDate(beforeDate),
         },
       },
       orderBy: [
@@ -209,7 +209,7 @@ class DiariesRepository {
         title,
         content,
         initial_draft: initialDraft,
-        diary_date: diaryDate,
+        diary_date: toDbDate(diaryDate),
         analysis: {},
         input_type: inputType,
       },
@@ -226,8 +226,8 @@ class DiariesRepository {
         user_id: userId,
         deleted_at: null,
         diary_date: {
-          gte: startDate,
-          lte: endDate,
+          gte: toDbDate(startDate),
+          lte: toDbDate(endDate),
         },
       },
       include: {
