@@ -46,4 +46,15 @@ export const formatKstDate = (date: string | Date) => {
   return dayjs(date).tz().format("YYYY-MM-DD");
 };
 
+/**
+ * Converts a date (string, Date, or Dayjs) to a UTC midnight Date object based on KST.
+ * Essential for PostgreSQL 'Date' columns to prevent timezone shift issues.
+ */
+export const toDbDate = (date?: string | Date) => {
+  const target = date ? dayjs(date) : dayjs();
+  const kstDateString = target.tz("Asia/Seoul").format("YYYY-MM-DD");
+  return new Date(`${kstDateString}T00:00:00Z`);
+};
+
 export { dayjs };
+
