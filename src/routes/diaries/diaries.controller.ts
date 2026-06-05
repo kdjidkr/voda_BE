@@ -24,6 +24,7 @@ import { ApiResponse } from "../../interfaces/ApiResponse";
 import { diariesService } from "./diaries.service";
 import {
   CreateBasicDiaryRequestDto,
+  CreateConversationDiaryRequestDto,
   CreateKeywordsRequestDto,
   PredictDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
@@ -616,6 +617,92 @@ export class DiariesController extends Controller {
       targetDate,
     );
     this.setStatus(200);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
+   * @summary 대화 기록을 기반으로 일기를 생성하고 저장합니다.
+   * @description 
+   * 대화 유형(`conversationType`)과 방 ID(`roomId`)를 본체 바디로 전달받아 다음의 프로세스를 수행합니다:
+   * 1. 채팅/통화 전체 대화 내용 조회 후 텍스트만 추출하여 배열 형태로 변환
+   * 2. 외부 AI API(`https://voda-ai-api.p-e.kr/chat/finish`)로 대화 배열 전달
+   * 3. AI가 반환한 일기 텍스트를 백엔드 DB의 `diary` 테이블에 저장 
+   *  -  채팅 기반 저장 시 입력 타입: `CHAT`
+   *  - 통화 기반 저장 시 입력 타입: `CALL`
+   * 4. 저장된 일기 반환
+   * 
+   * @returns 대화 기반으로 생성 및 저장된 일기 정보
+   */
+  @Security("jwt")
+  @SuccessResponse(201, "대화 기반 일기 생성 및 자동 저장 성공")
+  @Example<ApiResponse<CreateBasicDiaryResponseDto>>({
+    success: true,
+      data: {
+      diaryId: "dbf94c44-359c-4f4b-8ac9-cd5c6de2b06f",
+      title: "대화로 작성한 일기",
+      content: "오늘은 몸이 좋지 않아 수영 강습에 가지 못했다.",
+      photos: [],
+      inputType: "CALL",
+      createdAt: new Date("2026-06-05T11:50:00.000Z"),
+      inputId: "123e4567-e89b-12d3-a456-426614174000",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 없거나 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(404, "채팅방을 찾을 수 없는 경우", {
+    success: false,
+    error: {
+      code: "CHAT_ROOM003",
+      message: "존재하지 않는 채팅방입니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(404, "통화방을 찾을 수 없는 경우", {
+    success: false,
+    error: {
+      code: "CALL_ROOM003",
+      message: "존재하지 않는 통화방입니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(502, "외부 AI API 서버 호출에 실패한 경우", {
+    success: false,
+    error: {
+      code: "AI_API_ERROR",
+      message: "AI API 호출에 실패했습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(400, "UUID 형식이 올바르지 않은 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "UUID 형식이 올바르지 않습니다.",
+    },
+  })
+  @Post("conversation")
+  public async createConversationDiary(
+    @Body() requestBody: CreateConversationDiaryRequestDto,
+    @Request() req: any,
+  ): Promise<ApiResponse<CreateBasicDiaryResponseDto>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    const result = await diariesService.createConversationDiary(
+      userId,
+      requestBody,
+    );
+
+    this.setStatus(201);
 
     return {
       success: true,

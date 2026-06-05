@@ -16,3 +16,8 @@ export class CreateKeywordsRequestDto {
 export class PredictDiaryRequestDto {
   targetDate!: string;
 }
+
+export class CreateConversationDiaryRequestDto {
+  conversationType!: "chat" | "call";
+  roomId!: string;
+}
