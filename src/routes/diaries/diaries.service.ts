@@ -3,6 +3,8 @@ import { HttpException } from "../../errors/HttpException";
 import { kstDayjs } from "../../utils/date";
 import { todoRepository } from "../todo/todo.repository";
 import { usersRepository } from "../users/users.repository";
+import { chatRoomsRepository } from "../chat-rooms/chat-rooms.repository";
+import { callRoomsRepository } from "../call-rooms/call-rooms.repository";
 import {
   validateDateString,
   validateNonEmptyText,
@@ -14,6 +16,7 @@ import { BasicDiaryInput, UpdateBasicDiaryInput } from "./diaries.model";
 import { diariesRepository } from "./diaries.repository";
 import {
   CreateBasicDiaryRequestDto,
+  CreateConversationDiaryRequestDto,
   PredictDiaryRequestDto,
   UpdateBasicDiaryRequestDto,
 } from "./dto/diaries.req.dto";
@@ -561,6 +564,127 @@ export class DiariesService {
       },
     };
   }
+
+  public async createConversationDiary(
+    userId: string,
+    requestBody: CreateConversationDiaryRequestDto,
+  ): Promise<CreateBasicDiaryResponseDto> {
+    const { conversationType, roomId } = requestBody;
+
+    const userProfile = await usersRepository.findUserMeBaseProfile(userId);
+    if (!userProfile) {
+      throw new HttpException(ErrorCode.USER001);
+    }
+
+    let conversation: string[] = [];
+
+    if (conversationType === "chat") {
+      const chatRoom = await chatRoomsRepository.findChatRoomById(roomId);
+
+      if(!chatRoom) {
+        throw new HttpException(ErrorCode.CHAT_ROOM003);
+      }
+
+      conversation = chatRoom.chat_message.map(
+        (message) => message.text_content,
+      );
+    }
+
+    if (conversationType === "call") {
+      const callRoom = await callRoomsRepository.findCallRoomById(roomId);
+
+      if(!callRoom) {
+        throw new HttpException(ErrorCode.CALL_ROOM003);
+      }
+
+      conversation = callRoom.call_text.map(
+        (message) => message.text_content,);
+    }
+
+    if (conversation.length === 0) {
+      throw new HttpException(
+        conversationType === "chat"
+        ? ErrorCode.CHAT_ROOM001
+        : ErrorCode.CALL_ROOM001,
+      );
+    }
+
+    const diaryResponse = await fetch("https://voda-ai-api.p-e.kr/chat/finish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        conversation,
+      }),
+    });
+
+    if (!diaryResponse.ok) {
+      const errorText = await diaryResponse.text();
+
+      console.error(
+        `AI 대화 기반 일기 생성 API 호출 실패: Status=${diaryResponse.status}, Body=${errorText}`,
+      );
+      throw new HttpException(
+        502,
+        "AI 일기 생성 API 호출에 실패했습니다.",
+        "AI_API_ERROR",
+      );
+    }
+
+    const responseText = await diaryResponse.text();
+
+    let rawDiaryData: any;
+
+    try {
+      rawDiaryData = JSON.parse(responseText);
+    } catch {
+      throw new HttpException(
+        502,
+        "AI 일기 생성 API 응답 형식이 올바르지 않습니다.",
+        "AI_API_ERROR",
+      );
+    }
+
+    const diaryTitle = rawDiaryData?.diary?.title;
+    const diaryContent = rawDiaryData?.diary?.content;
+
+    if (
+      typeof diaryTitle !== "string" ||
+      diaryTitle.trim() === "" ||
+      typeof diaryContent !== "string" ||
+      diaryContent.trim() === ""
+    ) {
+      throw new HttpException(
+        502,
+        "AI 일기 생성 API 응답이 올바르지 않습니다.",
+        "AI_API_ERROR",
+      );
+    }
+
+    const saved = await diariesRepository.createConversationDiary(
+      userId,
+      diaryTitle.trim(),
+      diaryContent.trim(),
+      conversation,
+      conversationType === "chat" ? "CHAT" : "CALL",
+      roomId,
+    );
+
+    return {
+      diaryId: saved.diary_id,
+      title: saved.title ?? "",
+      content: saved.content,
+      photos: saved.diary_photo.map((photo) => ({
+        photoId: photo.diary_photo_id,
+        imageUrl: photo.image_url,
+      })),
+      inputType: saved.input_type,
+      createdAt: saved.created_at,
+      inputId: saved.input_id ?? undefined,
+    };
+  }
+
 }
 
 export const diariesService = new DiariesService();

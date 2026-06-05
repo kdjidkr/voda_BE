@@ -242,6 +242,31 @@ class DiariesRepository {
       },
     });
   }
+
+  async createConversationDiary(
+    userId: string,
+    title: string,
+    content: string,
+    conversation: string[],
+    inputType: "CHAT" | "CALL",
+    inputId: string,
+  ): Promise<DiaryWithPhotos> {
+    return await prisma.diary.create({
+      data: {
+        user_id: userId,
+        title,
+        content,
+        initial_draft: conversation.join("\n"),
+        diary_date: toDbDate(),
+        analysis: {},
+        input_type: inputType,
+        input_id: inputId,
+      },
+      include: {
+        diary_photo: true,
+      },
+    });
+  }
 }
 
 export const diariesRepository = new DiariesRepository();
