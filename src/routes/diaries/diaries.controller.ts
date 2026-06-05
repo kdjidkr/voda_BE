@@ -629,7 +629,7 @@ export class DiariesController extends Controller {
    * @description 
    * 대화 유형(`conversationType`)과 방 ID(`roomId`)를 본체 바디로 전달받아 다음의 프로세스를 수행합니다:
    * 1. 채팅/통화 전체 대화 내용 조회 후 텍스트만 추출하여 배열 형태로 변환
-   * 2. 외부 AI API(`https://voda-ai-api.p-e.kr/chat/finish`)로 대화 배열 전달
+   * 2. 외부 AI API(`https://voda-ai-api.p-e.kr/diaries/from-conversation`)로 대화 배열 전달
    * 3. AI가 반환한 일기 텍스트를 백엔드 DB의 `diary` 테이블에 저장 
    *  -  채팅 기반 저장 시 입력 타입: `CHAT`
    *  - 통화 기반 저장 시 입력 타입: `CALL`

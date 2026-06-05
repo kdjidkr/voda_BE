@@ -609,7 +609,7 @@ export class DiariesService {
       );
     }
 
-    const diaryResponse = await fetch("https://voda-ai-api.p-e.kr/chat/finish", {
+    const diaryResponse = await fetch("https://voda-ai-api.p-e.kr/diaries/from-conversation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
