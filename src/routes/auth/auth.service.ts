@@ -125,8 +125,6 @@ class AuthService {
       throw new HttpException(ErrorCode.AUTH002);
     }
 
-    await this.deleteKakaoSignupSession(sessionToken);
-
     const newAccount = await authRepository.createAccount({
       email: null,
       hashedPassword: null,
@@ -138,6 +136,8 @@ class AuthService {
       oauthId: kakaoId,
       profileImage: requestBody.profileImage ?? null,
     });
+
+    await this.deleteKakaoSignupSession(sessionToken);
 
     return await this.generateAndSaveTokens({ sub: newAccount.id });
   }
