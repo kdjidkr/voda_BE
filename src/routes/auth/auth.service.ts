@@ -112,7 +112,7 @@ class AuthService {
       requestBody.sessionToken,
       ErrorCode.AUTH017,
     );
-    const kakaoId = await this.consumeKakaoSignupSession(sessionToken);
+    const kakaoId = await this.getKakaoSignupSession(sessionToken);
     const name = validateNonEmptyText(requestBody.name, ErrorCode.AUTH001);
     const nickname = validateNonEmptyText(
       requestBody.nickname,
@@ -124,6 +124,8 @@ class AuthService {
     if (await usersRepository.findUserbyNickname(nickname)) {
       throw new HttpException(ErrorCode.AUTH002);
     }
+
+    await this.deleteKakaoSignupSession(sessionToken);
 
     const newAccount = await authRepository.createAccount({
       email: null,
@@ -327,7 +329,7 @@ class AuthService {
     }
   }
 
-  private async consumeKakaoSignupSession(
+  private async getKakaoSignupSession(
     sessionToken: string,
   ): Promise<string> {
     const key = REDIS_KEYS.KAKAO_SIGNUP_SESSION(sessionToken);
@@ -339,7 +341,6 @@ class AuthService {
         throw new HttpException(ErrorCode.AUTH017);
       }
 
-      await redisClient.del(key);
       return kakaoId;
     } catch (error) {
       if (error instanceof HttpException) {
@@ -347,10 +348,24 @@ class AuthService {
       }
 
       console.error(
-        `[Kakao Signup Session] Redis 조회/삭제 실패`,
+        `[Kakao Signup Session] Redis 조회 실패`,
         error instanceof Error ? error.message : error,
       );
       throw new HttpException(ErrorCode.AUTH005);
+    }
+  }
+
+  private async deleteKakaoSignupSession(
+    sessionToken: string,
+  ): Promise<void> {
+    const key = REDIS_KEYS.KAKAO_SIGNUP_SESSION(sessionToken);
+    try {
+      await redisClient.del(key);
+    } catch (error) {
+      console.error(
+        `[Kakao Signup Session] Redis 삭제 실패`,
+        error instanceof Error ? error.message : error,
+      );
     }
   }
 
