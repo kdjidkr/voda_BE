@@ -81,6 +81,19 @@ export class DiariesService {
     }
   }
 
+  async deleteDiary(userId: string, diaryId: string): Promise<void> {
+    const normalizedDiaryId = validateUuid(diaryId, ErrorCode.INVALID007);
+
+    const deleted = await diariesRepository.deleteDiary(
+      userId,
+      normalizedDiaryId,
+    );
+
+    if (!deleted) {
+      throw new HttpException(ErrorCode.DIARY002);
+    }
+  }
+
   async getDiaryById(
     userId: string,
     diaryId: string,

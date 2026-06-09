@@ -52,6 +52,7 @@ class DiariesRepository {
       where: {
         diary_id: diaryId,
         user_id: userId,
+        deleted_at: null,
       },
       include: {
         diary_photo: {
@@ -61,6 +62,24 @@ class DiariesRepository {
         },
       },
     });
+  }
+
+  async deleteDiary(
+    userId: string,
+    diaryId: string,
+  ): Promise<boolean> {
+    const result = await prisma.diary.updateMany({
+      where: {
+        diary_id: diaryId,
+        user_id: userId,
+        deleted_at: null,
+      },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+
+    return result.count > 0;
   }
 
   async findMonthlyDiarySummaries(
