@@ -393,6 +393,57 @@ export class DiariesController extends Controller {
   }
 
   /**
+   * @summary 일기를 삭제합니다.
+   * @description diary id를 받아 본인 소유 일기를 삭제(Soft Delete)합니다.
+   * @returns 삭제 성공 여부
+   */
+  @Security("jwt")
+  @SuccessResponse(200, "일기 삭제 성공")
+  @Response<ApiResponse<null>>(400, "diaryId가 UUID 형식이 아닌 경우", {
+    success: false,
+    error: {
+      code: "INVALID007",
+      message: "유효하지 않은 UUID 형식입니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(401, "액세스 토큰이 유효하지 않은 경우", {
+    success: false,
+    error: {
+      code: "AUTH008",
+      message: "액세스 토큰이 유효하지 않습니다.",
+    },
+  })
+  @Response<ApiResponse<null>>(
+    404,
+    "삭제할 일기가 없거나 본인 소유가 아닌 경우",
+    {
+      success: false,
+      error: {
+        code: "DIARY002",
+        message: "조회할 일기를 찾을 수 없거나 접근 권한이 없습니다.",
+      },
+    },
+  )
+  @Delete("{diaryId}")
+  public async deleteDiary(
+    @Path() diaryId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<null>> {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      throw new HttpException(ErrorCode.AUTH008);
+    }
+
+    await diariesService.deleteDiary(userId, diaryId);
+    this.setStatus(200);
+
+    return {
+      success: true,
+    };
+  }
+
+  /**
    * @summary 일기에 키워드를 추가합니다.
    * @description 3개 이상의 키워드를 받아 일기에 저장합니다.
    * @returns 저장된 키워드 정보
