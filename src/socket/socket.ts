@@ -3,17 +3,20 @@ import { Server } from "socket.io";
 
 import { callRoomsService } from "../routes/call-rooms/call-rooms.service";
 import { chatRoomsService } from "../routes/chat-rooms/chat-rooms.service";
+import { chatRoomsRepository } from "../routes/chat-rooms/chat-rooms.repository";
+import { callRoomsRepository } from "../routes/call-rooms/call-rooms.repository";
 
 // AI 답변 요청
-async function requestAiReply (message: string) : Promise<string> {
-  const response = await fetch ("https://voda-ai-api.p-e.kr/chat", {
+async function requestAiReply(payload: {
+  conversation_history: string[];
+  user_text: string;
+}): Promise<string> {
+  const response = await fetch("https://voda-ai-api.p-e.kr/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      user_text: message,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok){
@@ -79,7 +82,24 @@ export function initSocket(io: Server) {
               });
             }
 
-            const aiReply = await requestAiReply(message);
+            // DB에서 지금까지의 대화 내역 전체 조회
+            let conversation: string[] = [];
+            if (type === "chat") {
+              const chatRoom = await chatRoomsRepository.findChatRoomById(roomId);
+              conversation = chatRoom?.chat_message.map((m) => m.text_content) || [];
+            } else {
+              const callRoom = await callRoomsRepository.findCallRoomById(roomId);
+              conversation = callRoom?.call_text.map((m) => m.text_content) || [];
+            }
+
+            // 방금 저장한 마지막 유저 메시지를 제외한 내역을 conversation_history로 분리
+            const conversation_history = conversation.slice(0, -1);
+            const user_text = message;
+
+            const aiReply = await requestAiReply({
+              conversation_history,
+              user_text,
+            });
             const aiText = `AI: ${aiReply}`;
 
             if (type === "chat") {
